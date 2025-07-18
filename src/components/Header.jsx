@@ -33,8 +33,14 @@ const Header = () => {
         />
       </form>
       <div className="flex gap-2">
-        <button className="px-4 py-2 border rounded hover:bg-blue-50">LOG IN</button>
-        <button className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800">SIGN UP</button>
+        <button
+          className="px-4 py-2 border rounded hover:bg-blue-50"
+          onClick={() => navigate('/login')}
+        >LOG IN</button>
+        <button
+          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+          onClick={() => navigate('/register')}
+        >SIGN UP</button>
       </div>
     </header>
   );
