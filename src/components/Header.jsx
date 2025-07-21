@@ -101,6 +101,10 @@ const Header = () => {
       <div className="flex gap-2">
         <button
           className="px-4 py-2 border rounded hover:bg-blue-50"
+          onClick={() => navigate('/list-products')}
+        >List Products</button>
+        <button
+          className="px-4 py-2 border rounded hover:bg-blue-50"
           onClick={() => navigate('/login')}
         >LOG IN</button>
         <button
