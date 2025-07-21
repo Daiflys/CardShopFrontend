@@ -1,5 +1,6 @@
 // src/api/auth.js
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- MOCKS ---
 const mockLogin = async (email, password) => {
@@ -21,7 +22,7 @@ const mockRegister = async (email, password) => {
 
 // --- REAL ---
 const realLogin = async (email, password) => {
-  const response = await fetch("https://tu-backend.com/api/login", {
+  const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -31,7 +32,7 @@ const realLogin = async (email, password) => {
 };
 
 const realRegister = async (email, password) => {
-  const response = await fetch("https://tu-backend.com/api/register", {
+  const response = await fetch(`${API_BASE_URL}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),

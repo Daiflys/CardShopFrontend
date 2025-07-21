@@ -18,7 +18,7 @@ const mockSearchCards = async (query) => {
 
 // --- REAL ---
 const realSearchCards = async (query) => {
-  const response = await fetch(`https://tu-backend.com/api/cards/search?q=${encodeURIComponent(query)}`);
+  const response = await fetch(`${API_BASE_URL}/cards/search?q=${encodeURIComponent(query)}`);
   if (!response.ok) throw new Error("Error en la búsqueda");
   return response.json();
 };

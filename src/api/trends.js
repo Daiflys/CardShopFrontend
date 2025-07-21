@@ -1,5 +1,6 @@
 // src/api/trends.js
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- MOCKS ---
 const bestSellers = [
@@ -25,12 +26,12 @@ const mockGetBestBargains = async () => {
 
 // --- REAL ---
 const realGetBestSellers = async () => {
-  const response = await fetch("https://tu-backend.com/api/trends/best-sellers");
+  const response = await fetch(`${API_BASE_URL}/trends/best-sellers`);
   if (!response.ok) throw new Error("Error al obtener best sellers");
   return response.json();
 };
 const realGetBestBargains = async () => {
-  const response = await fetch("https://tu-backend.com/api/trends/best-bargains");
+  const response = await fetch(`${API_BASE_URL}/trends/best-bargains`);
   if (!response.ok) throw new Error("Error al obtener best bargains");
   return response.json();
 };

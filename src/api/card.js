@@ -1,5 +1,6 @@
 // src/api/card.js
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- MOCK ---
 const mockCard = {
@@ -36,7 +37,7 @@ const mockGetCardDetail = async (cardId) => {
 
 // --- REAL ---
 const realGetCardDetail = async (cardId) => {
-  const response = await fetch(`https://tu-backend.com/api/cards/${cardId}`);
+  const response = await fetch(`${API_BASE_URL}/cards/${cardId}`);
   if (!response.ok) throw new Error("Error al obtener detalle de carta");
   return response.json();
 };

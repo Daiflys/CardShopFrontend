@@ -1,5 +1,6 @@
 // src/api/products.js
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- MOCKS ---
 const mockProducts = [
@@ -27,7 +28,7 @@ const mockGetProducts = async () => {
 
 // --- REAL ---
 const realGetProducts = async () => {
-  const response = await fetch("https://tu-backend.com/api/products");
+  const response = await fetch(`${API_BASE_URL}/products`);
   if (!response.ok) throw new Error("Error al obtener productos");
   return response.json();
 };

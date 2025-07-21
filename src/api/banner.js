@@ -1,5 +1,6 @@
 // src/api/banner.js
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- MOCK ---
 const banners = [
@@ -36,7 +37,7 @@ const mockGetBanners = async () => {
 
 // --- REAL ---
 const realGetBanners = async () => {
-  const response = await fetch("https://tu-backend.com/api/banners");
+  const response = await fetch(`${API_BASE_URL}/banners`);
   if (!response.ok) throw new Error("Error al obtener banners");
   return response.json();
 };
