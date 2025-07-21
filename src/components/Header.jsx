@@ -43,7 +43,7 @@ const Header = () => {
   const handleResultClick = (card) => {
     setSearch(card.name);
     setShowDropdown(false);
-    navigate(`/card/${card.name.toLowerCase().replace(/\s+/g, "-")}`);
+    navigate(`/card/${card.id}`); 
   };
 
   // Hide dropdown if clicked outside

@@ -37,9 +37,11 @@ const mockGetCardDetail = async (cardId) => {
 
 // --- REAL ---
 const realGetCardDetail = async (cardId) => {
-  const response = await fetch(`${API_BASE_URL}/cards/${cardId}`);
+  console.log("going to search for cardId", cardId);
+  const response = await fetch(`${API_BASE_URL}/cards/id/${cardId}`);
   if (!response.ok) throw new Error("Error al obtener detalle de carta");
   return response.json();
 };
 
-export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail; 
+//export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail; 
+export const getCardDetail = realGetCardDetail; 

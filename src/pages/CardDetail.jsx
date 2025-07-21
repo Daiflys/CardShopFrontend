@@ -29,29 +29,32 @@ const CardDetail = () => {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Imagen */}
           <div className="flex-shrink-0 flex justify-center">
-            <img src={card.image} alt={card.name} className="w-64 h-auto rounded-lg shadow-lg border" />
+            <img src={card.imageUrl} alt={card.name} className="w-64 h-auto rounded-lg shadow-lg border" />
           </div>
           {/* Info principal */}
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-blue-900 mb-1">{card.name}</h1>
             <div className="text-lg text-gray-600 mb-2">{card.set} - Singles</div>
             <div className="flex flex-wrap gap-4 mb-4">
-              <div><b>Rarity:</b> {card.rarity}</div>
-              <div><b>Number:</b> {card.number}</div>
-              <div><b>Printed in:</b> <span className="text-blue-700 font-semibold">{card.printedIn}</span></div>
+              <div><b>Rarity:</b> {card.rarity ?? "Unknown"}</div>
+              <div><b>Number:</b> {card.number ?? "Unknown"}</div>
+              <div><b>Printed in:</b> <span className="text-blue-700 font-semibold">{card.printedIn ?? "Unknown"}</span></div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-              <div><b>Available items</b><br />{card.available}</div>
-              <div><b>From</b><br />{card.from.toFixed(2)} €</div>
-              <div><b>Price Trend</b><br />{card.priceTrend.toFixed(2)} €</div>
-              <div><b>30-days avg</b><br />{card.avg30.toFixed(2)} €</div>
-              <div><b>7-days avg</b><br />{card.avg7.toFixed(2)} €</div>
-              <div><b>1-day avg</b><br />{card.avg1.toFixed(2)} €</div>
+              <div><b>Available items</b><br />{card.available ?? "Unknown"}</div>
+              <div><b>From</b><br />{card.from != null ? Number(card.from).toFixed(2) : "Unknown"} €</div>
+              <div><b>Price Trend</b><br />{card.priceTrend != null ? Number(card.priceTrend).toFixed(2) : "Unknown"} €</div>
+              <div><b>30-days avg</b><br />{card.avg30 != null ? Number(card.avg30).toFixed(2) : "Unknown"} €</div>
+              <div><b>7-days avg</b><br />{card.avg7 != null ? Number(card.avg7).toFixed(2) : "Unknown"} €</div>
+              <div><b>1-day avg</b><br />{card.avg1 != null ? Number(card.avg1).toFixed(2) : "Unknown"} €</div>
             </div>
             <div className="mb-4">
               <b>Rules Text</b>
               <ul className="list-disc ml-6 text-gray-700">
-                {card.rules.map((r, i) => <li key={i}>{r}</li>)}
+                {(card.rules && card.rules.length > 0)
+                  ? card.rules.map((r, i) => <li key={i}>{r ?? "Unknown"}</li>)
+                  : <li>Unknown</li>
+                }
               </ul>
             </div>
           </div>
@@ -85,14 +88,17 @@ const CardDetail = () => {
                 </tr>
               </thead>
               <tbody>
-                {card.sellers.map((s, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="px-3 py-2">{s.name}</td>
-                    <td className="px-3 py-2">{s.country}</td>
-                    <td className="px-3 py-2">{s.offer.toFixed(2)} €</td>
-                    <td className="px-3 py-2">{s.quantity}</td>
-                  </tr>
-                ))}
+                {(card.sellers && card.sellers.length > 0)
+                  ? card.sellers.map((s, i) => (
+                    <tr key={i} className="border-t">
+                      <td className="px-3 py-2">{s.name ?? "Unknown"}</td>
+                      <td className="px-3 py-2">{s.country ?? "Unknown"}</td>
+                      <td className="px-3 py-2">{s.offer != null ? Number(s.offer).toFixed(2) : "Unknown"} €</td>
+                      <td className="px-3 py-2">{s.quantity ?? "Unknown"}</td>
+                    </tr>
+                  ))
+                  : <tr><td colSpan={4} className="text-center text-gray-500">No sellers</td></tr>
+                }
               </tbody>
             </table>
           </div>
