@@ -1,30 +1,30 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
-const DUMMY_CARDS = [
-  { id: 1, name: "Dragon1" },
-  { id: 2, name: "Dragon2" },
-  { id: 3, name: "Dragon3" },
-];
+import { searchCards } from "../api/search";
 
 const Header = () => {
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const inputRef = useRef(null);
 
-  // Filter dummy data as user types (replace with backend call in future)
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     const value = e.target.value;
     setSearch(value);
     if (value.trim()) {
-      // Here you can call your backend endpoint instead of filtering DUMMY_CARDS
-      const filtered = DUMMY_CARDS.filter(card =>
-        card.name.toLowerCase().includes(value.trim().toLowerCase())
-      );
-      setResults(filtered);
-      setShowDropdown(filtered.length > 0);
+      setLoading(true);
+      try {
+        const res = await searchCards(value);
+        setResults(res);
+        setShowDropdown(res.length > 0);
+      } catch {
+        setResults([]);
+        setShowDropdown(false);
+      } finally {
+        setLoading(false);
+      }
     } else {
       setResults([]);
       setShowDropdown(false);
@@ -82,7 +82,9 @@ const Header = () => {
         </form>
         {showDropdown && (
           <ul className="absolute z-20 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
-            {results.length === 0 ? (
+            {loading ? (
+              <li className="px-4 py-2 text-gray-500">Buscando...</li>
+            ) : results.length === 0 ? (
               <li className="px-4 py-2 text-gray-500">No results</li>
             ) : (
               results.map(card => (

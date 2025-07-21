@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { login } from "../api/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -7,16 +8,18 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    // Aquí irá la llamada al backend
-    setTimeout(() => {
+    try {
+      await login(email, password);
+      // Aquí puedes redirigir o guardar token, etc.
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-      // Simulación de error
-      // setError("Credenciales incorrectas");
-    }, 1000);
+    }
   };
 
   return (

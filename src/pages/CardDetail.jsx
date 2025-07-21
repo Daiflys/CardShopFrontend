@@ -1,37 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-// Mock data para la carta
-const mockCard = {
-  name: "Dragon Wings",
-  set: "Scourge",
-  rarity: "Common",
-  number: 34,
-  printedIn: "Scourge",
-  available: 2685,
-  from: 0.02,
-  priceTrend: 0.20,
-  avg30: 0.20,
-  avg7: 0.13,
-  avg1: 0.27,
-  image: "https://cards.scryfall.io/large/front/2/2/22b7e2e2-2e7e-4e2e-8e2e-2e7e2e2e2e2e.jpg?1682206500",
-  rules: [
-    "Enchanted creature has flying.",
-    "Cycling {2}{U} ({2}{U}, Discard this card: Draw a card.)",
-    "When a creature with converted mana cost 6 or more enters the battlefield, you may return Dragon Wings from your graveyard to play enchanting that creature."
-  ],
-  sellers: [
-    { name: "NibiruCardsTCG", country: "FR", offer: 0.02, quantity: 1 },
-    { name: "NibiruCardsTCG", country: "FR", offer: 0.02, quantity: 4 },
-    { name: "NibiruCardsTCG", country: "FR", offer: 0.02, quantity: 1 },
-    { name: "ledouble6", country: "FR", offer: 0.02, quantity: 1 },
-  ],
-};
+import { getCardDetail } from "../api/card";
 
 const CardDetail = () => {
   const { cardId } = useParams();
-  // En real, aquí harías fetch/card lookup por cardId
-  const card = mockCard;
+  const [card, setCard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    getCardDetail(cardId)
+      .then(card => {
+        console.log("cardId:", cardId, "card:", card);
+        setCard(card);
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [cardId]);
+
+  if (loading) return <div className="p-8 text-center">Cargando...</div>;
+  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
+  if (!card) return null;
 
   return (
     <div className="bg-gray-50 min-h-screen pb-10">

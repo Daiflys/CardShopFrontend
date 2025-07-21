@@ -1,31 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
-const banners = [
-  {
-    title: "AETHERDRIFT",
-    subtitle: "Ramp & Furious",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-  {
-    title: "MAGIC X FINAL FANTASY",
-    subtitle: "It's the Final (Fantasy) Countdown",
-    image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-  {
-    title: "MODERN HORIZONS",
-    subtitle: "New Horizons Await",
-    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-  {
-    title: "LEGENDARY BATTLES",
-    subtitle: "Epic Showdowns",
-    image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-];
+import { getBanners } from "../api/banner";
 
 const slideOut = {
   right: "-translate-x-full transition-transform duration-500",
@@ -41,21 +15,33 @@ const slideActive = "translate-x-0 transition-transform duration-500";
 const oppositeDirection = (dir) => (dir === "right" ? "left" : "right");
 
 const Banner = () => {
+  const [banners, setBanners] = useState([]);
   const [current, setCurrent] = useState(0);
   const [nextIdx, setNextIdx] = useState(null);
   const [direction, setDirection] = useState("right");
   const [isAnimating, setIsAnimating] = useState(false);
   const [enterActive, setEnterActive] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const timeoutRef = useRef(null);
   const animTimeoutRef = useRef(null);
 
+  useEffect(() => {
+    setLoading(true);
+    getBanners()
+      .then(setBanners)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
   // Rotación automática
   useEffect(() => {
+    if (!banners.length) return;
     timeoutRef.current = setTimeout(() => {
       handleNext();
     }, 5000);
     return () => clearTimeout(timeoutRef.current);
-  }, [current]);
+  }, [current, banners.length]);
 
   // Limpia animación al desmontar
   useEffect(() => () => clearTimeout(animTimeoutRef.current), []);
@@ -86,6 +72,10 @@ const Banner = () => {
 
   const handlePrev = () => goTo((current - 1 + banners.length) % banners.length, "left");
   const handleNext = () => goTo((current + 1) % banners.length, "right");
+
+  if (loading) return <div className="p-8 text-center">Cargando banners...</div>;
+  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
+  if (!banners.length) return null;
 
   return (
     <section className="relative bg-gray-800 text-white py-10 px-2 md:px-8 flex items-center justify-center overflow-hidden rounded-lg shadow-lg mt-6 min-h-[260px] md:min-h-[340px]">

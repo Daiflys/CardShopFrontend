@@ -6,6 +6,7 @@ import Trends from "./components/Trends";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ListProducts from "./pages/ListProducts";
+import CardDetail from "./pages/CardDetail";
 import "./App.css";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/list-products" element={<ListProducts />} />
+            <Route path="/card/:cardId" element={<CardDetail />} />
           </Routes>
         </main>
       </div>

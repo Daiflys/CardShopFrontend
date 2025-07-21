@@ -1,23 +1,5 @@
-import React, { useState } from "react";
-
-// Mock product data
-const mockProducts = [
-  { name: "Dragon Wings", icon: "🐉" },
-  { name: "Dragonspeaker Shaman", icon: "📷" },
-  { name: "Eternal Dragon", icon: "🐉" },
-  { name: "Dragon Shadow", icon: "🐉" },
-  { name: "Dragon Breath", icon: "🐉" },
-  { name: "Covetous Dragon", icon: "🐉" },
-  { name: "Dragon Fangs", icon: "🐉" },
-  { name: "Balefire Dragon", icon: "🐲" },
-  { name: "Dragon Scales", icon: "🐉" },
-  { name: "Dragonstorm", icon: "⏳" },
-  { name: "Scion of the Ur-Dragon", icon: "⏳" },
-  { name: "Dragon Arch", icon: "📷" },
-  { name: "Worldgorger Dragon", icon: "📷" },
-  { name: "Dragon Tyrant", icon: "🐉" },
-  { name: "Dragonskull Summit", icon: "🅰️" },
-];
+import React, { useState, useEffect } from "react";
+import { getProducts } from "../api/products";
 
 const categories = ["Singles", "Boosters", "Decks"];
 const languages = ["English", "Spanish", "German", "French"];
@@ -28,9 +10,20 @@ const ListProducts = () => {
   const [category, setCategory] = useState(categories[0]);
   const [language, setLanguage] = useState(languages[0]);
   const [expansion, setExpansion] = useState(expansions[0]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    getProducts()
+      .then(setProducts)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   // Filter products by name (case-insensitive substring match)
-  const filteredProducts = mockProducts.filter(product =>
+  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(name.toLowerCase())
   );
 
@@ -85,18 +78,24 @@ const ListProducts = () => {
         </div>
         {/* Product Results */}
         <div className="flex-1 bg-white rounded-xl shadow p-6">
-          <ul className="space-y-3">
-            {filteredProducts.length === 0 ? (
-              <li className="text-gray-500">No products found.</li>
-            ) : (
-              filteredProducts.map(product => (
-                <li key={product.name} className="flex items-center gap-3 text-lg">
-                  <span className="text-2xl">{product.icon}</span>
-                  <span>{product.name}</span>
-                </li>
-              ))
-            )}
-          </ul>
+          {loading ? (
+            <div className="text-gray-500">Cargando productos...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : (
+            <ul className="space-y-3">
+              {filteredProducts.length === 0 ? (
+                <li className="text-gray-500">No products found.</li>
+              ) : (
+                filteredProducts.map(product => (
+                  <li key={product.name} className="flex items-center gap-3 text-lg">
+                    <span className="text-2xl">{product.icon}</span>
+                    <span>{product.name}</span>
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { register } from "../api/auth";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -11,7 +12,7 @@ const Register = () => {
 
   const passwordsMatch = password === repeatPassword;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!passwordsMatch) {
       setError("Las contraseñas no coinciden");
@@ -20,13 +21,14 @@ const Register = () => {
     setLoading(true);
     setError("");
     setSuccess(false);
-    // Aquí irá la llamada al backend
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await register(email, password);
       setSuccess(true);
-      // Simulación de error
-      // setError("El email ya está registrado");
-    }, 1000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
