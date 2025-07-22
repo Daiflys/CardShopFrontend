@@ -13,8 +13,12 @@ const Login = () => {
     setLoading(true);
     setError("");
     try {
-      await login(email, password);
+      const result = await login(email, password);
       // Aquí puedes redirigir o guardar token, etc.
+      if (result && result.success) {
+        localStorage.setItem("userEmail", email);
+        // window.location.reload(); // Opcional: recargar para que el header se actualice
+      }
     } catch (err) {
       setError(err.message);
     } finally {

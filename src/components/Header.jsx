@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { searchCards } from "../api/search";
 
@@ -9,6 +9,12 @@ const Header = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const inputRef = useRef(null);
+  const [userEmail, setUserEmail] = useState(null);
+
+  useEffect(() => {
+    const email = localStorage.getItem("userEmail");
+    setUserEmail(email);
+  }, []);
 
   const handleInputChange = async (e) => {
     const value = e.target.value;
@@ -100,19 +106,28 @@ const Header = () => {
           </ul>
         )}
       </div>
-      <div className="flex gap-2">
-        <button
-          className="px-4 py-2 border rounded hover:bg-blue-50"
-          onClick={() => navigate('/list-products')}
-        >List Products</button>
-        <button
-          className="px-4 py-2 border rounded hover:bg-blue-50"
-          onClick={() => navigate('/login')}
-        >LOG IN</button>
-        <button
-          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
-          onClick={() => navigate('/register')}
-        >SIGN UP</button>
+      <div className="flex gap-4 items-center">
+        {userEmail ? (
+          <span className="text-blue-700 font-semibold">Hola {userEmail}</span>
+        ) : (
+          <span className="text-gray-500">Identifícate</span>
+        )}
+        {!userEmail && (
+          <>
+            <button
+              className="px-4 py-2 border rounded hover:bg-blue-50"
+              onClick={() => navigate('/list-products')}
+            >List Products</button>
+            <button
+              className="px-4 py-2 border rounded hover:bg-blue-50"
+              onClick={() => navigate('/login')}
+            >LOG IN</button>
+            <button
+              className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+              onClick={() => navigate('/register')}
+            >SIGN UP</button>
+          </>
+        )}
       </div>
     </header>
   );
