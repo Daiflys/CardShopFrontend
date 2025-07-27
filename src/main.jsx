@@ -7,4 +7,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
+  //TODO, this is causing the useEffect to be called twice, so remove in dev
 );

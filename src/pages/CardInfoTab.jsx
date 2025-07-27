@@ -1,7 +1,35 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { getCardsToSell } from "../api/card";
 
 const CardInfoTab = ({ card }) => {
+  const [cardsToSell, setCardsToSell] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchCardsToSell = useCallback(async (cardName) => {
+    if (!cardName) return;
+    
+    setLoading(true);
+    setError("");
+    
+    try {
+      const data = await getCardsToSell(cardName);
+      setCardsToSell(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (card?.name) {
+      fetchCardsToSell(card.name);
+    }
+  }, [card?.name, fetchCardsToSell]);
+
   if (!card) return null;
+
   return (
     <>
       <div className="flex flex-col md:flex-row gap-8">
@@ -52,34 +80,59 @@ const CardInfoTab = ({ card }) => {
           </div>
         </div>
       </div>
+      
       {/* Tabla de vendedores */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-2">Sellers</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border rounded-lg">
-            <thead>
-              <tr className="bg-blue-100 text-blue-900">
-                <th className="px-3 py-2 text-left">Seller</th>
-                <th className="px-3 py-2 text-left">Country</th>
-                <th className="px-3 py-2 text-left">Offer</th>
-                <th className="px-3 py-2 text-left">Quantity</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(card.sellers && card.sellers.length > 0)
-                ? card.sellers.map((s, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="px-3 py-2">{s.name ?? "Unknown"}</td>
-                    <td className="px-3 py-2">{s.country ?? "Unknown"}</td>
-                    <td className="px-3 py-2">{s.offer != null ? Number(s.offer).toFixed(2) : "Unknown"} €</td>
-                    <td className="px-3 py-2">{s.quantity ?? "Unknown"}</td>
+        {loading ? (
+          <div className="text-center py-4">
+            <div className="text-gray-600">Cargando vendedores...</div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-4">
+            <div className="text-red-600 mb-2">Error: {error}</div>
+            <button 
+              onClick={() => fetchCardsToSell(card.name)} 
+              className="bg-blue-700 text-white px-4 py-2 rounded"
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : cardsToSell.length === 0 ? (
+          <div className="text-center py-4">
+            <div className="text-gray-600">No hay cartas en venta para "{card?.name}"</div>
+            <div className="text-sm text-gray-500">Sé el primero en vender esta carta</div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white border rounded-lg">
+              <thead>
+                <tr className="bg-blue-100 text-blue-900">
+                  <th className="px-3 py-2 text-left">Set</th>
+                  <th className="px-3 py-2 text-left">Price</th>
+                  <th className="px-3 py-2 text-left">Seller ID</th>
+                  <th className="px-3 py-2 text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cardsToSell.map((cardToSell, i) => (
+                  <tr key={i} className="border-t hover:bg-gray-50">
+                    <td className="px-3 py-2">{cardToSell.setName ?? "Unknown"}</td>
+                    <td className="px-3 py-2 font-semibold text-green-600">
+                      €{cardToSell.cardPrice?.toFixed(2) ?? "Unknown"}
+                    </td>
+                    <td className="px-3 py-2">{cardToSell.userId ?? "Unknown"}</td>
+                    <td className="px-3 py-2">
+                      <button className="bg-blue-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-800 transition-colors">
+                        Comprar
+                      </button>
+                    </td>
                   </tr>
-                ))
-                : <tr><td colSpan={4} className="text-center text-gray-500">No sellers</td></tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </>
   );

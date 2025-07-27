@@ -6,7 +6,6 @@ const CardSellTab = ({ card }) => {
   const [condition, setCondition] = useState("Near Mint");
   const [comments, setComments] = useState("");
   const [price, setPrice] = useState("");
-  // Puedes añadir más estados según los campos que necesites
 
   const handleSubmit = (e) => {
     e.preventDefault();
