@@ -19,7 +19,7 @@ const Trends = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-8 text-center">Cargando tendencias...</div>;
+  if (loading) return <div className="p-8 text-center">Loading trends...</div>;
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
 
   return (

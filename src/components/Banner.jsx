@@ -34,7 +34,7 @@ const Banner = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Rotación automática
+  // Auto-rotation
   useEffect(() => {
     if (!banners.length) return;
     timeoutRef.current = setTimeout(() => {
@@ -43,10 +43,10 @@ const Banner = () => {
     return () => clearTimeout(timeoutRef.current);
   }, [current, banners.length]);
 
-  // Limpia animación al desmontar
+  // Clean up animation on unmount
   useEffect(() => () => clearTimeout(animTimeoutRef.current), []);
 
-  // Activa la animación de entrada en el siguiente tick
+  // Activate enter animation on next tick
   useEffect(() => {
     if (isAnimating && nextIdx !== null) {
       setEnterActive(false);
@@ -73,13 +73,13 @@ const Banner = () => {
   const handlePrev = () => goTo((current - 1 + banners.length) % banners.length, "left");
   const handleNext = () => goTo((current + 1) % banners.length, "right");
 
-  if (loading) return <div className="p-8 text-center">Cargando banners...</div>;
+  if (loading) return <div className="p-8 text-center">Loading banners...</div>;
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
   if (!banners.length) return null;
 
   return (
     <section className="relative bg-gray-800 text-white py-10 px-2 md:px-8 flex items-center justify-center overflow-hidden rounded-lg shadow-lg mt-6 min-h-[260px] md:min-h-[340px]">
-      {/* Flecha izquierda */}
+      {/* Left arrow */}
       <button
         onClick={handlePrev}
         className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
@@ -87,9 +87,9 @@ const Banner = () => {
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
       </button>
-      {/* Carrusel con animación */}
+      {/* Carousel with animation */}
       <div className="relative w-full max-w-6xl h-full min-h-[180px] md:min-h-[220px] flex items-center justify-center overflow-hidden">
-        {/* Banner actual (saliente durante animación) */}
+        {/* Current banner (slides out during animation) */}
         <div
           className={`absolute inset-0 flex flex-col md:flex-row items-center justify-between w-full h-full ${isAnimating ? slideOut[direction] : slideActive}`}
           style={{ zIndex: isAnimating ? 1 : 2 }}
@@ -108,7 +108,7 @@ const Banner = () => {
             />
           </div>
         </div>
-        {/* Banner entrante (solo durante animación) */}
+        {/* Incoming banner (only during animation) */}
         {isAnimating && nextIdx !== null && (
           <div
             className={`absolute inset-0 flex flex-col md:flex-row items-center justify-between w-full h-full ${slideIn[oppositeDirection(direction)]}${enterActive ? ` ${slideActive}` : ""}`}
@@ -130,7 +130,7 @@ const Banner = () => {
           </div>
         )}
       </div>
-      {/* Flecha derecha */}
+      {/* Right arrow */}
       <button
         onClick={handleNext}
         className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
@@ -138,7 +138,7 @@ const Banner = () => {
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
       </button>
-      {/* Indicadores */}
+      {/* Indicators */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {banners.map((_, idx) => (
           <button

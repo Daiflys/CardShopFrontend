@@ -29,7 +29,7 @@ const mockGetProducts = async () => {
 // --- REAL ---
 const realGetProducts = async () => {
   const response = await fetch(`${API_BASE_URL}/products`);
-  if (!response.ok) throw new Error("Error al obtener productos");
+  if (!response.ok) throw new Error("Error fetching products");
   return response.json();
 };
 

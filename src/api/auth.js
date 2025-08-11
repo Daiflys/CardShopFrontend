@@ -8,27 +8,31 @@ const mockLogin = async (email, password) => {
   if (email === "test@test.com" && password === "1234") {
     return { success: true, token: "mock-token" };
   } else {
-    throw new Error("Credenciales incorrectas (mock)");
+    throw new Error("Incorrect credentials (mock)");
   }
 };
 
 const mockRegister = async (email, password) => {
   await new Promise(res => setTimeout(res, 1000));
   if (email === "test@test.com") {
-    throw new Error("El email ya está registrado (mock)");
+    throw new Error("Email is already registered (mock)");
   }
   return { success: true };
 };
 
 // --- REAL ---
 const realLogin = async (email, password) => {
-  const response = await fetch(`${API_BASE_URL}/login`, {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username: "first", password: "1234" }),
   });
-  if (!response.ok) throw new Error("Credenciales incorrectas");
-  return response.json();
+  if (!response.ok) {
+    console.log("Response not ok, error: ", response);
+  }
+  const token = await response.text();
+  localStorage.setItem("authToken", token);
+  return response;
 };
 
 const realRegister = async (email, password) => {
@@ -37,9 +41,9 @@ const realRegister = async (email, password) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
-  if (!response.ok) throw new Error("Error en el registro");
+  if (!response.ok) throw new Error("Registration error");
   return response.json();
 };
 
-export const login = USE_MOCK ? mockLogin : realLogin;
+export const login = realLogin;
 export const register = USE_MOCK ? mockRegister : realRegister; 

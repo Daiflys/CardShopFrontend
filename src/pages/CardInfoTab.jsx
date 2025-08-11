@@ -33,11 +33,11 @@ const CardInfoTab = ({ card }) => {
   return (
     <>
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Imagen */}
+        {/* Image */}
         <div className="flex-shrink-0 flex justify-center">
           <img src={card.imageUrl ?? card.image ?? ""} alt={card.name ?? ""} className="w-64 h-auto rounded-lg shadow-lg border" />
         </div>
-        {/* Info principal */}
+        {/* Main info */}
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-blue-900 mb-1">{card.name ?? "Unknown"}</h1>
           <div className="text-lg text-gray-600 mb-2">{card.setName ?? card.set ?? "Unknown"} - Singles</div>
@@ -64,7 +64,7 @@ const CardInfoTab = ({ card }) => {
             </ul>
           </div>
         </div>
-        {/* Gráfico (placeholder) */}
+        {/* Chart (placeholder) */}
         <div className="hidden md:block w-72">
           <div className="bg-gray-100 rounded-lg p-4 shadow flex flex-col items-center">
             <span className="font-semibold mb-2">Avg. Sell Price</span>
@@ -81,12 +81,12 @@ const CardInfoTab = ({ card }) => {
         </div>
       </div>
       
-      {/* Tabla de vendedores */}
+      {/* Sellers table */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-2">Sellers</h2>
         {loading ? (
           <div className="text-center py-4">
-            <div className="text-gray-600">Cargando vendedores...</div>
+            <div className="text-gray-600">Loading sellers...</div>
           </div>
         ) : error ? (
           <div className="text-center py-4">
@@ -95,13 +95,13 @@ const CardInfoTab = ({ card }) => {
               onClick={() => fetchCardsToSell(card.name)} 
               className="bg-blue-700 text-white px-4 py-2 rounded"
             >
-              Reintentar
+              Retry
             </button>
           </div>
         ) : cardsToSell.length === 0 ? (
           <div className="text-center py-4">
-            <div className="text-gray-600">No hay cartas en venta para "{card?.name}"</div>
-            <div className="text-sm text-gray-500">Sé el primero en vender esta carta</div>
+            <div className="text-gray-600">No cards for sale for "{card?.name}"</div>
+            <div className="text-sm text-gray-500">Be the first to sell this card</div>
           </div>
         ) : (
           <div className="overflow-x-auto">

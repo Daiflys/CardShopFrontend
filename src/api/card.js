@@ -63,14 +63,16 @@ const mockGetCardsToSell = async (cardName) => {
 const realGetCardDetail = async (cardId) => {
   console.log("going to search for cardId", cardId);
   const response = await fetch(`${API_BASE_URL}/cards/id/multi/${cardId}`);
-  if (!response.ok) throw new Error("Error al obtener detalle de carta");
-  return response.json();
+  if (!response.ok) throw new Error("Error fetching card details");
+  const responseRead = await response.json();
+  console.log("response json: ", responseRead);
+  return responseRead;
 };
 
 const realGetCardsToSell = async (cardName) => {
   console.log("going to search for cards to sell with name", cardName);
   const response = await fetch(`${API_BASE_URL}/cardsToSell/${encodeURIComponent(cardName)}`);
-  if (!response.ok) throw new Error("Error al obtener cartas en venta");
+  if (!response.ok) throw new Error("Error fetching cards to sell");
   return response.json();
 };
 

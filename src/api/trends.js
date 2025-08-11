@@ -27,12 +27,12 @@ const mockGetBestBargains = async () => {
 // --- REAL ---
 const realGetBestSellers = async () => {
   const response = await fetch(`${API_BASE_URL}/trends/best-sellers`);
-  if (!response.ok) throw new Error("Error al obtener best sellers");
+  if (!response.ok) throw new Error("Error fetching best sellers");
   return response.json();
 };
 const realGetBestBargains = async () => {
   const response = await fetch(`${API_BASE_URL}/trends/best-bargains`);
-  if (!response.ok) throw new Error("Error al obtener best bargains");
+  if (!response.ok) throw new Error("Error fetching best bargains");
   return response.json();
 };
 

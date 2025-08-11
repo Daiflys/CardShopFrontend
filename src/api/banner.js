@@ -38,7 +38,7 @@ const mockGetBanners = async () => {
 // --- REAL ---
 const realGetBanners = async () => {
   const response = await fetch(`${API_BASE_URL}/banners`);
-  if (!response.ok) throw new Error("Error al obtener banners");
+  if (!response.ok) throw new Error("Error fetching banners");
   return response.json();
 };
 

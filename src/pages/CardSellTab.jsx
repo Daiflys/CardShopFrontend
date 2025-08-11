@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { setCardToSell } from "../api/postCardToSell";
 
 const CardSellTab = ({ card }) => {
   const [quantity, setQuantity] = useState(1);
@@ -6,22 +7,41 @@ const CardSellTab = ({ card }) => {
   const [condition, setCondition] = useState("Near Mint");
   const [comments, setComments] = useState("");
   const [price, setPrice] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    console.log("handleSubmit called");
     e.preventDefault();
-    // Aquí iría la lógica para poner la carta a la venta
-    alert("Put for sale: " + JSON.stringify({
-      cardId: card?.id,
-      quantity,
-      language,
-      condition,
-      comments,
-      price
-    }));
+    setLoading(true);
+    setError("");
+    setSuccessMessage("");
+    try {
+      const result = await setCardToSell(card.id, card.setName, card.name, card.imageUrl, price);
+      console.log("result is: " + result + " result success is: " + result.success);
+      setSuccessMessage("Card successfully put up for sale!");
+    } catch (err) {
+      //console.error("Error posting card to sell: ", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form className="bg-white rounded-xl shadow p-6 max-w-lg mx-auto" onSubmit={handleSubmit}>
+      {successMessage && (
+        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+          {successMessage}
+        </div>
+      )}
+      
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
       <div className="mb-4">
         <label className="block font-semibold mb-1">Quantity</label>
         <input type="number" min="1" className="border rounded px-3 py-2 w-full" value={quantity} onChange={e => setQuantity(e.target.value)} />

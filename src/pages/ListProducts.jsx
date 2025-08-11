@@ -79,7 +79,7 @@ const ListProducts = () => {
         {/* Product Results */}
         <div className="flex-1 bg-white rounded-xl shadow p-6">
           {loading ? (
-            <div className="text-gray-500">Cargando productos...</div>
+            <div className="text-gray-500">Loading products...</div>
           ) : error ? (
             <div className="text-red-500">{error}</div>
           ) : (
