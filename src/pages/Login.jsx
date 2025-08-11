@@ -14,11 +14,8 @@ const Login = () => {
     setError("");
     try {
       const result = await login(email, password);
-      // Aquí puedes redirigir o guardar token, etc.
-      if (result && result.success) {
-        localStorage.setItem("userEmail", email);
-        // window.location.reload(); // Opcional: recargar para que el header se actualice
-      }
+      // If backend returned token in login() and we saved it, also store email for header fallback
+      localStorage.setItem("userEmail", email);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -29,7 +26,7 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-[70vh]">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-blue-800 mb-6 text-center">Iniciar sesión</h2>
+        <h2 className="text-2xl font-bold text-blue-800 mb-6 text-center">Log in</h2>
         {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-center">{error}</div>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
@@ -42,7 +39,7 @@ const Login = () => {
           />
           <input
             type="password"
-            placeholder="Contraseña"
+            placeholder="Password"
             className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={password}
             onChange={e => setPassword(e.target.value)}
@@ -53,12 +50,12 @@ const Login = () => {
             className="bg-blue-700 text-white font-bold px-4 py-2 rounded hover:bg-blue-800 transition"
             disabled={loading}
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
         <div className="mt-4 text-center text-sm text-gray-600">
-          ¿No tienes cuenta?{' '}
-          <Link to="/register" className="text-blue-700 hover:underline font-semibold">Regístrate</Link>
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-700 hover:underline font-semibold">Sign up</Link>
         </div>
       </div>
     </div>

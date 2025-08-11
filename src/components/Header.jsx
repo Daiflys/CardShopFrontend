@@ -10,10 +10,23 @@ const Header = () => {
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const [userEmail, setUserEmail] = useState(null);
+  const [userName, setUserName] = useState(null);
 
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
     setUserEmail(email);
+
+    const token = localStorage.getItem("authToken");
+    if (token && token.split(".").length === 3) {
+      try {
+        const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+        const payloadJson = JSON.parse(atob(payloadBase64));
+        const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
+        if (nameFromToken) setUserName(nameFromToken);
+      } catch {
+        // ignore decoding errors
+      }
+    }
   }, []);
 
   const handleInputChange = async (e) => {
@@ -89,7 +102,7 @@ const Header = () => {
         {showDropdown && (
           <ul className="absolute z-20 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
             {loading ? (
-              <li className="px-4 py-2 text-gray-500">Buscando...</li>
+              <li className="px-4 py-2 text-gray-500">Searching...</li>
             ) : results.length === 0 ? (
               <li className="px-4 py-2 text-gray-500">No results</li>
             ) : (
@@ -107,12 +120,24 @@ const Header = () => {
         )}
       </div>
       <div className="flex gap-4 items-center">
-        {userEmail ? (
-          <span className="text-blue-700 font-semibold">Hola {userEmail}</span>
+        {userEmail || userName ? (
+          <>
+            <span className="text-blue-700 font-semibold">Hello {userName || userEmail}</span>
+            <button
+              className="px-4 py-2 border rounded hover:bg-blue-50"
+              onClick={() => {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userEmail");
+                setUserName(null);
+                setUserEmail(null);
+                navigate('/');
+              }}
+            >Sign out</button>
+          </>
         ) : (
-          <span className="text-gray-500">Identifícate</span>
+          <span className="text-gray-500">Sign in</span>
         )}
-        {!userEmail && (
+        {!userEmail && !userName && (
           <>
             <button
               className="px-4 py-2 border rounded hover:bg-blue-50"
