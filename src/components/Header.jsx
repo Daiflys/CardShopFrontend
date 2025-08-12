@@ -81,7 +81,12 @@ const Header = () => {
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
       <div className="flex items-center gap-4">
-        <span className="text-2xl font-bold text-blue-800">cardmarket</span>
+        <span 
+          className="text-2xl font-bold text-blue-800 cursor-pointer hover:text-blue-600 transition-colors"
+          onClick={() => navigate('/')}
+        >
+          cardmarket
+        </span>
         <nav className="hidden md:flex gap-4 text-gray-700">
           <a href="#" className="hover:text-blue-600">PRODUCTS</a>
           <a href="#" className="hover:text-blue-600">TRENDS</a>
