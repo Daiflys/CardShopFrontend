@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { getCardsToSell } from "../api/card";
+import AddToCartButton from "../components/AddToCartButton";
 
 const CardInfoTab = ({ card }) => {
   const [cardsToSell, setCardsToSell] = useState([]);
@@ -123,9 +124,22 @@ const CardInfoTab = ({ card }) => {
                     </td>
                     <td className="px-3 py-2">{cardToSell.userId ?? "Unknown"}</td>
                     <td className="px-3 py-2">
-                      <button className="bg-blue-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-800 transition-colors">
-                        Comprar
-                      </button>
+                      {cardToSell.cardPrice ? (
+                        <AddToCartButton 
+                          card={{
+                            id: `${cardToSell.userId}-${cardToSell.setName}`,
+                            card_name: card.name,
+                            image_url: card.imageUrl || card.image,
+                            name: card.name,
+                            price: cardToSell.cardPrice,
+                            set: cardToSell.setName,
+                            sellerId: cardToSell.userId
+                          }}
+                          className="px-3 py-1 text-sm"
+                        />
+                      ) : (
+                        <span className="text-gray-500 text-sm">Sin precio</span>
+                      )}
                     </td>
                   </tr>
                 ))}
