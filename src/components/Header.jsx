@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { searchCards } from "../api/search";
+import AddToCartButton from "./AddToCartButton";
+import CartIcon from "./CartIcon";
 
 const Header = () => {
   const [search, setSearch] = useState("");
@@ -114,10 +116,26 @@ const Header = () => {
               results.map(card => (
                 <li
                   key={card.id}
-                  className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                  onClick={() => handleResultClick(card)}
+                  className="px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
                 >
-                  {card.name}
+                  <div className="flex items-center justify-between">
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => handleResultClick(card)}
+                    >
+                      <div className="font-medium text-gray-900">{card.name}</div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        {card.set && <span>{card.set}</span>}
+                        {card.price && <span className="text-green-600 font-semibold">${card.price}</span>}
+                      </div>
+                    </div>
+                    <div className="ml-3" onClick={(e) => e.stopPropagation()}>
+                      <AddToCartButton 
+                        card={card}
+                        className="px-2 py-1 text-xs"
+                      />
+                    </div>
+                  </div>
                 </li>
               ))
             )}
@@ -125,6 +143,7 @@ const Header = () => {
         )}
       </div>
       <div className="flex gap-4 items-center">
+        <CartIcon />
         {userEmail || userName ? (
           <>
             <span className="text-blue-700 font-semibold">Hello {userName || userEmail}</span>
