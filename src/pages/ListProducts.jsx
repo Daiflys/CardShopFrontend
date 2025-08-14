@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getProducts } from "../api/products";
+import ProductCard from "../components/ProductCard";
 
 const categories = ["Singles", "Boosters", "Decks"];
 const languages = ["English", "Spanish", "German", "French"];
@@ -26,6 +27,16 @@ const ListProducts = () => {
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(name.toLowerCase())
   );
+
+  // Transform products to match ProductCard props
+  const transformedProducts = filteredProducts.map(product => ({
+    id: product.id || product.name.toLowerCase().replace(/\s+/g, "-"),
+    card_name: product.name,
+    image_url: product.image_url || "https://via.placeholder.com/120x160?text=Card",
+    name: product.name,
+    price: product.price,
+    set: product.set
+  }));
 
   return (
     <div className="flex flex-col min-h-[70vh] p-6">
@@ -83,18 +94,17 @@ const ListProducts = () => {
           ) : error ? (
             <div className="text-red-500">{error}</div>
           ) : (
-            <ul className="space-y-3">
-              {filteredProducts.length === 0 ? (
-                <li className="text-gray-500">No products found.</li>
+            <div>
+              {transformedProducts.length === 0 ? (
+                <div className="text-gray-500">No products found.</div>
               ) : (
-                filteredProducts.map(product => (
-                  <li key={product.name} className="flex items-center gap-3 text-lg">
-                    <span className="text-2xl">{product.icon}</span>
-                    <span>{product.name}</span>
-                  </li>
-                ))
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {transformedProducts.map(product => (
+                    <ProductCard key={product.id} {...product} />
+                  ))}
+                </div>
               )}
-            </ul>
+            </div>
           )}
         </div>
       </div>
