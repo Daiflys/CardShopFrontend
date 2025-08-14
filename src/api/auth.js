@@ -1,5 +1,24 @@
 // src/api/auth.js
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+// --- MOCKS ---
+const mockLogin = async (email, password) => {
+  await new Promise(res => setTimeout(res, 1000));
+  if (email === "test@test.com" && password === "1234") {
+    return { success: true, token: "mock-token", user: { email, username: "TestUser" } };
+  } else {
+    throw new Error("Incorrect credentials (mock)");
+  }
+};
+
+const mockRegister = async (username, email, password) => {
+  await new Promise(res => setTimeout(res, 1000));
+  if (email === "test@test.com") {
+    throw new Error("Email is already registered (mock)");
+  }
+  return { success: true, token: "mock-token", user: { email, username } };
+};
 
 // --- REAL ---
 const realLogin = async (email, password) => {
@@ -17,20 +36,16 @@ const realLogin = async (email, password) => {
   const token = await response.text();
   localStorage.setItem("authToken", token);
   
-  // Store email for header display
-  localStorage.setItem("userEmail", email);
-  
-  // Try to decode JWT to get user info if it's a valid JWT
+  // Try to decode JWT to get user info
   let userInfo = { email };
   if (token && token.split(".").length === 3) {
     try {
       const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
       const payloadJson = JSON.parse(atob(payloadBase64));
-      const username = payloadJson.username || payloadJson.name || payloadJson.sub;
-      if (username) {
-        userInfo.username = username;
-        localStorage.setItem("userName", username);
-      }
+      userInfo = {
+        email: payloadJson.email || email,
+        username: payloadJson.username || payloadJson.name || payloadJson.sub
+      };
     } catch (error) {
       console.log("Could not decode JWT token:", error);
     }
@@ -53,8 +68,6 @@ const realRegister = async (username, email, password) => {
   
   const token = await response.text();
   localStorage.setItem("authToken", token);
-  localStorage.setItem("userEmail", email);
-  localStorage.setItem("userName", username);
   
   return { success: true, token, user: { email, username } };
 };
