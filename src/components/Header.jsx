@@ -13,9 +13,11 @@ const Header = () => {
   const [userEmail, setUserEmail] = useState(null);
   const [userName, setUserName] = useState(null);
 
-  useEffect(() => {
+  const loadUserInfo = () => {
     const email = localStorage.getItem("userEmail");
+    const storedUserName = localStorage.getItem("userName");
     setUserEmail(email);
+    setUserName(storedUserName);
 
     const token = localStorage.getItem("authToken");
     if (token && token.split(".").length === 3) {
@@ -23,11 +25,36 @@ const Header = () => {
         const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
         const payloadJson = JSON.parse(atob(payloadBase64));
         const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
-        if (nameFromToken) setUserName(nameFromToken);
-      } catch {
-        // ignore decoding errors
+        if (nameFromToken && nameFromToken !== email) {
+          setUserName(nameFromToken);
+          localStorage.setItem("userName", nameFromToken);
+        }
+      } catch (error) {
+        console.log("Could not decode JWT token:", error);
       }
     }
+  };
+
+  useEffect(() => {
+    loadUserInfo();
+    
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = () => {
+      loadUserInfo();
+    };
+    
+    // Listen for custom events (when user logs in/out in same tab)
+    const handleAuthChange = () => {
+      loadUserInfo();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('authChange', handleAuthChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authChange', handleAuthChange);
+    };
   }, []);
 
   const handleInputChange = async (e) => {
@@ -64,6 +91,19 @@ const Header = () => {
     setSearch(card.name);
     setShowDropdown(false);
     navigate(`/card/${card.id}`); 
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userName");
+    setUserName(null);
+    setUserEmail(null);
+    
+    // Notify other components about auth change
+    window.dispatchEvent(new Event('authChange'));
+    
+    navigate('/');
   };
 
   // Hide dropdown if clicked outside
@@ -133,35 +173,36 @@ const Header = () => {
         <CartIcon />
         {userEmail || userName ? (
           <>
-            <span className="text-blue-700 font-semibold">Hello {userName || userEmail}</span>
+            <span className="text-blue-700 font-semibold">
+              Hello {userName || userEmail}
+            </span>
             <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
-              onClick={() => {
-                localStorage.removeItem("authToken");
-                localStorage.removeItem("userEmail");
-                setUserName(null);
-                setUserEmail(null);
-                navigate('/');
-              }}
-            >Sign out</button>
+              className="px-4 py-2 border rounded hover:bg-blue-50 transition-colors"
+              onClick={handleLogout}
+            >
+              Sign out
+            </button>
           </>
         ) : (
-          <span className="text-gray-500">Sign in</span>
-        )}
-        {!userEmail && !userName && (
           <>
             <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
+              className="px-4 py-2 border rounded hover:bg-blue-50 transition-colors"
               onClick={() => navigate('/list-products')}
-            >List Products</button>
+            >
+              List Products
+            </button>
             <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
+              className="px-4 py-2 border rounded hover:bg-blue-50 transition-colors"
               onClick={() => navigate('/login')}
-            >LOG IN</button>
+            >
+              LOG IN
+            </button>
             <button
-              className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+              className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition-colors"
               onClick={() => navigate('/register')}
-            >SIGN UP</button>
+            >
+              SIGN UP
+            </button>
           </>
         )}
       </div>

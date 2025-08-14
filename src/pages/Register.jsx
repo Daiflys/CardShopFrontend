@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
 
 const Register = () => {
@@ -10,6 +10,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const passwordsMatch = password === repeatPassword;
 
@@ -31,8 +32,18 @@ const Register = () => {
     setError("");
     setSuccess(false);
     try {
-      const res = await register(username, email, password);
-      setSuccess(true);
+      const result = await register(username, email, password);
+      if (result.success) {
+        setSuccess(true);
+        
+        // Notify Header to update user info
+        window.dispatchEvent(new Event('authChange'));
+        
+        // Redirect after a short delay
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+      }
     } catch (err) {
       setError(err?.message || "Registration error");
     } finally {
@@ -44,8 +55,8 @@ const Register = () => {
     <div className="flex items-center justify-center min-h-[70vh]">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-blue-800 mb-6 text-center">Create account</h2>
-        {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-center">{error}</div>}
-        {success && <div className="bg-green-100 text-green-700 p-2 rounded mb-4 text-center">Registration successful! You can now log in.</div>}
+        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center border border-red-200">{error}</div>}
+        {success && <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-center border border-green-200">Registration successful! Redirecting...</div>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
             type="username"
@@ -84,7 +95,7 @@ const Register = () => {
           )}
           <button
             type="submit"
-            className="bg-blue-700 text-white font-bold px-4 py-2 rounded hover:bg-blue-800 transition"
+            className="bg-blue-700 text-white font-bold px-4 py-2 rounded hover:bg-blue-800 transition disabled:opacity-50"
             disabled={loading || !passwordsMatch}
           >
             {loading ? "Registering..." : "Register"}
