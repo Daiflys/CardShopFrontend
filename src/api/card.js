@@ -32,6 +32,7 @@ const mockCard = {
 
 const mockCardsToSell = [
   {
+    id: "sell-1",
     oracleId: "12345",
     setName: "Scourge",
     name: "Dragon Wings",
@@ -40,6 +41,7 @@ const mockCardsToSell = [
     userId: 1
   },
   {
+    id: "sell-2",
     oracleId: "12345",
     setName: "Scourge",
     name: "Dragon Wings",

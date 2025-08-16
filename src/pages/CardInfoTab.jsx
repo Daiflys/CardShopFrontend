@@ -116,8 +116,15 @@ const CardInfoTab = ({ card }) => {
                 </tr>
               </thead>
               <tbody>
-                {cardsToSell.map((cardToSell, i) => (
-                  <tr key={i} className="border-t hover:bg-gray-50">
+                {cardsToSell.map((cardToSell, i) => {
+                  const listingId = cardToSell.id 
+                    ?? cardToSell.cardToSellId 
+                    ?? cardToSell.cardId 
+                    ?? cardToSell.listingId 
+                    ?? cardToSell._id 
+                    ?? `${cardToSell.userId ?? 'nouser'}-${cardToSell.setName ?? 'noset'}-${i}`;
+                  return (
+                  <tr key={`${listingId}`} className="border-t hover:bg-gray-50">
                     <td className="px-3 py-2">{cardToSell.setName ?? "Unknown"}</td>
                     <td className="px-3 py-2 font-semibold text-green-600">
                       €{cardToSell.cardPrice?.toFixed(2) ?? "Unknown"}
@@ -127,7 +134,7 @@ const CardInfoTab = ({ card }) => {
                       {cardToSell.cardPrice ? (
                         <AddToCartButton 
                           card={{
-                            id: `${cardToSell.userId}-${cardToSell.setName}`,
+                            id: listingId,
                             card_name: card.name,
                             image_url: card.imageUrl || card.image,
                             name: card.name,
@@ -142,7 +149,7 @@ const CardInfoTab = ({ card }) => {
                       )}
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>
