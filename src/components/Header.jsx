@@ -132,19 +132,42 @@ const Header = () => {
       <div className="flex gap-4 items-center">
         <CartIcon />
         {userEmail || userName ? (
-          <>
-            <span className="text-blue-700 font-semibold">Hello {userName || userEmail}</span>
-            <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
-              onClick={() => {
-                localStorage.removeItem("authToken");
-                localStorage.removeItem("userEmail");
-                setUserName(null);
-                setUserEmail(null);
-                navigate('/');
-              }}
-            >Sign out</button>
-          </>
+          <div className="relative">
+            <details className="group">
+              <summary className="list-none flex items-center gap-2 cursor-pointer select-none">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white font-bold">
+                  {(userName || userEmail || '?').toString().charAt(0).toUpperCase()}
+                </span>
+                <span className="text-blue-700 font-semibold hidden sm:inline">{userName || userEmail}</span>
+                <svg className="h-4 w-4 text-gray-500 group-open:rotate-180 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+                </svg>
+              </summary>
+              <ul className="absolute right-0 mt-2 w-52 bg-white border rounded-md shadow-lg overflow-hidden z-30">
+                <li>
+                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/profile')}>My account</button>
+                </li>
+                <li className="border-t">
+                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/transactions')}>Transactions</button>
+                </li>
+                <li className="border-t">
+                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/settings')}>Settings</button>
+                </li>
+                <li className="border-t">
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-blue-50 text-red-600"
+                    onClick={() => {
+                      localStorage.removeItem("authToken");
+                      localStorage.removeItem("userEmail");
+                      setUserName(null);
+                      setUserEmail(null);
+                      navigate('/');
+                    }}
+                  >Sign out</button>
+                </li>
+              </ul>
+            </details>
+          </div>
         ) : (
           <span className="text-gray-500">Sign in</span>
         )}

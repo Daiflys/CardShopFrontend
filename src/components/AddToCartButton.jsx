@@ -18,14 +18,14 @@ const AddToCartButton = ({ card, className = "", showQuantity = false }) => {
     try {
       const result = await addItemToCart(card);
       if (result.success) {
-        setMessage("¡Añadido al carrito!");
+        setMessage("Added to cart!");
         setTimeout(() => setMessage(""), 2000);
       } else {
-        setMessage(result.error || "Error al añadir al carrito");
+        setMessage(result.error || "Error adding to cart");
         setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
-      setMessage("Error al añadir al carrito");
+      setMessage("Error adding to cart");
       setTimeout(() => setMessage(""), 3000);
     } finally {
       setIsAdding(false);
@@ -49,14 +49,14 @@ const AddToCartButton = ({ card, className = "", showQuantity = false }) => {
           disabled:opacity-50 disabled:cursor-not-allowed
           inline-flex items-center justify-center gap-2
         `}
-        title={isCardInCart ? 'En carrito' : 'Añadir al carrito'}
+        title={isCardInCart ? 'In cart' : 'Add to cart'}
       >
         {isAdding ? (
           <>
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white">
               <span className="h-4 w-4 rounded-full border-2 border-blue-700 border-t-transparent animate-spin" />
             </span>
-            Añadiendo...
+            Adding...
           </>
         ) : isCardInCart ? (
           <>
@@ -65,7 +65,7 @@ const AddToCartButton = ({ card, className = "", showQuantity = false }) => {
                 <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
-            En carrito
+            In cart
           </>
         ) : (
           <>
@@ -78,7 +78,7 @@ const AddToCartButton = ({ card, className = "", showQuantity = false }) => {
               <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-blue-700 text-white flex items-center justify-center text-[10px] font-black leading-none">+
               </span>
             </span>
-            Añadir al carrito
+            Add to cart
           </>
         )}
       </button>
