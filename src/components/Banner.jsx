@@ -83,7 +83,7 @@ const Banner = () => {
       <button
         onClick={handlePrev}
         className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
-        aria-label="Anterior"
+        aria-label="Previous"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
       </button>
@@ -134,7 +134,7 @@ const Banner = () => {
       <button
         onClick={handleNext}
         className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
-        aria-label="Siguiente"
+        aria-label="Next"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
       </button>
@@ -145,7 +145,7 @@ const Banner = () => {
             key={idx}
             onClick={() => goTo(idx, idx > current ? "right" : "left")}
             className={`w-4 h-2 rounded-full transition-all duration-300 ${current === idx ? "bg-blue-500 w-8" : "bg-white/60"}`}
-            aria-label={`Ir al banner ${idx + 1}`}
+            aria-label={`Go to banner ${idx + 1}`}
           />
         ))}
       </div>
