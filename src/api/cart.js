@@ -135,8 +135,37 @@ const realUpdateQuantity = async (cardId, quantity) => {
   return response.json();
 };
 
+// --- CHECKOUT ---
+const mockCheckout = async (cardId) => {
+  await new Promise(res => setTimeout(res, 300));
+  return { success: true };
+};
+
+const realCheckout = async (cardId) => {
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    throw new Error("User not authenticated");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/purchases/buy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: cardId
+  });
+
+  if (!response.ok) {
+    throw new Error("Error performing checkout");
+  }
+
+  return response.json();
+};
+
 // Export functions
 export const addToCart = USE_MOCK ? mockAddToCart : realAddToCart;
 export const removeFromCart = USE_MOCK ? mockRemoveFromCart : realRemoveFromCart;
 export const getCart = USE_MOCK ? mockGetCart : realGetCart;
 export const updateQuantity = USE_MOCK ? mockUpdateQuantity : realUpdateQuantity;
+export const checkout = realCheckout;

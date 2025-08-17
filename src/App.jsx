@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ListProducts from "./pages/ListProducts";
 import CardDetail from "./pages/CardDetail";
+import Checkout from "./pages/Checkout";
 import { CartProvider } from "./context/CartContext";
 import "./App.css";
 
@@ -28,6 +29,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/list-products" element={<ListProducts />} />
               <Route path="/card/:cardId" element={<CardDetail />} />
+              <Route path="/checkout" element={<Checkout />} />
             </Routes>
           </main>
         </div>

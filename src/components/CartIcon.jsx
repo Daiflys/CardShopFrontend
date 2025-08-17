@@ -1,23 +1,29 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const CartIcon = () => {
   const { getCartCount, cartItems } = useCart();
   const [showCartPreview, setShowCartPreview] = useState(false);
   const cartCount = getCartCount();
+  const hasItems = cartCount > 0;
+  const navigate = useNavigate();
 
   return (
     <div className="relative">
       <button
         onClick={() => setShowCartPreview(!showCartPreview)}
-        className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors"
+        className={`relative p-2 rounded-md transition-colors ${hasItems ? 'text-blue-700 bg-blue-50 hover:bg-blue-100' : 'text-gray-700 hover:text-blue-600'}`}
         aria-label="Shopping cart"
+        title={hasItems ? `Cart (${cartCount})` : 'Empty cart'}
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+        <svg className="w-7 h-7" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M3 3h2l.4 2H7l1.2 6h9.3a2 2 0 0 0 1.9-1.4l1.3-4.6H5.4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="9" cy="19" r="1.7" fill="none" stroke="currentColor" strokeWidth="2.2" />
+          <circle cx="18" cy="19" r="1.7" fill="none" stroke="currentColor" strokeWidth="2.2" />
         </svg>
-        {cartCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+        {hasItems && (
+          <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] rounded-full h-5 min-w-5 px-1 flex items-center justify-center font-bold shadow">
             {cartCount > 99 ? '99+' : cartCount}
           </span>
         )}
@@ -27,9 +33,9 @@ const CartIcon = () => {
       {showCartPreview && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
           <div className="p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Carrito</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Cart</h3>
             {cartItems.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Tu carrito está vacío</p>
+              <p className="text-gray-500 text-center py-4">Your cart is empty</p>
             ) : (
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {cartItems.map((item) => (
@@ -49,9 +55,7 @@ const CartIcon = () => {
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {item.card_name || item.name}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        Cantidad: {item.quantity}
-                      </p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                     </div>
                   </div>
                 ))}
@@ -59,8 +63,11 @@ const CartIcon = () => {
             )}
             {cartItems.length > 0 && (
               <div className="mt-4 pt-3 border-t">
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                  Ver carrito completo
+                <button 
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                  onClick={() => { setShowCartPreview(false); navigate('/checkout'); }}
+                >
+                  View cart
                 </button>
               </div>
             )}
