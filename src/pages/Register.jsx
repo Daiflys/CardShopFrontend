@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
 
 const Register = () => {
@@ -10,6 +10,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const passwordsMatch = password === repeatPassword;
 
@@ -32,7 +33,14 @@ const Register = () => {
     setSuccess(false);
     try {
       const res = await register(username, email, password);
-      setSuccess(true);
+      // Store email for header fallback since register also sets token
+      localStorage.setItem("userEmail", email);
+      
+      // Trigger auth change event to update Header
+      window.dispatchEvent(new CustomEvent('authChange'));
+      
+      // Redirect to home page after successful registration
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err?.message || "Registration error");
     } finally {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { login } from "../api/auth";
 
 const Login = () => {
@@ -7,6 +7,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +18,13 @@ const Login = () => {
       const result = await login(email, password);
       // If backend returned token in login() and we saved it, also store email for header fallback
       localStorage.setItem("userEmail", email);
+      
+      // Trigger auth change event to update Header
+      window.dispatchEvent(new CustomEvent('authChange'));
+      
+      // Redirect to intended page or home page
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
