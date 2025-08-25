@@ -47,5 +47,33 @@ const realRegister = async (username, email, password) => {
   return response;
 };
 
+const validateToken = async () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return false;
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/validate`, {
+      method: "GET",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+    });
+    
+    if (!response.ok) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userEmail");
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userEmail");
+    return false;
+  }
+};
+
 export const login = realLogin;
-export const register = realRegister; 
+export const register = realRegister;
+export { validateToken }; 

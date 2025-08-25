@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { searchCards } from "../api/search";
+import { validateToken } from "../api/auth";
 import CartIcon from "./CartIcon";
 
 const Header = () => {
@@ -13,21 +14,52 @@ const Header = () => {
   const [userEmail, setUserEmail] = useState(null);
   const [userName, setUserName] = useState(null);
 
-  useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    setUserEmail(email);
+  const checkAuth = async () => {
+    const isValid = await validateToken();
+    
+    if (isValid) {
+      const email = localStorage.getItem("userEmail");
+      setUserEmail(email);
 
-    const token = localStorage.getItem("authToken");
-    if (token && token.split(".").length === 3) {
-      try {
-        const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-        const payloadJson = JSON.parse(atob(payloadBase64));
-        const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
-        if (nameFromToken) setUserName(nameFromToken);
-      } catch {
-        // ignore decoding errors
+      const token = localStorage.getItem("authToken");
+      if (token && token.split(".").length === 3) {
+        try {
+          const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+          const payloadJson = JSON.parse(atob(payloadBase64));
+          const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
+          if (nameFromToken) setUserName(nameFromToken);
+        } catch {
+          // ignore decoding errors
+        }
       }
+    } else {
+      setUserEmail(null);
+      setUserName(null);
     }
+  };
+
+  useEffect(() => {
+    checkAuth();
+
+    // Listen for localStorage changes (for cross-tab updates)
+    const handleStorageChange = (e) => {
+      if (e.key === 'authToken' || e.key === 'userEmail') {
+        checkAuth();
+      }
+    };
+
+    // Listen for custom auth events (for same-tab updates)
+    const handleAuthChange = () => {
+      checkAuth();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('authChange', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authChange', handleAuthChange);
+    };
   }, []);
 
   const handleInputChange = async (e) => {
@@ -161,6 +193,7 @@ const Header = () => {
                       localStorage.removeItem("userEmail");
                       setUserName(null);
                       setUserEmail(null);
+                      window.dispatchEvent(new CustomEvent('authChange'));
                       navigate('/');
                     }}
                   >Sign out</button>
