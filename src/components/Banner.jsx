@@ -1,30 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getBanners } from "../api/banner";
 
-const slideOut = {
-  right: "-translate-x-full transition-transform duration-500",
-  left: "translate-x-full transition-transform duration-500",
-};
-const slideIn = {
-  right: "translate-x-full",
-  left: "-translate-x-full",
-};
-const slideActive = "translate-x-0 transition-transform duration-500";
-
-// Nueva función para invertir la dirección
-const oppositeDirection = (dir) => (dir === "right" ? "left" : "right");
-
 const Banner = () => {
   const [banners, setBanners] = useState([]);
   const [current, setCurrent] = useState(0);
-  const [nextIdx, setNextIdx] = useState(null);
-  const [direction, setDirection] = useState("right");
   const [isAnimating, setIsAnimating] = useState(false);
-  const [enterActive, setEnterActive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const timeoutRef = useRef(null);
-  const animTimeoutRef = useRef(null);
 
   useEffect(() => {
     setLoading(true);
@@ -43,30 +26,65 @@ const Banner = () => {
     return () => clearTimeout(timeoutRef.current);
   }, [current, banners.length]);
 
-  // Clean up animation on unmount
-  useEffect(() => () => clearTimeout(animTimeoutRef.current), []);
-
-  // Activate enter animation on next tick
-  useEffect(() => {
-    if (isAnimating && nextIdx !== null) {
-      setEnterActive(false);
-      const id = setTimeout(() => setEnterActive(true), 20); // pequeño delay para forzar el reflow
-      return () => clearTimeout(id);
-    }
-  }, [isAnimating, nextIdx]);
-
-  const goTo = (idx, dir = "right") => {
+  const goTo = (idx, direction = "right") => {
     if (isAnimating || idx === current) return;
-    setDirection(dir);
-    setNextIdx(idx);
     setIsAnimating(true);
-    setEnterActive(false);
-    animTimeoutRef.current = setTimeout(() => {
-      setCurrent(idx);
+    
+    const container = document.querySelector('.carousel-container');
+    const currentSlide = container.querySelector('.current-slide');
+    const nextSlide = container.querySelector('.next-slide');
+    
+    // Setup next slide
+    nextSlide.innerHTML = `
+      <div class="z-10 max-w-xl flex-1 px-4 md:px-0">
+        <h1 class="text-3xl md:text-5xl font-bold mb-2 leading-tight drop-shadow-lg">${banners[idx].title}</h1>
+        <h2 class="text-xl md:text-3xl font-semibold mb-6 drop-shadow-lg">${banners[idx].subtitle}</h2>
+        <button class="bg-blue-700 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-800 transition">${banners[idx].cta}</button>
+      </div>
+      <div class="flex-1 flex items-center justify-center relative min-w-[180px] min-h-[120px] md:min-w-[320px] md:min-h-[220px]">
+        <img
+          src="${banners[idx].image}"
+          alt="${banners[idx].title}"
+          class="object-contain h-40 md:h-60 w-auto rounded-lg shadow-lg"
+          draggable="false"
+        />
+      </div>
+    `;
+    
+    // Set initial position
+    if (direction === "right") {
+      nextSlide.style.transform = 'translateX(100%)';
+    } else {
+      nextSlide.style.transform = 'translateX(-100%)';
+    }
+    
+    // Start animation
+    requestAnimationFrame(() => {
+      currentSlide.style.transform = direction === "right" ? 'translateX(-100%)' : 'translateX(100%)';
+      nextSlide.style.transform = 'translateX(0)';
+    });
+    
+    setTimeout(() => {
       setIsAnimating(false);
-      setNextIdx(null);
-      setEnterActive(false);
+      // Disable transitions temporarily to avoid visual jumps
+      currentSlide.style.transition = 'none';
+      nextSlide.style.transition = 'none';
+      
+      // Update the current slide content immediately
+      setCurrent(idx);
+      
+      // Reset positions instantly without transitions
+      currentSlide.style.transform = 'translateX(0)';
+      nextSlide.innerHTML = '';
+      nextSlide.style.transform = direction === "right" ? 'translateX(100%)' : 'translateX(-100%)';
+      
+      // Re-enable transitions after a brief delay
+      setTimeout(() => {
+        currentSlide.style.transition = '';
+        nextSlide.style.transition = '';
+      }, 50);
     }, 500);
+    
     clearTimeout(timeoutRef.current);
   };
 
@@ -85,15 +103,15 @@ const Banner = () => {
         className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
         aria-label="Previous"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
       </button>
-      {/* Carousel with animation */}
-      <div className="relative w-full max-w-6xl h-full min-h-[180px] md:min-h-[220px] flex items-center justify-center overflow-hidden">
-        {/* Current banner (slides out during animation) */}
-        <div
-          className={`absolute inset-0 flex flex-col md:flex-row items-center justify-between w-full h-full ${isAnimating ? slideOut[direction] : slideActive}`}
-          style={{ zIndex: isAnimating ? 1 : 2 }}
-        >
+      
+      {/* Carousel container */}
+      <div className="carousel-container relative w-full max-w-6xl h-full min-h-[180px] md:min-h-[220px] flex items-center justify-center overflow-hidden">
+        {/* Current slide */}
+        <div className="current-slide absolute inset-0 flex flex-col md:flex-row items-center justify-between w-full h-full transition-transform duration-500 ease-out">
           <div className="z-10 max-w-xl flex-1 px-4 md:px-0">
             <h1 className="text-3xl md:text-5xl font-bold mb-2 leading-tight drop-shadow-lg">{banners[current].title}</h1>
             <h2 className="text-xl md:text-3xl font-semibold mb-6 drop-shadow-lg">{banners[current].subtitle}</h2>
@@ -108,36 +126,22 @@ const Banner = () => {
             />
           </div>
         </div>
-        {/* Incoming banner (only during animation) */}
-        {isAnimating && nextIdx !== null && (
-          <div
-            className={`absolute inset-0 flex flex-col md:flex-row items-center justify-between w-full h-full ${slideIn[oppositeDirection(direction)]}${enterActive ? ` ${slideActive}` : ""}`}
-            style={{ zIndex: 2 }}
-          >
-            <div className="z-10 max-w-xl flex-1 px-4 md:px-0">
-              <h1 className="text-3xl md:text-5xl font-bold mb-2 leading-tight drop-shadow-lg">{banners[nextIdx].title}</h1>
-              <h2 className="text-xl md:text-3xl font-semibold mb-6 drop-shadow-lg">{banners[nextIdx].subtitle}</h2>
-              <button className="bg-blue-700 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-800 transition">{banners[nextIdx].cta}</button>
-            </div>
-            <div className="flex-1 flex items-center justify-center relative min-w-[180px] min-h-[120px] md:min-w-[320px] md:min-h-[220px]">
-              <img
-                src={banners[nextIdx].image}
-                alt={banners[nextIdx].title}
-                className="object-contain h-40 md:h-60 w-auto rounded-lg shadow-lg"
-                draggable="false"
-              />
-            </div>
-          </div>
-        )}
+        
+        {/* Next slide (for animation) */}
+        <div className="next-slide absolute inset-0 flex flex-col md:flex-row items-center justify-between w-full h-full transition-transform duration-500 ease-out" style={{transform: 'translateX(100%)'}}></div>
       </div>
+      
       {/* Right arrow */}
       <button
         onClick={handleNext}
         className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
         aria-label="Next"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
       </button>
+      
       {/* Indicators */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {banners.map((_, idx) => (
@@ -153,4 +157,4 @@ const Banner = () => {
   );
 };
 
-export default Banner; 
+export default Banner;
