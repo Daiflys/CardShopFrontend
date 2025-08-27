@@ -12,15 +12,20 @@ const Trends = () => {
     setLoading(true);
     Promise.all([getBestSellers(), getBestBargains()])
       .then(([sellers, bargains]) => {
-        const normalize = (arr) => arr.map(item => ({
+        const normalizeSellers = (arr) => arr.map(item => ({
           id: item.id,
           card_name: item.card_name || item.name,
           image_url: item.image_url || item.imageUrl,
-          // ...añade aquí más campos si los necesitas
+        }));
+
+        const normalizeBargains = (arr) => arr.map(item => ({
+          id: item.oracle_id,
+          card_name: item.card_name || item.name,
+          image_url: item.image_url || item.imageUrl,
         }));
   
-        setBestSellers(normalize(sellers));
-        setBestBargains(normalize(bargains));
+        setBestSellers(normalizeSellers(sellers));
+        setBestBargains(normalizeBargains(bargains));
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
