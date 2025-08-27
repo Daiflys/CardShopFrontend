@@ -16,14 +16,12 @@ const Trends = () => {
           id: item.id,
           card_name: item.card_name || item.name,
           image_url: item.image_url || item.imageUrl,
-          // ...añade aquí más campos si los necesitas
         }));
 
         const normalizeBargains = (arr) => arr.map(item => ({
           id: item.oracle_id,
           card_name: item.card_name || item.name,
           image_url: item.image_url || item.imageUrl,
-          // ...añade aquí más campos si los necesitas
         }));
   
         setBestSellers(normalizeSellers(sellers));
