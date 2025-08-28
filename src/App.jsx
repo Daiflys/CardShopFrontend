@@ -20,7 +20,7 @@ function App() {
   return (
     <CartProvider>
       <BrowserRouter>
-        <div className="bg-gray-100 min-h-screen">
+        <div className="min-h-screen" style={{background: 'var(--gradient-bg, linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%))'}}>
           <Header />
           <main className="max-w-6xl mx-auto">
             <Routes>

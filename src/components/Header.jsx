@@ -112,17 +112,17 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
+    <header className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg relative z-40">
       <div className="flex items-center gap-4">
         <span 
-          className="text-2xl font-bold text-blue-800 cursor-pointer hover:text-blue-600 transition-colors"
+          className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent cursor-pointer hover:from-purple-600 hover:to-blue-600 transition-all duration-300 hover-grow"
           onClick={() => navigate('/')}
         >
           cardmarket
         </span>
-        <nav className="hidden md:flex gap-4 text-gray-700">
-          <a href="#" className="hover:text-blue-600">PRODUCTS</a>
-          <a href="#" className="hover:text-blue-600">TRENDS</a>
+        <nav className="hidden md:flex gap-6 text-gray-700">
+          <a href="#" className="font-medium hover:text-purple-600 transition-all duration-200 hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-blue-500 after:to-purple-500 after:transition-all after:duration-300 hover:after:w-full">PRODUCTS</a>
+          <a href="#" className="font-medium hover:text-purple-600 transition-all duration-200 hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-blue-500 after:to-purple-500 after:transition-all after:duration-300 hover:after:w-full">TRENDS</a>
         </nav>
       </div>
       <div className="flex-1 mx-6 relative" ref={inputRef}>
@@ -130,7 +130,7 @@ const Header = () => {
           <input
             type="text"
             placeholder="Search Cardmarket..."
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-4 py-3 bg-white/90 backdrop-blur border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md font-medium placeholder:text-gray-400"
             value={search}
             onChange={handleInputChange}
             onFocus={() => setShowDropdown(results.length > 0)}
@@ -138,7 +138,7 @@ const Header = () => {
           />
         </form>
         {showDropdown && (
-          <ul className="absolute z-20 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+          <ul className="absolute z-50 left-0 right-0 bg-white/95 backdrop-blur-lg border border-gray-100 rounded-xl shadow-xl mt-2 max-h-60 overflow-y-auto">
             {loading ? (
               <li className="px-4 py-2 text-gray-500">Searching...</li>
             ) : results.length === 0 ? (
@@ -147,7 +147,7 @@ const Header = () => {
               results.map(card => (
                 <li
                   key={card.id}
-                  className="px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                  className="px-4 py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 border-b border-gray-100 last:border-b-0 cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-sm"
                   onClick={() => handleResultClick(card)}
                 >
                   <div className="font-medium text-gray-900">{card.name}</div>
@@ -175,19 +175,19 @@ const Header = () => {
                   <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
                 </svg>
               </summary>
-              <ul className="absolute right-0 mt-2 w-52 bg-white border rounded-md shadow-lg overflow-hidden z-30">
+              <ul className="absolute right-0 mt-2 w-52 bg-white/95 backdrop-blur-lg border border-gray-100 rounded-xl shadow-xl overflow-hidden z-50">
                 <li>
-                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/profile')}>My account</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 font-medium" onClick={() => navigate('/account/profile')}>My account</button>
                 </li>
                 <li className="border-t">
-                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/transactions')}>Transactions</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 font-medium" onClick={() => navigate('/account/transactions')}>Transactions</button>
                 </li>
                 <li className="border-t">
-                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/settings')}>Settings</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 font-medium" onClick={() => navigate('/account/settings')}>Settings</button>
                 </li>
                 <li className="border-t">
                   <button
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 text-red-600"
+                    className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 transition-all duration-200 font-medium"
                     onClick={() => {
                       localStorage.removeItem("authToken");
                       localStorage.removeItem("userEmail");
@@ -207,15 +207,15 @@ const Header = () => {
         {!userEmail && !userName && (
           <>
             <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
+              className="btn-secondary"
               onClick={() => navigate('/list-products')}
             >List Products</button>
             <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
+              className="btn-secondary"
               onClick={() => navigate('/login')}
             >LOG IN</button>
             <button
-              className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+              className="btn-primary"
               onClick={() => navigate('/register')}
             >SIGN UP</button>
           </>

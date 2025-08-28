@@ -96,11 +96,11 @@ const Banner = () => {
   if (!banners.length) return null;
 
   return (
-    <section className="relative bg-gray-800 text-white py-10 px-2 md:px-8 flex items-center justify-center overflow-hidden rounded-lg shadow-lg mt-6 min-h-[260px] md:min-h-[340px]">
+    <section className="relative bg-gradient-to-br from-gray-800 via-gray-900 to-blue-900 text-white py-10 px-2 md:px-8 flex items-center justify-center overflow-hidden rounded-2xl shadow-2xl mt-8 min-h-[260px] md:min-h-[340px] border border-white/10 backdrop-blur-sm">
       {/* Left arrow */}
       <button
         onClick={handlePrev}
-        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
+        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 z-10 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-110"
         aria-label="Previous"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -113,9 +113,9 @@ const Banner = () => {
         {/* Current slide */}
         <div className="current-slide absolute inset-0 flex flex-col md:flex-row items-center justify-between w-full h-full transition-transform duration-500 ease-out">
           <div className="z-10 max-w-xl flex-1 px-4 md:px-0">
-            <h1 className="text-3xl md:text-5xl font-bold mb-2 leading-tight drop-shadow-lg">{banners[current].title}</h1>
-            <h2 className="text-xl md:text-3xl font-semibold mb-6 drop-shadow-lg">{banners[current].subtitle}</h2>
-            <button className="bg-blue-700 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-800 transition">{banners[current].cta}</button>
+            <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight drop-shadow-lg bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">{banners[current].title}</h1>
+            <h2 className="text-xl md:text-3xl font-semibold mb-6 drop-shadow-lg text-blue-100">{banners[current].subtitle}</h2>
+            <button className="btn-accent hover:scale-105 transition-all duration-300 shadow-xl">{banners[current].cta}</button>
           </div>
           <div className="flex-1 flex items-center justify-center relative min-w-[180px] min-h-[120px] md:min-w-[320px] md:min-h-[220px]">
             <img
@@ -134,7 +134,7 @@ const Banner = () => {
       {/* Right arrow */}
       <button
         onClick={handleNext}
-        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 rounded-full p-2 z-10"
+        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 z-10 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-110"
         aria-label="Next"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -148,7 +148,7 @@ const Banner = () => {
           <button
             key={idx}
             onClick={() => goTo(idx, idx > current ? "right" : "left")}
-            className={`w-4 h-2 rounded-full transition-all duration-300 ${current === idx ? "bg-blue-500 w-8" : "bg-white/60"}`}
+            className={`h-2 rounded-full transition-all duration-300 hover:scale-110 ${current === idx ? "bg-gradient-to-r from-yellow-400 to-orange-500 w-8 shadow-lg" : "bg-white/60 w-4 hover:bg-white/80"}`}
             aria-label={`Go to banner ${idx + 1}`}
           />
         ))}
