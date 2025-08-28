@@ -26,12 +26,12 @@ const mockGetBestBargains = async () => {
 
 // --- REAL ---
 const realGetBestSellers = async () => {
-  const response = await fetch(`${API_BASE_URL}/trend/getRandomCards?amount=3`);
+  const response = await fetch(`${API_BASE_URL}/trends/cards/random?amount=3`);
   if (!response.ok) throw new Error("Error fetching best sellers");
   return response.json();
 };
 const realGetBestBargains = async () => {
-  const response = await fetch(`${API_BASE_URL}/trend/getRandomCardsToSell?amount=3`);
+  const response = await fetch(`${API_BASE_URL}/trends/cards-to-sell/random?amount=3`);
   if (!response.ok) throw new Error("Error fetching best bargains");
   return response.json();
 };

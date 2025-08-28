@@ -22,7 +22,7 @@ const mockRegister = async (username, email, password) => {
 
 // --- REAL ---
 const realLogin = async (email, password) => {
-  const response = await fetch(`${API_BASE_URL}/auth/loginbyemail`, {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
