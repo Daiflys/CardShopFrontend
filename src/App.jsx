@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
-import Banner from "./components/Banner";
+import BannerNew from "./components/BannerNew";
 import Trends from "./components/Trends";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -20,36 +20,38 @@ function App() {
   return (
     <CartProvider>
       <BrowserRouter>
-        <div className="bg-gray-100 min-h-screen">
+        <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f0f9ff)' }}>
           <Header />
-          <main className="max-w-6xl mx-auto">
-            <Routes>
-              <Route path="/" element={
-                <>
-                  <Banner />
+          <Routes>
+            <Route path="/" element={
+              <>
+                <BannerNew />
+                <main className="w-full">
                   <Trends />
-                </>
-              } />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/list-products" element={<ListProducts />} />
-              <Route path="/card/:cardId" element={<CardDetail />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route
-                path="/account/*"
-                element={
+                </main>
+              </>
+            } />
+            <Route path="/login" element={<main className="max-w-6xl mx-auto"><Login /></main>} />
+            <Route path="/register" element={<main className="max-w-6xl mx-auto"><Register /></main>} />
+            <Route path="/list-products" element={<main className="max-w-6xl mx-auto"><ListProducts /></main>} />
+            <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto"><CardDetail /></main>} />
+            <Route path="/checkout" element={<main className="max-w-6xl mx-auto"><Checkout /></main>} />
+            <Route
+              path="/account/*"
+              element={
+                <main className="max-w-6xl mx-auto">
                   <RequireAuth>
                     <AccountLayout />
                   </RequireAuth>
-                }
-              >
-                <Route index element={<Profile />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="transactions" element={<Transactions />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
-            </Routes>
-          </main>
+                </main>
+              }
+            >
+              <Route index element={<Profile />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Routes>
         </div>
       </BrowserRouter>
     </CartProvider>
