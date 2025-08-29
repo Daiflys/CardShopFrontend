@@ -49,8 +49,9 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh]">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+    <div className="px-6 py-8">
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-blue-800 mb-6 text-center">Create account</h2>
         {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-center">{error}</div>}
         {success && <div className="bg-green-100 text-green-700 p-2 rounded mb-4 text-center">Registration successful! You can now log in.</div>}
@@ -101,6 +102,7 @@ const Register = () => {
         <div className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{' '}
           <Link to="/login" className="text-blue-700 hover:underline font-semibold">Log in</Link>
+        </div>
         </div>
       </div>
     </div>

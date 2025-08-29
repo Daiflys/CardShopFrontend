@@ -33,8 +33,9 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh]">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+    <div className="px-6 py-8">
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-blue-800 mb-6 text-center">Log in</h2>
         {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-center">{error}</div>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -65,6 +66,7 @@ const Login = () => {
         <div className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{' '}
           <Link to="/register" className="text-blue-700 hover:underline font-semibold">Sign up</Link>
+        </div>
         </div>
       </div>
     </div>
