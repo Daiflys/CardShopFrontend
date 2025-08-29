@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { searchCards } from "../api/search";
 import { validateToken } from "../api/auth";
+import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
 
 const Header = () => {
@@ -24,10 +25,11 @@ const Header = () => {
       const token = localStorage.getItem("authToken");
       if (token && token.split(".").length === 3) {
         try {
-          const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-          const payloadJson = JSON.parse(atob(payloadBase64));
-          const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
-          if (nameFromToken) setUserName(nameFromToken);
+          const payloadJson = decodeJWTToken(token);
+          if (payloadJson) {
+            const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
+            if (nameFromToken) setUserName(nameFromToken);
+          }
         } catch {
           // ignore decoding errors
         }
