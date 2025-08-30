@@ -12,6 +12,8 @@ const Header = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const inputRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
+  const currentSearchRef = useRef(0);
   const [userEmail, setUserEmail] = useState(null);
   const [userName, setUserName] = useState(null);
 
@@ -67,21 +69,53 @@ const Header = () => {
   const handleInputChange = async (e) => {
     const value = e.target.value;
     setSearch(value);
+    
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Increment search counter for race condition prevention
+    currentSearchRef.current += 1;
+    const currentSearchId = currentSearchRef.current;
+    
     if (value.trim()) {
-      setLoading(true);
-      try {
-        const res = await searchCards(value);
-        setResults(res);
-        setShowDropdown(res.length > 0);
-      } catch {
+      if (value.length < 3) {
         setResults([]);
         setShowDropdown(false);
-      } finally {
         setLoading(false);
+        return;
       }
+      
+      setLoading(true);
+      
+      // Debounce search by 300ms
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const res = await searchCards(value);
+          
+          // Only update if this is still the latest search
+          if (currentSearchId === currentSearchRef.current) {
+            setResults(res.slice(0, 10));
+            setShowDropdown(res.length > 0);
+          }
+        } catch {
+          // Only update if this is still the latest search
+          if (currentSearchId === currentSearchRef.current) {
+            setResults([]);
+            setShowDropdown(false);
+          }
+        } finally {
+          // Only update if this is still the latest search
+          if (currentSearchId === currentSearchRef.current) {
+            setLoading(false);
+          }
+        }
+      }, 300);
     } else {
       setResults([]);
       setShowDropdown(false);
+      setLoading(false);
     }
   };
 
