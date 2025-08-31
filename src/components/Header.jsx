@@ -99,8 +99,16 @@ const Header = () => {
           
           // Only update if this is still the latest search
           if (currentSearchId === currentSearchRef.current) {
-            setResults(res.slice(0, 10));
-            setShowDropdown(res.length > 0);
+            // Remove duplicates by card name (prioritizing exact matches and lower IDs)
+            const uniqueResults = res.filter((card, index, self) => {
+              const cardName = card.name || card.card_name;
+              return index === self.findIndex(c => {
+                const cName = c.name || c.card_name;
+                return cName && cardName && cName.toLowerCase() === cardName.toLowerCase();
+              });
+            });
+            setResults(uniqueResults.slice(0, 10));
+            setShowDropdown(uniqueResults.length > 0);
           }
         } catch {
           // Only update if this is still the latest search
@@ -126,15 +134,14 @@ const Header = () => {
     e.preventDefault();
     setShowDropdown(false);
     if (search.trim()) {
-      const slug = search.trim().toLowerCase().replace(/\s+/g, "-");
-      navigate(`/card/${slug}`);
+      navigate(`/search?q=${encodeURIComponent(search.trim())}`);
     }
   };
 
   const handleResultClick = (card) => {
     setSearch(card.name);
     setShowDropdown(false);
-    navigate(`/card/${card.id}`); 
+    navigate(`/search?q=${encodeURIComponent(card.name)}`); 
   };
 
   // Hide dropdown if clicked outside

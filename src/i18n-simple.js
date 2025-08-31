@@ -68,7 +68,8 @@ const resources = {
         filter: "Filter",
         sort: "Sort",
         language: "Language",
-        noResults: "No results"
+        noResults: "No results",
+        results: "results"
       },
       homepage: {
         welcome: "Welcome to CardMarket",
@@ -167,7 +168,8 @@ const resources = {
         filter: "Filtrar",
         sort: "Ordenar",
         language: "Idioma",
-        noResults: "Sin resultados"
+        noResults: "Sin resultados",
+        results: "resultados"
       },
       homepage: {
         welcome: "Bienvenido a CardMarket",
@@ -266,7 +268,8 @@ const resources = {
         filter: "フィルタ",
         sort: "並び替え",
         language: "言語",
-        noResults: "結果なし"
+        noResults: "結果なし",
+        results: "結果"
       },
       homepage: {
         welcome: "トレカ市場へようこそ",
