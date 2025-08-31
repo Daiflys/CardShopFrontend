@@ -61,7 +61,8 @@
     "search": "検索",
     "filter": "フィルタ",
     "sort": "並び替え",
-    "language": "言語"
+    "language": "言語",
+    "noResults": "結果なし"
   },
   "homepage": {
     "welcome": "トレカ市場へようこそ",

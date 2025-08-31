@@ -162,7 +162,7 @@ const Header = () => {
         </span>
         <nav className="hidden md:flex gap-4 text-slate-600">
           <a href="#" className="hover:text-sky-600 transition-colors">{t('navigation.products').toUpperCase()}</a>
-          <a href="#" className="hover:text-sky-600 transition-colors">TRENDS</a>
+          <a href="#" className="hover:text-sky-600 transition-colors">{t('homepage.trendingCards').toUpperCase()}</a>
         </nav>
       </div>
       <div className="flex-1 mx-6 relative" ref={inputRef}>
@@ -182,7 +182,7 @@ const Header = () => {
             {loading ? (
               <li className="px-4 py-2 text-gray-500">{t('common.loading')}</li>
             ) : results.length === 0 ? (
-              <li className="px-4 py-2 text-gray-500">No results</li>
+              <li className="px-4 py-2 text-gray-500">{t('common.noResults')}</li>
             ) : (
               results.map(card => (
                 <li

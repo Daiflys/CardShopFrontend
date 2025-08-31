@@ -1,36 +1,40 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
-const banners = [
+const getBanners = (t) => [
   {
     id: 1,
-    title: "AETHER DRIFT",
-    subtitle: "Speed into the multiverse",
-    cta: "EXPLORE NOW",
+    title: t('banners.aetherDrift.title'),
+    subtitle: t('banners.aetherDrift.subtitle'),
+    cta: t('banners.aetherDrift.cta'),
     image: "/images/aetherdrift.jpg",
     bgColor: "from-cyan-400 via-blue-500 to-purple-600"
   },
   {
     id: 2,
-    title: "FINAL FANTASY",
-    subtitle: "The ultimate crossover experience",
-    cta: "BUY NOW",
+    title: t('banners.finalFantasy.title'),
+    subtitle: t('banners.finalFantasy.subtitle'),
+    cta: t('banners.finalFantasy.cta'),
     image: "/images/finalfantasy.jpg",
     bgColor: "from-orange-400 via-red-500 to-pink-600"
   },
   {
     id: 3,
-    title: "MODERN HORIZONS",
-    subtitle: "Dive into the depths of power",
-    cta: "DISCOVER",
+    title: t('banners.modernHorizons.title'),
+    subtitle: t('banners.modernHorizons.subtitle'),
+    cta: t('banners.modernHorizons.cta'),
     image: "/images/modernhorizons.jpg",
     bgColor: "from-teal-400 via-cyan-500 to-blue-600"
   }
 ];
 
 const BannerNew = () => {
+  const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const timeoutRef = useRef(null);
+
+  const banners = getBanners(t);
 
   // Auto-rotation using original timing
   useEffect(() => {

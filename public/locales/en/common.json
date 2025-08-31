@@ -61,7 +61,8 @@
     "search": "Search",
     "filter": "Filter",
     "sort": "Sort",
-    "language": "Language"
+    "language": "Language",
+    "noResults": "No results"
   },
   "homepage": {
     "welcome": "Welcome to CardMarket",
