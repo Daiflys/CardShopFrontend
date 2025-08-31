@@ -59,6 +59,7 @@ coverage/
 # Misc
 *.local
 CLAUDE.md
+.claude/
 
 # Images folder for sharing screenshots
 images/
