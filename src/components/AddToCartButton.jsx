@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useCart } from "../context/CartContext";
+import useCartStore from "../store/cartStore";
 
 const AddToCartButton = ({ card, className = "", showQuantity = false }) => {
-  const { addItemToCart, isInCart, loading } = useCart();
+  const { addItemToCart, isInCart, loading } = useCartStore();
   const [isAdding, setIsAdding] = useState(false);
   const [message, setMessage] = useState("");
 

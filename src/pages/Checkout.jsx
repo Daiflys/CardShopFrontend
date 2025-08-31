@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useCart } from "../context/CartContext";
+import useCartStore from "../store/cartStore";
 import { useNavigate } from "react-router-dom";
 import { checkout } from "../api/cart";
 
@@ -12,7 +12,7 @@ const Checkout = () => {
     loading,
     error,
     clearCart,
-  } = useCart();
+  } = useCartStore();
 
   const navigate = useNavigate();
 
