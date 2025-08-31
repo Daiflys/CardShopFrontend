@@ -64,7 +64,7 @@ const mockGetCardsToSell = async (cardName) => {
 // --- REAL ---
 const realGetCardDetail = async (cardId) => {
   console.log("going to search for cardId", cardId);
-  const response = await fetch(`${API_BASE_URL}/cards/id/multi/${cardId}`);
+  const response = await fetch(`${API_BASE_URL}/cards/id/${cardId}`);
   if (!response.ok) throw new Error("Error fetching card details");
   const responseRead = await response.json();
   console.log("response json: ", responseRead);
