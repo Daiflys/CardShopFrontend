@@ -55,7 +55,6 @@ const validateToken = async () => {
     const response = await fetch(`${API_BASE_URL}/auth/validate`, {
       method: "GET",
       headers: { 
-        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
       },
     });
