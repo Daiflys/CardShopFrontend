@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useCart } from "../context/CartContext";
+import useCartStore from "../store/cartStore";
 import { useNavigate } from "react-router-dom";
 
 const CartIcon = () => {
-  const { getCartCount, cartItems } = useCart();
+  const { getCartCount, cartItems } = useCartStore();
   const [showCartPreview, setShowCartPreview] = useState(false);
   const cartCount = getCartCount();
   const hasItems = cartCount > 0;

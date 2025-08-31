@@ -13,12 +13,12 @@ import Profile from "./pages/account/Profile";
 import Transactions from "./pages/account/Transactions";
 import Settings from "./pages/account/Settings";
 import RequireAuth from "./pages/RequireAuth";
-import { CartProvider } from "./context/CartContext";
+import CartInitializer from "./components/CartInitializer";
 import "./App.css";
 
 function App() {
   return (
-    <CartProvider>
+    <CartInitializer>
       <BrowserRouter>
         <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f0f9ff)' }}>
           <Header />
@@ -54,7 +54,7 @@ function App() {
           </Routes>
         </div>
       </BrowserRouter>
-    </CartProvider>
+    </CartInitializer>
   );
 }
 
