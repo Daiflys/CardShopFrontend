@@ -1,0 +1,65 @@
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount, getRarityIcon, getRarityColor }) => {
+  const { t } = useTranslation();
+  const availableCount = getAvailableCount(card);
+  const hasStock = availableCount > 0;
+
+  return (
+    <div 
+      className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all cursor-pointer group hover:shadow-md"
+      onClick={onClick}
+    >
+      {/* Card Image */}
+      <div className="aspect-[3/4] bg-gray-100 rounded-t-lg overflow-hidden p-2">
+        {card.imageUrl ? (
+          <img 
+            src={card.imageUrl} 
+            alt={card.card_name || card.name}
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform rounded-lg"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <span className="text-sm">No Image</span>
+          </div>
+        )}
+      </div>
+      
+      {/* Card Info */}
+      <div className="p-3 relative">
+        {/* Available badge - only show if there's stock */}
+        {hasStock && (
+          <div className="absolute top-1 right-1">
+            <span className="inline-block px-2 py-1 text-xs font-bold rounded bg-green-500 text-white">
+              {availableCount}
+            </span>
+          </div>
+        )}
+        
+        <div className={`mb-2 ${hasStock ? 'pr-12' : ''}`}>
+          <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
+            {card.card_name || card.name}
+          </h3>
+          <p className="text-xs text-gray-500 truncate">
+            {card.set || card.setName || 'Unknown Set'}
+          </p>
+        </div>
+        
+        {/* Bottom row with rarity and price */}
+        <div className="flex justify-between items-center">
+          <span className={`text-lg ${getRarityColor(card.rarity)}`}>
+            {getRarityIcon(card.rarity)}
+          </span>
+          <div className="text-right">
+            <span className="text-sm font-bold text-blue-600">
+              {formatPrice(card)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SearchGridCard;

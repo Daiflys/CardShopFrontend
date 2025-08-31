@@ -6,6 +6,7 @@ import Trends from "./components/Trends";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ListProducts from "./pages/ListProducts";
+import Search from "./pages/Search";
 import CardDetail from "./pages/CardDetail";
 import Checkout from "./pages/Checkout";
 import AccountLayout from "./pages/account/AccountLayout";
@@ -34,6 +35,7 @@ function App() {
             <Route path="/login" element={<main className="max-w-6xl mx-auto"><Login /></main>} />
             <Route path="/register" element={<main className="max-w-6xl mx-auto"><Register /></main>} />
             <Route path="/list-products" element={<main className="max-w-6xl mx-auto"><ListProducts /></main>} />
+            <Route path="/search" element={<main className="max-w-7xl mx-auto"><Search /></main>} />
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto"><Checkout /></main>} />
             <Route
