@@ -1,0 +1,73 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "products": "Productos",
+    "account": "Cuenta",
+    "cart": "Carrito",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar Sesión"
+  },
+  "auth": {
+    "loginTitle": "Iniciar sesión en tu cuenta",
+    "registerTitle": "Crear nueva cuenta",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "loginButton": "Iniciar Sesión",
+    "registerButton": "Registrarse",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "signUp": "Regístrate",
+    "signIn": "Inicia sesión"
+  },
+  "cart": {
+    "title": "Carrito de Compras",
+    "addToCart": "Añadir al Carrito",
+    "removeFromCart": "Eliminar",
+    "quantity": "Cantidad",
+    "total": "Total",
+    "checkout": "Pagar",
+    "empty": "Tu carrito está vacío",
+    "continueShopping": "Continuar Comprando"
+  },
+  "product": {
+    "price": "Precio",
+    "condition": "Condición",
+    "seller": "Vendedor",
+    "addToCart": "Añadir al Carrito",
+    "outOfStock": "Sin Stock",
+    "inStock": "En Stock",
+    "description": "Descripción",
+    "details": "Detalles"
+  },
+  "account": {
+    "profile": "Perfil",
+    "transactions": "Transacciones",
+    "settings": "Configuración",
+    "personalInfo": "Información Personal",
+    "orderHistory": "Historial de Pedidos",
+    "preferences": "Preferencias"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "language": "Idioma"
+  },
+  "homepage": {
+    "welcome": "Bienvenido a CardMarket",
+    "subtitle": "Descubre e intercambia cartas increíbles",
+    "featuredProducts": "Productos Destacados",
+    "trendingCards": "Cartas Tendencia",
+    "browseCategories": "Explorar Categorías"
+  }
+}

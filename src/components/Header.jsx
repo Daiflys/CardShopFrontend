@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { searchCards } from "../api/search";
 import { validateToken } from "../api/auth";
 import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [results, setResults] = useState([]);
@@ -158,7 +161,7 @@ const Header = () => {
           トレカ市場
         </span>
         <nav className="hidden md:flex gap-4 text-slate-600">
-          <a href="#" className="hover:text-sky-600 transition-colors">PRODUCTS</a>
+          <a href="#" className="hover:text-sky-600 transition-colors">{t('navigation.products').toUpperCase()}</a>
           <a href="#" className="hover:text-sky-600 transition-colors">TRENDS</a>
         </nav>
       </div>
@@ -166,7 +169,7 @@ const Header = () => {
         <form onSubmit={handleSearch}>
           <input
             type="text"
-            placeholder="Search トレカ市場..."
+            placeholder={t('common.search') + ' トレカ市場...'}
             className="w-full px-3 py-2 border border-sky-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 bg-white/80"
             value={search}
             onChange={handleInputChange}
@@ -177,7 +180,7 @@ const Header = () => {
         {showDropdown && (
           <ul className="absolute z-20 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
             {loading ? (
-              <li className="px-4 py-2 text-gray-500">Searching...</li>
+              <li className="px-4 py-2 text-gray-500">{t('common.loading')}</li>
             ) : results.length === 0 ? (
               <li className="px-4 py-2 text-gray-500">No results</li>
             ) : (
@@ -199,6 +202,7 @@ const Header = () => {
         )}
       </div>
       <div className="flex gap-4 items-center">
+        <LanguageSwitcher />
         <CartIcon />
         {userEmail || userName ? (
           <div className="relative">
@@ -214,13 +218,13 @@ const Header = () => {
               </summary>
               <ul className="absolute right-0 mt-2 w-52 bg-white border rounded-md shadow-lg overflow-hidden z-30">
                 <li>
-                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/profile')}>My account</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/profile')}>{t('account.profile')}</button>
                 </li>
                 <li className="border-t border-sky-100">
-                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/transactions')}>Transactions</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/transactions')}>{t('account.transactions')}</button>
                 </li>
                 <li className="border-t border-sky-100">
-                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/settings')}>Settings</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/settings')}>{t('account.settings')}</button>
                 </li>
                 <li className="border-t border-sky-100">
                   <button
@@ -233,28 +237,28 @@ const Header = () => {
                       window.dispatchEvent(new CustomEvent('authChange'));
                       navigate('/');
                     }}
-                  >Sign out</button>
+                  >{t('navigation.logout')}</button>
                 </li>
               </ul>
             </details>
           </div>
         ) : (
-          <span className="text-slate-500">Sign in</span>
+          <span className="text-slate-500">{t('navigation.login')}</span>
         )}
         {!userEmail && !userName && (
           <>
             <button
               className="px-4 py-2 border border-sky-200 rounded hover:bg-sky-50 text-slate-700 transition-colors"
               onClick={() => navigate('/list-products')}
-            >List Products</button>
+            >{t('navigation.products')}</button>
             <button
               className="px-4 py-2 border border-sky-300 rounded hover:bg-sky-50 text-sky-700 transition-colors"
               onClick={() => navigate('/login')}
-            >LOG IN</button>
+            >{t('navigation.login').toUpperCase()}</button>
             <button
               className="px-4 py-2 bg-gradient-to-r from-sky-600 to-blue-600 text-white rounded hover:from-sky-700 hover:to-blue-700 transition-all shadow-md"
               onClick={() => navigate('/register')}
-            >SIGN UP</button>
+            >{t('auth.signUp').toUpperCase()}</button>
           </>
         )}
       </div>
