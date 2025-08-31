@@ -6,7 +6,7 @@ const realGetUserTransactions = async () => {
   const token = localStorage.getItem("authToken");
   const response = await fetch(`${API_BASE_URL}/purchases/myorders`, {
     method: "GET",
-    headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`, }
+    headers: { "Authorization": `Bearer ${token}` }
   });
   if (!response.ok) throw new Error("Error getting my orders");
   return response.json();
