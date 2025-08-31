@@ -5,7 +5,7 @@ import { searchCards } from "../api/search";
 import { validateToken } from "../api/auth";
 import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
-import LanguageSwitcher from "./LanguageSwitcher";
+import LanguageSwitcherFlags from "./LanguageSwitcherFlags";
 
 const Header = () => {
   const { t } = useTranslation();
@@ -169,6 +169,8 @@ const Header = () => {
         <form onSubmit={handleSearch}>
           <input
             type="text"
+            id="search-cards"
+            name="search"
             placeholder={t('common.search') + ' トレカ市場...'}
             className="w-full px-3 py-2 border border-sky-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 bg-white/80"
             value={search}
@@ -202,7 +204,6 @@ const Header = () => {
         )}
       </div>
       <div className="flex gap-4 items-center">
-        <LanguageSwitcher />
         <CartIcon />
         {userEmail || userName ? (
           <div className="relative">
@@ -261,6 +262,7 @@ const Header = () => {
             >{t('auth.signUp').toUpperCase()}</button>
           </>
         )}
+        <LanguageSwitcherFlags />
       </div>
       </div>
     </header>
