@@ -7,8 +7,6 @@ const SearchListCard = ({
   onClick, 
   formatPrice, 
   getAvailableCount, 
-  getRarityIcon, 
-  getRarityColor, 
   hoveredCard, 
   setHoveredCard 
 }) => {
@@ -69,8 +67,8 @@ const SearchListCard = ({
         
         {/* Rarity */}
         <div className="col-span-1 text-center">
-          <span className={`text-lg ${getRarityColor(card.rarity)}`}>
-            {getRarityIcon(card.rarity)}
+          <span className="text-sm text-gray-600">
+            {card.rarity || '-'}
           </span>
         </div>
         

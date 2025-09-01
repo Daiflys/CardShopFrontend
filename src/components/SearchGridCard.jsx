@@ -1,14 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import RarityIndicator from './RarityIndicator';
 
-const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount, getRarityIcon, getRarityColor }) => {
+const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
   const { t } = useTranslation();
   const availableCount = getAvailableCount(card);
   const hasStock = availableCount > 0;
 
   return (
     <div 
-      className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all cursor-pointer group hover:shadow-md"
+      className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all cursor-pointer group hover:shadow-md overflow-hidden relative"
       onClick={onClick}
     >
       {/* Card Image */}
@@ -46,11 +47,8 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount, getRari
           </p>
         </div>
         
-        {/* Bottom row with rarity and price */}
-        <div className="flex justify-between items-center">
-          <span className={`text-lg ${getRarityColor(card.rarity)}`}>
-            {getRarityIcon(card.rarity)}
-          </span>
+        {/* Bottom row with price */}
+        <div className="flex justify-end items-center">
           <div className="text-right">
             <span className="text-sm font-bold text-blue-600">
               {formatPrice(card)}
@@ -58,6 +56,9 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount, getRari
           </div>
         </div>
       </div>
+      
+      {/* Rarity Indicator at the bottom of the entire card */}
+      <RarityIndicator rarity={card.rarity} className="rounded-b-lg" />
     </div>
   );
 };

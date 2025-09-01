@@ -7,7 +7,7 @@ const mockCard = {
   id: "dragon-wings",
   name: "Dragon Wings",
   set: "Scourge",
-  rarity: "Common",
+  rarity: "common",
   number: 34,
   printedIn: "Scourge",
   available: 2685,

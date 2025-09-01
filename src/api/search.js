@@ -72,10 +72,65 @@ const mockSearchCards = async (name) => {
 };
 
 // --- REAL ---
-const realSearchCards = async (name) => {
-  const response = await fetch(`${API_BASE_URL}/cards/search?name=${encodeURIComponent(name)}`);
-  if (!response.ok) throw new Error("Error en la búsqueda");
+const realSearchCards = async (name, filters = {}) => {
+  // Build query parameters
+  const params = new URLSearchParams();
+  
+  console.log('Search filters received:', filters);
+  
+  if (name) {
+    params.append('name', name);
+  }
+  
+  if (filters.collection && filters.collection !== 'All Collections') {
+    params.append('collection', filters.collection);
+  }
+  
+  // Handle language filters
+  if (filters.languages && Object.keys(filters.languages).length > 0) {
+    // Only include languages that are enabled (true)
+    const activeLanguages = Object.entries(filters.languages)
+      .filter(([, isEnabled]) => isEnabled === true)
+      .map(([lang]) => lang)
+      .join(',');
+    
+    console.log('Active languages:', activeLanguages);
+    
+    if (activeLanguages) {
+      params.append('languages', activeLanguages);
+    }
+  }
+  
+  const finalUrl = `${API_BASE_URL}/cards/search?${params.toString()}`;
+  console.log('Final search URL:', finalUrl);
+  
+  const response = await fetch(finalUrl);
+  if (!response.ok) throw new Error("Search error");
   return response.json();
+};
+
+const mockSearchCardsWithFilters = async (name, filters = {}) => {
+  await new Promise(res => setTimeout(res, 300));
+  if (!name && !filters.collection) return [];
+  
+  let results = [...MOCK_CARDS];
+  
+  // Filter by name
+  if (name) {
+    const query = name.trim().toLowerCase();
+    results = results.filter(card =>
+      card.name.toLowerCase().includes(query)
+    );
+  }
+  
+  // Filter by collection
+  if (filters.collection) {
+    results = results.filter(card => card.set === filters.collection);
+  }
+  
+  // Language filtering would be implemented here if we had language data in mock
+  
+  return results;
 };
 
 export const searchCards = realSearchCards;

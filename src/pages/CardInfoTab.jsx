@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { getCardsToSell } from "../api/card";
 import AddToCartButton from "../components/AddToCartButton";
+import { getRarityTextColor } from "../utils/rarity";
 
 const CardInfoTab = ({ card }) => {
   const [cardsToSell, setCardsToSell] = useState([]);
@@ -43,7 +44,7 @@ const CardInfoTab = ({ card }) => {
           <h1 className="text-3xl font-bold text-blue-900 mb-1">{card.name ?? "Unknown"}</h1>
           <div className="text-lg text-gray-600 mb-2">{card.setName ?? card.set ?? "Unknown"} - Singles</div>
           <div className="flex flex-wrap gap-4 mb-4">
-            <div><b>Rarity:</b> {card.rarity ?? "Unknown"}</div>
+            <div><b>Rarity:</b> <span className={getRarityTextColor(card.rarity)}>{card.rarity ?? "Unknown"}</span></div>
             <div><b>Number:</b> {card.number ?? "Unknown"}</div>
             <div><b>Printed in:</b> <span className="text-blue-700 font-semibold">{card.printedIn ?? "Unknown"}</span></div>
           </div>
