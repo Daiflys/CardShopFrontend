@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import { getCardsToSell } from "../api/card";
 import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor } from "../utils/rarity";
+import ConditionIcon from "../components/ConditionIcon";
 
 const CardInfoTab = ({ card }) => {
   const [cardsToSell, setCardsToSell] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedQuantities, setSelectedQuantities] = useState({});
 
   const fetchCardsToSell = useCallback(async (cardName) => {
     if (!cardName) return;
@@ -112,8 +114,11 @@ const CardInfoTab = ({ card }) => {
                 <tr className="bg-blue-100 text-blue-900">
                   <th className="px-3 py-2 text-left">Set</th>
                   <th className="px-3 py-2 text-left">Price</th>
+                  <th className="px-3 py-2 text-left">Condition</th>
+                  <th className="px-3 py-2 text-left">Available</th>
                   <th className="px-3 py-2 text-left">Seller ID</th>
-                  <th className="px-3 py-2 text-left">Action</th>
+                  <th className="px-3 py-2 text-left">Quantity</th>
+                  <th className="px-3 py-2 text-right">Add to Cart</th>
                 </tr>
               </thead>
               <tbody>
@@ -130,8 +135,32 @@ const CardInfoTab = ({ card }) => {
                     <td className="px-3 py-2 font-semibold text-green-600">
                       €{cardToSell.cardPrice?.toFixed(2) ?? "Unknown"}
                     </td>
+                    <td className="px-3 py-2">
+                      <ConditionIcon condition={cardToSell.condition} />
+                    </td>
+                    <td className="px-3 py-2 font-semibold text-blue-600">
+                      {cardToSell.quantity ?? "Unknown"}
+                    </td>
                     <td className="px-3 py-2">{cardToSell.userId ?? "Unknown"}</td>
                     <td className="px-3 py-2">
+                      {cardToSell.cardPrice ? (
+                        <select 
+                          className="border rounded px-2 py-1 text-sm"
+                          value={selectedQuantities[listingId] || 1}
+                          onChange={e => setSelectedQuantities(prev => ({
+                            ...prev,
+                            [listingId]: parseInt(e.target.value)
+                          }))}
+                        >
+                          {Array.from({length: Math.min(cardToSell.quantity || 1, 10)}, (_, i) => i + 1).map(num => (
+                            <option key={num} value={num}>{num}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-gray-500 text-sm">-</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right">
                       {cardToSell.cardPrice ? (
                         <AddToCartButton 
                           card={{
@@ -141,7 +170,9 @@ const CardInfoTab = ({ card }) => {
                             name: card.name,
                             price: cardToSell.cardPrice,
                             set: cardToSell.setName,
-                            sellerId: cardToSell.userId
+                            sellerId: cardToSell.userId,
+                            quantity: selectedQuantities[listingId] || 1,
+                            condition: cardToSell.condition
                           }}
                           className="px-3 py-1 text-sm"
                         />
