@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import useCartStore from "../store/cartStore";
 import { useNavigate } from "react-router-dom";
 import { checkout } from "../api/cart";
+import ConditionIcon from "../components/ConditionIcon";
 
 const Checkout = () => {
   const {
@@ -142,6 +143,11 @@ const Checkout = () => {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-gray-900 truncate">{item.card_name || item.name}</div>
                   <div className="text-sm text-gray-500 truncate">{item.set}</div>
+                  {item.condition && (
+                    <div className="mt-1">
+                      <ConditionIcon condition={item.condition} size="xs" />
+                    </div>
+                  )}
                 </div>
                 <div className="w-24 text-right font-semibold text-green-700">
                   €{Number(item.price || 0).toFixed(2)}

@@ -62,7 +62,7 @@ const realAddToCart = async (card) => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: JSON.stringify({ cardId: card.id, quantity: 1 })
+    body: JSON.stringify({ cardId: card.id, quantity: card.quantity || 1 })
   });
 
   if (!response.ok) {
