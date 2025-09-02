@@ -129,6 +129,26 @@ const CardInfoTab = ({ card }) => {
                     ?? cardToSell.listingId 
                     ?? cardToSell._id 
                     ?? `${cardToSell.userId ?? 'nouser'}-${cardToSell.setName ?? 'noset'}-${i}`;
+                  
+                  // Crear el objeto card aquí para que se recalcule cuando cambie selectedQuantities
+                  const selectedQty = selectedQuantities[listingId] || 1;
+                  console.log(`🔄 Rendering card ${listingId} with quantity:`, selectedQty);
+                  
+                  const cardForCart = {
+                    id: listingId,
+                    card_name: card.name,
+                    image_url: card.imageUrl || card.image,
+                    name: card.name,
+                    price: cardToSell.cardPrice,
+                    set: cardToSell.setName,
+                    sellerId: cardToSell.userId,
+                    quantity: selectedQty,
+                    condition: cardToSell.condition,
+                    available: cardToSell.quantity
+                  };
+                  
+                  console.log(`🛍️ CardForCart object for ${listingId}:`, cardForCart);
+                  
                   return (
                   <tr key={`${listingId}`} className="border-t hover:bg-gray-50">
                     <td className="px-3 py-2">{cardToSell.setName ?? "Unknown"}</td>
@@ -163,18 +183,14 @@ const CardInfoTab = ({ card }) => {
                     <td className="px-3 py-2 text-right">
                       {cardToSell.cardPrice ? (
                         <AddToCartButton 
-                          card={{
-                            id: listingId,
-                            card_name: card.name,
-                            image_url: card.imageUrl || card.image,
-                            name: card.name,
-                            price: cardToSell.cardPrice,
-                            set: cardToSell.setName,
-                            sellerId: cardToSell.userId,
-                            quantity: selectedQuantities[listingId] || 1,
-                            condition: cardToSell.condition
-                          }}
+                          card={cardForCart}
                           className="px-3 py-1 text-sm"
+                          onAddToCart={() => {
+                            setSelectedQuantities(prev => ({
+                              ...prev,
+                              [listingId]: 1
+                            }));
+                          }}
                         />
                       ) : (
                         <span className="text-gray-500 text-sm">Sin precio</span>

@@ -21,7 +21,7 @@ const Trends = () => {
         }));
 
         const normalizeBargains = (arr) => arr.map(item => ({
-          id: item.id,
+          id: item.cardId || item.card_id || item.id,
           card_name: item.card_name || item.name,
           image_url: item.image_url || item.imageUrl,
         }));

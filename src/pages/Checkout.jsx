@@ -69,18 +69,24 @@ const Checkout = () => {
     setPlacing(true);
     setCheckoutError("");
     try {
+      console.log("🚀 Starting checkout with items:", cartItems.length);
       const result = await checkout(cartItems);
+      console.log("📋 Checkout result:", result);
+      
       if (result.success) {
         // Clear cart after successful batch purchase
+        console.log("✅ Checkout successful, clearing cart");
         for (const item of cartItems) {
           await updateItemQuantity(item.id, 0);
         }
         setOrderSuccess(true);
       } else {
         // Handle partial failure or complete failure
+        console.log("⚠️ Checkout failed:", result.message);
         setCheckoutError(result.message || "Some items could not be purchased");
       }
     } catch (e) {
+      console.error("❌ Checkout exception:", e);
       setCheckoutError(e.message || "Error processing your order");
     } finally {
       setPlacing(false);
