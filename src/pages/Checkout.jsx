@@ -21,6 +21,7 @@ const Checkout = () => {
   const [step, setStep] = useState("cart");
   const [placing, setPlacing] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
   const [shipping, setShipping] = useState({
     fullName: "",
@@ -66,22 +67,27 @@ const Checkout = () => {
   const handlePlaceOrder = async () => {
     if (!validateShipping()) return;
     setPlacing(true);
+    setCheckoutError("");
     try {
-      let anySuccess = false;
-      for (const item of cartItems) {
-        const quantity = Math.max(1, Number(item.quantity || 1));
-        const numericId = typeof item.id === 'string' ? Number(item.id) : item.id;
-        try {
-          await checkout(numericId, quantity);
-          anySuccess = true;
+      console.log("🚀 Starting checkout with items:", cartItems.length);
+      const result = await checkout(cartItems);
+      console.log("📋 Checkout result:", result);
+      
+      if (result.success) {
+        // Clear cart after successful batch purchase
+        console.log("✅ Checkout successful, clearing cart");
+        for (const item of cartItems) {
           await updateItemQuantity(item.id, 0);
-        } catch (e) {
-          // ignore failed unit and continue with next
         }
-      }
-      if (anySuccess) {
         setOrderSuccess(true);
+      } else {
+        // Handle partial failure or complete failure
+        console.log("⚠️ Checkout failed:", result.message);
+        setCheckoutError(result.message || "Some items could not be purchased");
       }
+    } catch (e) {
+      console.error("❌ Checkout exception:", e);
+      setCheckoutError(e.message || "Error processing your order");
     } finally {
       setPlacing(false);
     }
@@ -111,6 +117,18 @@ const Checkout = () => {
               Continue shopping
             </button>
           </div>
+        </div>
+      ) : checkoutError ? (
+        <div className="max-w-xl bg-white border rounded-lg shadow p-6">
+          <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
+            {checkoutError}
+          </div>
+          <button
+            className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
+            onClick={() => setCheckoutError("")}
+          >
+            Try again
+          </button>
         </div>
       ) : cartItems.length === 0 ? (
         <div className="text-center text-gray-600 py-16">

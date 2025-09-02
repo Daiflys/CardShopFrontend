@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useCartStore from "../store/cartStore";
 
-const AddToCartButton = ({ card, className = "", showQuantity = false }) => {
+const AddToCartButton = ({ card, className = "", showQuantity = false, onAddToCart }) => {
   const { addItemToCart, isInCart, loading } = useCartStore();
   const [isAdding, setIsAdding] = useState(false);
   const [message, setMessage] = useState("");
@@ -20,12 +20,16 @@ const AddToCartButton = ({ card, className = "", showQuantity = false }) => {
       if (result.success) {
         setMessage("Added to cart!");
         setTimeout(() => setMessage(""), 2000);
+        // Call the callback if provided
+        if (onAddToCart) {
+          onAddToCart();
+        }
       } else {
         setMessage(result.error || "Error adding to cart");
         setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
-      setMessage("Error adding to cart");
+      setMessage(error.message || "Error adding to cart");
       setTimeout(() => setMessage(""), 3000);
     } finally {
       setIsAdding(false);
