@@ -136,16 +136,28 @@ const realUpdateQuantity = async (cardId, quantity) => {
 };
 
 // --- CHECKOUT ---
-const mockCheckout = async (cardId) => {
+const mockCheckout = async (items) => {
   await new Promise(res => setTimeout(res, 300));
-  return { success: true };
+  return { 
+    success: true, 
+    transaction_id: "mock-transaction-" + Date.now(),
+    purchases: items,
+    message: "All items purchased successfully"
+  };
 };
 
-const realCheckout = async (cardId) => {
+const realCheckout = async (items) => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
   }
+
+  const batchRequest = {
+    items: items.map(item => ({
+      cardId: typeof item.id === 'string' ? Number(item.id) : item.id,
+      quantity: item.quantity || 1
+    }))
+  };
 
   const response = await fetch(`${API_BASE_URL}/purchases/buy`, {
     method: "POST",
@@ -153,7 +165,7 @@ const realCheckout = async (cardId) => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: cardId
+    body: JSON.stringify(batchRequest)
   });
 
   if (!response.ok) {
