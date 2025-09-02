@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import useCartStore from "../store/cartStore";
 import { useNavigate } from "react-router-dom";
 import { checkout } from "../api/cart";
+import ConditionIcon from "../components/ConditionIcon";
 
 const Checkout = () => {
   const {
@@ -70,15 +71,12 @@ const Checkout = () => {
       for (const item of cartItems) {
         const quantity = Math.max(1, Number(item.quantity || 1));
         const numericId = typeof item.id === 'string' ? Number(item.id) : item.id;
-        for (let i = 0; i < quantity; i++) {
-          try {
-            await checkout(numericId);
-            anySuccess = true;
-            const newQty = quantity - (i + 1);
-            await updateItemQuantity(item.id, newQty);
-          } catch (e) {
-            // ignore failed unit and continue with next
-          }
+        try {
+          await checkout(numericId, quantity);
+          anySuccess = true;
+          await updateItemQuantity(item.id, 0);
+        } catch (e) {
+          // ignore failed unit and continue with next
         }
       }
       if (anySuccess) {
@@ -133,6 +131,11 @@ const Checkout = () => {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-gray-900 truncate">{item.card_name || item.name}</div>
                   <div className="text-sm text-gray-500 truncate">{item.set}</div>
+                  {item.condition && (
+                    <div className="mt-1">
+                      <ConditionIcon condition={item.condition} size="xs" />
+                    </div>
+                  )}
                 </div>
                 <div className="w-24 text-right font-semibold text-green-700">
                   €{Number(item.price || 0).toFixed(2)}

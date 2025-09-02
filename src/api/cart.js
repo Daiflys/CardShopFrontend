@@ -62,7 +62,7 @@ const realAddToCart = async (card) => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: JSON.stringify({ cardId: card.id, quantity: 1 })
+    body: JSON.stringify({ cardId: card.id, quantity: card.quantity || 1 })
   });
 
   if (!response.ok) {
@@ -136,12 +136,12 @@ const realUpdateQuantity = async (cardId, quantity) => {
 };
 
 // --- CHECKOUT ---
-const mockCheckout = async (cardId) => {
+const mockCheckout = async (cardId, quantity = 1) => {
   await new Promise(res => setTimeout(res, 300));
   return { success: true };
 };
 
-const realCheckout = async (cardId) => {
+const realCheckout = async (cardId, quantity = 1) => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
@@ -153,7 +153,7 @@ const realCheckout = async (cardId) => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: cardId
+    body: JSON.stringify({ cardId, quantity })
   });
 
   if (!response.ok) {
