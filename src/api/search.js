@@ -140,5 +140,117 @@ const realSearchCardsBySet = async (setCode) => {
   return response.json();
 };
 
+// --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
+const realSearchCardsBulk = async (filters = {}) => {
+  const params = new URLSearchParams();
+  
+  console.log('Bulk search filters:', filters);
+  
+  if (filters.set) {
+    params.append('set', filters.set);
+  }
+  
+  if (filters.rarity && filters.rarity !== 'All') {
+    params.append('rarity', filters.rarity);
+  }
+  
+  if (filters.sortBy) {
+    // Map UI sortBy values to server expected values
+    const sortByMapping = {
+      'Collectors Number': 'collector_number',
+      'English Name': 'name',
+      'Local Name': 'printed_name', 
+      'Rarity, Number': 'rarity'
+    };
+    const serverSortBy = sortByMapping[filters.sortBy] || filters.sortBy;
+    params.append('sortBy', serverSortBy);
+  }
+  
+  const finalUrl = `${API_BASE_URL}/cards/search/bulk?${params.toString()}`;
+  console.log('Final bulk search URL:', finalUrl);
+  
+  try {
+    const token = localStorage.getItem("authToken");
+    const response = await fetch(finalUrl, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      let errorMessage = `Bulk search failed with status ${response.status}`;
+      
+      // Check if response has content and is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (jsonError) {
+          console.warn('Could not parse error response as JSON:', jsonError);
+          errorMessage = `Server error (${response.status}): Unable to parse error details`;
+        }
+      } else {
+        // Response is not JSON, likely HTML error page or empty
+        try {
+          const textResponse = await response.text();
+          if (textResponse.trim()) {
+            errorMessage = `Server error (${response.status}): ${textResponse.substring(0, 100)}${textResponse.length > 100 ? '...' : ''}`;
+          } else {
+            errorMessage = `Server error (${response.status}): No response body`;
+          }
+        } catch (textError) {
+          errorMessage = `Server error (${response.status}): Unable to read response`;
+        }
+      }
+      
+      // Add context about what failed
+      const setName = filters.set ? ` for set "${filters.set}"` : '';
+      const rarityFilter = filters.rarity && filters.rarity !== 'All' ? ` with rarity "${filters.rarity}"` : '';
+      
+      throw new Error(`${errorMessage}${setName}${rarityFilter}`);
+    }
+    
+    // Check if successful response is JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server returned non-JSON response. Expected JSON data.');
+    }
+    
+    try {
+      const data = await response.json();
+      
+      // Map server response to expected format
+      return data.map(card => ({
+        id: card.id,
+        oracle_id: card.oracleId,
+        set_name: card.setName,
+        set: card.set,
+        name: card.name,
+        printed_name: card.printedName,
+        rarity: card.rarity,
+        collector_number: card.collectorNumber,
+        number: card.collectorNumber, // alias for collector_number
+        image_url: card.imageUrl,
+        imageUrl: card.imageUrl, // keep both for compatibility
+        language: card.lang, // Include language from server
+        idAsUUID: card.idAsUUID
+      }));
+    } catch (jsonError) {
+      console.error('Failed to parse successful response as JSON:', jsonError);
+      throw new Error('Server returned invalid JSON response. Please try again or contact support.');
+    }
+  } catch (error) {
+    // Network or other fetch errors
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
+    }
+    
+    // Re-throw our custom errors
+    throw error;
+  }
+};
+
 export const searchCards = realSearchCards;
 export const searchCardsBySet = realSearchCardsBySet;
+export const searchCardsBulk = realSearchCardsBulk;

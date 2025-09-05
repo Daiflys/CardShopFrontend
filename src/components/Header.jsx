@@ -243,6 +243,9 @@ const Header = () => {
                   <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/settings')}>{t('account.settings')}</button>
                 </li>
                 <li className="border-t border-sky-100">
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/bulk-sell')}>Bulk Sell</button>
+                </li>
+                <li className="border-t border-sky-100">
                   <button
                     className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
                     onClick={() => {

@@ -63,3 +63,26 @@ export const getRarityTextColor = (rarity) => {
 export const getRarityIcon = () => {
   return '●';
 };
+
+export const getRaritySolidColor = (rarity) => {
+  try {
+    const validRarity = validateRarity(rarity);
+    if (!validRarity) return 'bg-gray-500';
+    
+    switch (validRarity) {
+      case 'common':
+        return 'bg-gray-700';
+      case 'uncommon':
+        return 'bg-gray-300';
+      case 'rare':
+        return 'bg-yellow-400';
+      case 'mythic':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  } catch (error) {
+    console.error('Rarity validation error:', error);
+    return 'bg-gray-500';
+  }
+};
