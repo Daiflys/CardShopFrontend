@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import RarityIndicator from './RarityIndicator';
+import { getSetIcon } from '../data/sets';
 
 const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
   const { t } = useTranslation();
@@ -40,11 +41,20 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
         
         <div className={`mb-2 ${hasStock ? 'pr-12' : ''}`}>
           <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
-            {card.card_name || card.name}
+            {card.printedName || card.name}
           </h3>
-          <p className="text-xs text-gray-500 truncate">
-            {card.set || card.setName || 'Unknown Set'}
-          </p>
+          <div className="flex items-center gap-1">
+            {card.set && getSetIcon(card.set) && (
+              <img 
+                src={getSetIcon(card.set)} 
+                alt={card.set}
+                className="w-6 h-6 flex-shrink-0"
+              />
+            )}
+            <p className="text-xs text-gray-500 truncate">
+              {card.setName || 'Unknown Set'}
+            </p>
+          </div>
         </div>
         
         {/* Bottom row with price */}

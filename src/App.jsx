@@ -3,9 +3,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import BannerNew from "./components/BannerNew";
 import Trends from "./components/Trends";
+import SetsSidebar from "./components/SetsSidebar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ListProducts from "./pages/ListProducts";
 import Search from "./pages/Search";
 import CardDetail from "./pages/CardDetail";
 import Checkout from "./pages/Checkout";
@@ -28,13 +28,21 @@ function App() {
               <>
                 <BannerNew />
                 <main className="w-full">
-                  <Trends />
+                  <div className="w-full px-3 py-6">
+                    <div className="flex gap-0 items-start max-w-7xl mx-auto">
+                      <div className="flex-shrink-0 hidden xl:block" style={{ marginLeft: '-3rem' }}>
+                        <SetsSidebar />
+                      </div>
+                      <div className="flex-1 w-full">
+                        <Trends />
+                      </div>
+                    </div>
+                  </div>
                 </main>
               </>
             } />
             <Route path="/login" element={<main className="max-w-6xl mx-auto"><Login /></main>} />
             <Route path="/register" element={<main className="max-w-6xl mx-auto"><Register /></main>} />
-            <Route path="/list-products" element={<main className="max-w-6xl mx-auto"><ListProducts /></main>} />
             <Route path="/search" element={<main className="max-w-7xl mx-auto"><Search /></main>} />
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto"><Checkout /></main>} />

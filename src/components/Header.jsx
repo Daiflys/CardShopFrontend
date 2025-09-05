@@ -6,6 +6,7 @@ import { validateToken } from "../api/auth";
 import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
 import LanguageSwitcherFlags from "./LanguageSwitcherFlags";
+import { getSetIcon } from "../data/sets";
 
 const Header = () => {
   const { t } = useTranslation();
@@ -168,7 +169,6 @@ const Header = () => {
           トレカ市場
         </span>
         <nav className="hidden md:flex gap-4 text-slate-600">
-          <a href="#" className="hover:text-sky-600 transition-colors">{t('navigation.products').toUpperCase()}</a>
           <a href="#" className="hover:text-sky-600 transition-colors">{t('homepage.trendingCards').toUpperCase()}</a>
         </nav>
       </div>
@@ -199,9 +199,17 @@ const Header = () => {
                   className="px-4 py-3 hover:bg-sky-50 border-b border-sky-100 last:border-b-0 cursor-pointer"
                   onClick={() => handleResultClick(card)}
                 >
-                  <div className="font-medium text-gray-900">{card.name}</div>
+                  <div className="flex items-center gap-2">
+                    {card.set && getSetIcon(card.set) && (
+                      <img 
+                        src={getSetIcon(card.set)} 
+                        alt={card.set}
+                        className="w-4 h-4 flex-shrink-0"
+                      />
+                    )}
+                    <div className="font-medium text-gray-900">{card.name}</div>
+                  </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
-                    {card.set && <span>{card.set}</span>}
                     {card.price && <span className="text-green-600 font-semibold">${card.price}</span>}
                   </div>
                 </li>
@@ -255,10 +263,6 @@ const Header = () => {
         )}
         {!userEmail && !userName && (
           <>
-            <button
-              className="px-4 py-2 border border-sky-200 rounded hover:bg-sky-50 text-slate-700 transition-colors"
-              onClick={() => navigate('/list-products')}
-            >{t('navigation.products')}</button>
             <button
               className="px-4 py-2 border border-sky-300 rounded hover:bg-sky-50 text-sky-700 transition-colors"
               onClick={() => navigate('/login')}
