@@ -101,11 +101,16 @@ const BulkSell = () => {
     // Create a new unique ID for the copy
     const copyId = `${card.id}_copy_${Date.now()}`;
     
-    // Add the copy to filteredCards
+    // Find the index of the original card and insert the copy right after it
     const cardCopy = { ...card, id: copyId };
-    setFilteredCards(prev => [...prev, cardCopy]);
+    setFilteredCards(prev => {
+      const originalIndex = prev.findIndex(c => c.id === card.id);
+      const newArray = [...prev];
+      newArray.splice(originalIndex + 1, 0, cardCopy); // Insert right after original
+      return newArray;
+    });
     
-    // Copy the card data (conditions, language, etc.)
+    // Copy the card data but reset quantity and selection
     const originalData = cardData[card.id] || {
       selected: false,
       language: 'en',
@@ -117,7 +122,11 @@ const BulkSell = () => {
     
     setCardData(prev => ({
       ...prev,
-      [copyId]: { ...originalData }
+      [copyId]: { 
+        ...originalData,
+        selected: false, // Always start unselected
+        quantity: 0      // Always start with 0 quantity
+      }
     }));
   };
 
