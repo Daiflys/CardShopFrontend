@@ -219,13 +219,14 @@ const Search = () => {
             <div className="bg-white rounded-lg shadow overflow-hidden">
               {/* List Header */}
               <div className="bg-blue-900 text-white px-4 py-3">
-                <div className="grid grid-cols-12 gap-4 text-sm font-medium">
-                  <div className="col-span-1"></div>
-                  <div className="col-span-4">Name</div>
-                  <div className="col-span-1 text-center">Rarity</div>
-                  <div className="col-span-1 text-center">#</div>
-                  <div className="col-span-2 text-center">Available</div>
-                  <div className="col-span-3 text-right">From</div>
+                <div className="grid gap-4 text-sm font-medium" style={{gridTemplateColumns: '40px 1fr 50px 70px 50px 80px 120px'}}>
+                  <div></div>
+                  <div>Name</div>
+                  <div className="text-center">Rarity</div>
+                  <div className="text-center">Language</div>
+                  <div className="text-center">#</div>
+                  <div className="text-center">Available</div>
+                  <div className="text-right">From</div>
                 </div>
               </div>
               

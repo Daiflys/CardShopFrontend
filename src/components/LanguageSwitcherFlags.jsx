@@ -1,46 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { headerLanguageOptions } from '../utils/languageFlags.jsx';
 
 const LanguageSwitcherFlags = () => {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const languages = [
-    { 
-      code: 'en', 
-      name: 'English', 
-      flag: (
-        <svg width="20" height="15" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#012169"/>
-          <path d="M0,0 L20,15 M20,0 L0,15" stroke="#fff" strokeWidth="3"/>
-          <path d="M0,0 L20,15 M20,0 L0,15" stroke="#C8102E" strokeWidth="2"/>
-          <path d="M10,0 L10,15 M0,7.5 L20,7.5" stroke="#fff" strokeWidth="5"/>
-          <path d="M10,0 L10,15 M0,7.5 L20,7.5" stroke="#C8102E" strokeWidth="3"/>
-        </svg>
-      )
-    },
-    { 
-      code: 'es', 
-      name: 'Español', 
-      flag: (
-        <svg width="20" height="15" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#AA151B"/>
-          <rect width="20" height="9" y="3" fill="#F1BF00"/>
-        </svg>
-      )
-    },
-    { 
-      code: 'ja', 
-      name: '日本語', 
-      flag: (
-        <svg width="20" height="15" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#fff"/>
-          <circle cx="10" cy="7.5" r="4.5" fill="#BC002D"/>
-        </svg>
-      )
-    }
-  ];
+  // Use centralized language options
+  const languages = headerLanguageOptions;
 
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 

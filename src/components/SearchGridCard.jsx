@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import RarityIndicator from './RarityIndicator';
 import { getSetIcon } from '../data/sets';
+import { getLanguageFlag } from '../utils/languageFlags.jsx';
 
 const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
   const { t } = useTranslation();
@@ -40,9 +41,15 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
         )}
         
         <div className={`mb-2 ${hasStock ? 'pr-12' : ''}`}>
-          <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
-            {card.printedName || card.name}
-          </h3>
+          {/* Card name with language flag */}
+          <div className="flex items-start gap-2 mb-1 relative">
+            <h3 className="text-sm font-semibold text-gray-900 flex-1 min-w-0 break-words">
+              {card.printedName || card.name}
+            </h3>
+            <div className="flex-shrink-0 self-start">
+              {getLanguageFlag(card.language || 'en', 'normal')}
+            </div>
+          </div>
           <div className="flex items-center gap-1">
             {card.set && getSetIcon(card.set) && (
               <img 

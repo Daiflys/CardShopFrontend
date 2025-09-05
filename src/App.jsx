@@ -13,6 +13,7 @@ import AccountLayout from "./pages/account/AccountLayout";
 import Profile from "./pages/account/Profile";
 import Transactions from "./pages/account/Transactions";
 import Settings from "./pages/account/Settings";
+import BulkSell from "./pages/BulkSell";
 import RequireAuth from "./pages/RequireAuth";
 import CartInitializer from "./components/CartInitializer";
 import "./App.css";
@@ -46,6 +47,7 @@ function App() {
             <Route path="/search" element={<main className="max-w-7xl mx-auto"><Search /></main>} />
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto"><Checkout /></main>} />
+            <Route path="/bulk-sell" element={<RequireAuth><BulkSell /></RequireAuth>} />
             <Route
               path="/account/*"
               element={

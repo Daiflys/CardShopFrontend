@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { languageOptions } from '../utils/languageFlags.jsx';
 
 const SearchFilters = ({ initialQuery = '', onSearch }) => {
   const { t } = useTranslation();
@@ -82,116 +83,8 @@ const SearchFilters = ({ initialQuery = '', onSearch }) => {
     'March of the Machine'
   ];
 
-  const languages = [
-    { 
-      key: 'en', 
-      name: 'English', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#012169"/>
-          <path d="M0,0 L20,15 M20,0 L0,15" stroke="#fff" strokeWidth="3"/>
-          <path d="M0,0 L20,15 M20,0 L0,15" stroke="#C8102E" strokeWidth="2"/>
-          <path d="M10,0 L10,15 M0,7.5 L20,7.5" stroke="#fff" strokeWidth="5"/>
-          <path d="M10,0 L10,15 M0,7.5 L20,7.5" stroke="#C8102E" strokeWidth="3"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'es', 
-      name: 'Español', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#AA151B"/>
-          <rect width="20" height="9" y="3" fill="#F1BF00"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'fr', 
-      name: 'Français', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#fff"/>
-          <rect width="6.67" height="15" fill="#002654"/>
-          <rect width="6.67" height="15" x="13.33" fill="#CE1126"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'de', 
-      name: 'Deutsch', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="5" fill="#000"/>
-          <rect width="20" height="5" y="5" fill="#DE0000"/>
-          <rect width="20" height="5" y="10" fill="#FFCE00"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'it', 
-      name: 'Italiano', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#fff"/>
-          <rect width="6.67" height="15" fill="#009246"/>
-          <rect width="6.67" height="15" x="13.33" fill="#CE2B37"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'ja', 
-      name: '日本語', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#fff"/>
-          <circle cx="10" cy="7.5" r="4.5" fill="#BC002D"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'pt', 
-      name: 'Português', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#FF0000"/>
-          <rect width="12" height="15" fill="#00AF66"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'ru', 
-      name: 'Русский', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="5" fill="#fff"/>
-          <rect width="20" height="5" y="5" fill="#0033A0"/>
-          <rect width="20" height="5" y="10" fill="#DA020E"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'zh', 
-      name: '中文', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#EE1C25"/>
-          <polygon points="4,3 5,5 3,4 5,4 3,5" fill="#FFFF00"/>
-        </svg>
-      )
-    },
-    { 
-      key: 'ko', 
-      name: '한국어', 
-      flag: (
-        <svg width="16" height="12" viewBox="0 0 20 15" className="border border-gray-300">
-          <rect width="20" height="15" fill="#fff"/>
-          <circle cx="10" cy="7.5" r="6" fill="#003478" fillOpacity="0.3"/>
-          <circle cx="10" cy="7.5" r="3" fill="#CD2E3A" fillOpacity="0.6"/>
-        </svg>
-      )
-    }
-  ];
+  // Use centralized language options
+  const languages = languageOptions;
 
   const handleLanguageToggle = (language) => {
     setLanguageFilters(prev => ({
