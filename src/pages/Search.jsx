@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { searchCards } from '../api/search';
+import { searchCards, searchCardsBySet } from '../api/search';
 import SearchGridCard from '../components/SearchGridCard';
 import SearchListCard from '../components/SearchListCard';
 import SearchFilters from '../components/SearchFilters';
@@ -11,6 +11,7 @@ const Search = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get('q');
+  const setFilter = searchParams.get('set');
   
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,8 +23,10 @@ const Search = () => {
   useEffect(() => {
     if (query) {
       performSearch(query);
+    } else if (setFilter) {
+      performSetSearch(setFilter);
     }
-  }, [query]);
+  }, [query, setFilter]);
 
   const performSearch = async (searchQuery, filters = {}) => {
     try {
@@ -42,6 +45,26 @@ const Search = () => {
       setCurrentFilters(filters);
     } catch (error) {
       console.error('Search error:', error);
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const performSetSearch = async (setCode) => {
+    try {
+      setLoading(true);
+      const searchResults = await searchCardsBySet(setCode);
+      
+      if (searchResults.length > 0) {
+        console.log('Set search result structure:', searchResults[0]);
+        console.log('All set search results:', searchResults);
+      }
+      
+      setResults(searchResults);
+      setCurrentFilters({ set: setCode });
+    } catch (error) {
+      console.error('Set search error:', error);
       setResults([]);
     } finally {
       setLoading(false);
@@ -118,7 +141,10 @@ const Search = () => {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {t('common.search')}: "{query || currentFilters.query || 'All Cards'}"
+                {setFilter 
+                  ? `Set: ${setFilter.toUpperCase()}` 
+                  : `${t('common.search')}: "${query || currentFilters.query || 'All Cards'}"`
+                }
               </h1>
               <p className="text-gray-600 mt-1">
                 {filteredResults.length} of {results.length} {results.length === 1 ? 'result' : t('common.results')}
@@ -178,7 +204,7 @@ const Search = () => {
               </p>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
               {filteredResults.map((card) => (
                 <SearchGridCard 
                   key={card.id} 

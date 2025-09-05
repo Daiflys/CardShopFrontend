@@ -133,4 +133,12 @@ const mockSearchCardsWithFilters = async (name, filters = {}) => {
   return results;
 };
 
+// --- SEARCH BY SET ---
+const realSearchCardsBySet = async (setCode) => {
+  const response = await fetch(`${API_BASE_URL}/cards/search/set?set=${setCode}`);
+  if (!response.ok) throw new Error("Search by set error");
+  return response.json();
+};
+
 export const searchCards = realSearchCards;
+export const searchCardsBySet = realSearchCardsBySet;

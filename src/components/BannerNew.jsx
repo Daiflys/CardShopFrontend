@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const getBanners = (t) => [
   {
@@ -8,7 +9,8 @@ const getBanners = (t) => [
     subtitle: t('banners.aetherDrift.subtitle'),
     cta: t('banners.aetherDrift.cta'),
     image: "/images/aetherdrift.jpg",
-    bgColor: "from-cyan-400 via-blue-500 to-purple-600"
+    bgColor: "from-cyan-400 via-blue-500 to-purple-600",
+    setCode: "dft"
   },
   {
     id: 2,
@@ -16,7 +18,8 @@ const getBanners = (t) => [
     subtitle: t('banners.finalFantasy.subtitle'),
     cta: t('banners.finalFantasy.cta'),
     image: "/images/finalfantasy.jpg",
-    bgColor: "from-orange-400 via-red-500 to-pink-600"
+    bgColor: "from-orange-400 via-red-500 to-pink-600",
+    setCode: "fin"
   },
   {
     id: 3,
@@ -24,17 +27,23 @@ const getBanners = (t) => [
     subtitle: t('banners.modernHorizons.subtitle'),
     cta: t('banners.modernHorizons.cta'),
     image: "/images/modernhorizons.jpg",
-    bgColor: "from-teal-400 via-cyan-500 to-blue-600"
+    bgColor: "from-teal-400 via-cyan-500 to-blue-600",
+    setCode: "mh3"
   }
 ];
 
 const BannerNew = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const timeoutRef = useRef(null);
 
   const banners = getBanners(t);
+
+  const handleBannerClick = (setCode) => {
+    navigate(`/search?set=${setCode}`);
+  };
 
   // Auto-rotation using original timing
   useEffect(() => {
@@ -44,6 +53,16 @@ const BannerNew = () => {
     }, 5000);
     return () => clearTimeout(timeoutRef.current);
   }, [current]);
+
+  // Handle banner click events from dynamic buttons
+  useEffect(() => {
+    const handleBannerClickEvent = (event) => {
+      handleBannerClick(event.detail);
+    };
+
+    window.addEventListener('bannerClick', handleBannerClickEvent);
+    return () => window.removeEventListener('bannerClick', handleBannerClickEvent);
+  }, []);
 
   // Original sliding animation logic
   const goTo = (idx, direction = "right") => {
@@ -72,7 +91,7 @@ const BannerNew = () => {
           <div class="max-w-2xl">
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">${nextBanner.title}</h1>
             <p class="text-lg md:text-xl text-white mb-6">${nextBanner.subtitle}</p>
-            <button class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white font-bold px-6 py-3 md:px-8 md:py-4 rounded transition-all duration-300 shadow-lg hover:shadow-xl">${nextBanner.cta}</button>
+            <button onclick="window.dispatchEvent(new CustomEvent('bannerClick', { detail: '${nextBanner.setCode}' }))" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white font-bold px-6 py-3 md:px-8 md:py-4 rounded transition-all duration-300 shadow-lg hover:shadow-xl">${nextBanner.cta}</button>
           </div>
         </div>
       </div>
@@ -175,7 +194,10 @@ const BannerNew = () => {
                   <p className="text-lg md:text-xl text-white mb-6 drop-shadow-lg">
                     {currentBanner.subtitle}
                   </p>
-                  <button className="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white font-bold px-6 py-3 md:px-8 md:py-4 rounded transition-all duration-300 shadow-lg hover:shadow-xl">
+                  <button 
+                    onClick={() => handleBannerClick(currentBanner.setCode)}
+                    className="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white font-bold px-6 py-3 md:px-8 md:py-4 rounded transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
                     {currentBanner.cta}
                   </button>
                 </div>
