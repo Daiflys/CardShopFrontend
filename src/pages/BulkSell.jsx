@@ -92,14 +92,16 @@ const BulkSell = () => {
       ...prev,
       [cardId]: {
         ...prev[cardId],
-        [field]: value
+        [field]: value,
+        // Auto-select card when any field is modified (except when manually unchecking the checkbox)
+        selected: field === 'selected' ? value : true
       }
     }));
   };
 
   const copyCard = (card) => {
     // Create a new unique ID for the copy
-    const copyId = `${card.id}_copy_${Date.now()}`;
+    const copyId = `${card.id}`;
     
     // Find the index of the original card and insert the copy right after it
     const cardCopy = { ...card, id: copyId };
@@ -132,23 +134,8 @@ const BulkSell = () => {
 
 
   const handleSubmit = async () => {
-    const selectedCards = Object.entries(cardData)
-      .filter(([cardId, data]) => data.selected && data.quantity > 0)
-      .map(([cardId, data]) => {
-        const card = filteredCards.find(c => c.id === cardId);
-        return {
-          card_id: cardId,
-          oracle_id: card.oracle_id,
-          set_name: card.set_name,
-          card_name: card.name,
-          image_url: card.image_url,
-          price: parseFloat(data.price),
-          condition: data.condition,
-          quantity: parseInt(data.quantity),
-          comments: data.comments,
-          language: data.language
-        };
-      });
+    const selectedCardEntries = Object.entries(cardData);
+    const selectedCards = selectedCardEntries.filter(([cardId, data]) => data.selected && data.quantity > 0);
 
     if (selectedCards.length === 0) {
       setError('Please select at least one card with quantity > 0');
@@ -160,7 +147,7 @@ const BulkSell = () => {
     setSuccessMessage('');
 
     try {
-      const result = await bulkSellCards(selectedCards);
+      const result = await bulkSellCards(selectedCardEntries, filteredCards);
       setSuccessMessage(`Successfully listed ${selectedCards.length} cards for sale!`);
       
       // Clear selection after successful submission

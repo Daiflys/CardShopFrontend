@@ -140,9 +140,9 @@ const BannerNew = () => {
   const currentBanner = banners[current];
 
   return (
-    <section className="relative overflow-hidden" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
+    <section className="relative overflow-hidden px-4 md:px-6 lg:px-8 mt-6" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       {/* True fullwidth banner */}
-      <div className="relative w-full h-80 md:h-96 lg:h-[450px] overflow-hidden">
+      <div className="relative w-full h-80 md:h-96 lg:h-[450px] overflow-hidden rounded-2xl">
         
         {/* Left arrow */}
         <button
