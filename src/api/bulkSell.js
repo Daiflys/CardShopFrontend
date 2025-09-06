@@ -23,7 +23,7 @@ const realBulkSell = async (selectedCardEntries, filteredCards) => {
         card_id: card.id, // Always use original card.id for backend
         oracle_id: card.oracle_id,
         set_name: card.set_name,
-        set: card.set,
+        set_code: card.set_code,
         card_name: card.name,
         image_url: card.image_url,
         price: parseFloat(data.price),

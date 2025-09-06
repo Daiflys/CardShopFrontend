@@ -200,10 +200,10 @@ const Header = () => {
                   onClick={() => handleResultClick(card)}
                 >
                   <div className="flex items-center gap-2">
-                    {card.set && getSetIcon(card.set) && (
+                    {card.set_code && getSetIcon(card.set_code) && (
                       <img 
-                        src={getSetIcon(card.set)} 
-                        alt={card.set}
+                        src={getSetIcon(card.set_code)} 
+                        alt={card.set_code}
                         className="w-4 h-4 flex-shrink-0"
                       />
                     )}

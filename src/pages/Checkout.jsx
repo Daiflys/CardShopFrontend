@@ -148,7 +148,7 @@ const Checkout = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-gray-900 truncate">{item.card_name || item.name}</div>
-                  <div className="text-sm text-gray-500 truncate">{item.set}</div>
+                  <div className="text-sm text-gray-500 truncate">{item.set_name || item.set}</div>
                   {item.condition && (
                     <div className="mt-1">
                       <ConditionIcon condition={item.condition} size="xs" />
