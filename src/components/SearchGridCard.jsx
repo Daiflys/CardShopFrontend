@@ -51,15 +51,15 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            {card.set && getSetIcon(card.set) && (
+            {card.set_code && getSetIcon(card.set_code) && (
               <img 
-                src={getSetIcon(card.set)} 
-                alt={card.set}
+                src={getSetIcon(card.set_code)} 
+                alt={card.set_code}
                 className="w-6 h-6 flex-shrink-0"
               />
             )}
             <p className="text-xs text-gray-500 truncate">
-              {card.setName || 'Unknown Set'}
+              {card.set_name || card.setName || 'Unknown Set'}
             </p>
           </div>
         </div>

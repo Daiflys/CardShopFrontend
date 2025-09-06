@@ -225,7 +225,7 @@ const realSearchCardsBulk = async (filters = {}) => {
         id: card.id,
         oracle_id: card.oracleId,
         set_name: card.setName,
-        set: card.set,
+        set_code: card.set,
         name: card.name,
         printed_name: card.printedName,
         rarity: card.rarity,

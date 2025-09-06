@@ -30,7 +30,7 @@ const CardSellTab = ({ card }) => {
     setError("");
     setSuccessMessage("");
     try {
-      const result = await setCardToSell(card.oracleId, card.id, card.setName, card.name, card.imageUrl, price, condition, quantity, comments);
+      const result = await setCardToSell(card.oracleId, card.id, card.setName, card.set_code, card.name, card.imageUrl, price, condition, quantity, comments);
       console.log("result is: " + result + " result success is: " + result.success);
       setSuccessMessage("Card successfully put up for sale!");
     } catch (err) {
