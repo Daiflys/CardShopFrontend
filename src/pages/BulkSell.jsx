@@ -100,13 +100,13 @@ const BulkSell = () => {
   };
 
   const copyCard = (card) => {
-    // Create a new unique ID for the copy
-    const copyId = `${card.id}`;
+    // Keep original ID for backend, but add unique reactKey for React rendering
+    const uniqueReactKey = `${card.id}_copy_${Date.now()}_${Math.random()}`;
     
     // Find the index of the original card and insert the copy right after it
-    const cardCopy = { ...card, id: copyId };
+    const cardCopy = { ...card, reactKey: uniqueReactKey };
     setFilteredCards(prev => {
-      const originalIndex = prev.findIndex(c => c.id === card.id);
+      const originalIndex = prev.findIndex(c => c.id === card.id || c.reactKey === card.reactKey);
       const newArray = [...prev];
       newArray.splice(originalIndex + 1, 0, cardCopy); // Insert right after original
       return newArray;
@@ -124,7 +124,7 @@ const BulkSell = () => {
     
     setCardData(prev => ({
       ...prev,
-      [copyId]: { 
+      [uniqueReactKey]: { 
         ...originalData,
         selected: false, // Always start unselected
         quantity: 0      // Always start with 0 quantity
@@ -332,8 +332,9 @@ const BulkSell = () => {
                         onChange={(e) => {
                           const newCardData = { ...cardData };
                           currentCards.forEach(card => {
-                            newCardData[card.id] = {
-                              ...newCardData[card.id],
+                            const cardKey = card.reactKey || card.id;
+                            newCardData[cardKey] = {
+                              ...newCardData[cardKey],
                               selected: e.target.checked
                             };
                           });
@@ -353,13 +354,15 @@ const BulkSell = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentCards.map((card, index) => (
-                    <tr key={card.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  {currentCards.map((card, index) => {
+                    const cardKey = card.reactKey || card.id; // Use reactKey if available, otherwise use id
+                    return (
+                    <tr key={cardKey} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                       <td className="p-3">
                         <input
                           type="checkbox"
-                          checked={cardData[card.id]?.selected || false}
-                          onChange={(e) => updateCardData(card.id, 'selected', e.target.checked)}
+                          checked={cardData[cardKey]?.selected || false}
+                          onChange={(e) => updateCardData(cardKey, 'selected', e.target.checked)}
                         />
                       </td>
                       <td className="p-3">
@@ -368,7 +371,7 @@ const BulkSell = () => {
                             className="relative"
                             onMouseEnter={(e) => {
                               const rect = e.currentTarget.getBoundingClientRect();
-                              setHoveredCard({ id: card.id, rect });
+                              setHoveredCard({ id: cardKey, rect });
                             }}
                             onMouseLeave={() => setHoveredCard(null)}
                           >
@@ -395,7 +398,7 @@ const BulkSell = () => {
                           </div>
 
                           {/* Large image tooltip on hover - Fixed positioning */}
-                          {hoveredCard && hoveredCard.id === card.id && (card.image_url || card.imageUrl) && (
+                          {hoveredCard && hoveredCard.id === cardKey && (card.image_url || card.imageUrl) && (
                             <div 
                               className="fixed z-[9999] bg-white border rounded-lg shadow-2xl p-2 pointer-events-none"
                               style={{
@@ -426,10 +429,10 @@ const BulkSell = () => {
                         <div className="relative language-selector">
                           <button
                             className="flex items-center space-x-2 border rounded px-2 py-1 bg-white hover:bg-gray-50 min-w-[120px]"
-                            onClick={() => setOpenLanguageSelector(openLanguageSelector === card.id ? null : card.id)}
+                            onClick={() => setOpenLanguageSelector(openLanguageSelector === cardKey ? null : cardKey)}
                           >
                             {(() => {
-                              const selectedLang = languageOptions.find(lang => lang.key === (cardData[card.id]?.language || 'en'));
+                              const selectedLang = languageOptions.find(lang => lang.key === (cardData[cardKey]?.language || 'en'));
                               return (
                                 <>
                                   {selectedLang?.flag}
@@ -442,14 +445,14 @@ const BulkSell = () => {
                             })()}
                           </button>
                           
-                          {openLanguageSelector === card.id && (
+                          {openLanguageSelector === cardKey && (
                             <div className="absolute z-10 mt-1 w-40 bg-white border rounded-md shadow-lg">
                               {languageOptions.map(lang => (
                                 <button
                                   key={lang.key}
                                   className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 w-full text-left"
                                   onClick={() => {
-                                    updateCardData(card.id, 'language', lang.key);
+                                    updateCardData(cardKey, 'language', lang.key);
                                     setOpenLanguageSelector(null);
                                   }}
                                 >
@@ -464,8 +467,8 @@ const BulkSell = () => {
                       <td className="p-3">
                         <select
                           className="border rounded px-2 py-1"
-                          value={cardData[card.id]?.condition || 'NM'}
-                          onChange={(e) => updateCardData(card.id, 'condition', e.target.value)}
+                          value={cardData[cardKey]?.condition || 'NM'}
+                          onChange={(e) => updateCardData(cardKey, 'condition', e.target.value)}
                         >
                           {conditionOptions.map(option => (
                             <option key={option.code} value={option.code}>
@@ -479,8 +482,8 @@ const BulkSell = () => {
                         <input
                           type="text"
                           className="border rounded px-2 py-1 w-24"
-                          value={cardData[card.id]?.comments || ''}
-                          onChange={(e) => updateCardData(card.id, 'comments', e.target.value)}
+                          value={cardData[cardKey]?.comments || ''}
+                          onChange={(e) => updateCardData(cardKey, 'comments', e.target.value)}
                         />
                       </td>
                       <td className="p-3">
@@ -488,8 +491,8 @@ const BulkSell = () => {
                           type="number"
                           min="0"
                           className="border rounded px-2 py-1 w-16"
-                          value={cardData[card.id]?.quantity || 0}
-                          onChange={(e) => updateCardData(card.id, 'quantity', parseInt(e.target.value) || 0)}
+                          value={cardData[cardKey]?.quantity || 0}
+                          onChange={(e) => updateCardData(cardKey, 'quantity', parseInt(e.target.value) || 0)}
                         />
                       </td>
                       <td className="p-3">
@@ -498,8 +501,8 @@ const BulkSell = () => {
                           min="0"
                           step="0.01"
                           className="border rounded px-2 py-1 w-20"
-                          value={cardData[card.id]?.price || 0.00}
-                          onChange={(e) => updateCardData(card.id, 'price', parseFloat(e.target.value) || 0.00)}
+                          value={cardData[cardKey]?.price || 0.00}
+                          onChange={(e) => updateCardData(cardKey, 'price', parseFloat(e.target.value) || 0.00)}
                         />
                         <span className="ml-1">€</span>
                       </td>
@@ -525,7 +528,8 @@ const BulkSell = () => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

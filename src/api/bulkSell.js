@@ -3,7 +3,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const mockBulkSell = async (selectedCardEntries, filteredCards) => {
   // Filter selected cards for mock response
-  const selectedCards = selectedCardEntries.filter(([cardId, data]) => data.selected && data.quantity > 0);
+  const selectedCards = selectedCardEntries.filter(([cardKey, data]) => data.selected && data.quantity > 0);
   await new Promise(res => setTimeout(res, 2000));
   return { success: true, message: `Successfully listed ${selectedCards.length} cards for sale` };
 };
@@ -13,11 +13,14 @@ const realBulkSell = async (selectedCardEntries, filteredCards) => {
   
   // Map the selected cards data similar to BulkSell.jsx logic
   const cardsData = selectedCardEntries
-    .filter(([cardId, data]) => data.selected && data.quantity > 0)
-    .map(([cardId, data]) => {
-      const card = filteredCards.find(c => c.id === cardId);
+    .filter(([cardKey, data]) => data.selected && data.quantity > 0)
+    .map(([cardKey, data]) => {
+      // Find card by id or reactKey (for copied cards)
+      const card = filteredCards.find(c => 
+        (c.reactKey && c.reactKey === cardKey) || c.id === cardKey
+      );
       return {
-        card_id: cardId,
+        card_id: card.id, // Always use original card.id for backend
         oracle_id: card.oracle_id,
         set_name: card.set_name,
         set: card.set,
