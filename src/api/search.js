@@ -106,7 +106,15 @@ const realSearchCards = async (name, filters = {}) => {
   
   const response = await fetch(finalUrl);
   if (!response.ok) throw new Error("Search error");
-  return response.json();
+  const data = await response.json();
+  
+  // Extract card field from CardWithAvailability structure
+  return data.map(cardWithAvailability => ({
+    ...cardWithAvailability.card,
+    // Add availability info for future use
+    available: cardWithAvailability.available,
+    cardsToSell: cardWithAvailability.cardsToSell
+  }));
 };
 
 const mockSearchCardsWithFilters = async (name, filters = {}) => {
@@ -137,7 +145,15 @@ const mockSearchCardsWithFilters = async (name, filters = {}) => {
 const realSearchCardsBySet = async (setCode) => {
   const response = await fetch(`${API_BASE_URL}/cards/search/set?set=${setCode}`);
   if (!response.ok) throw new Error("Search by set error");
-  return response.json();
+  const data = await response.json();
+  
+  // Extract card field from CardWithAvailability structure
+  return data.map(cardWithAvailability => ({
+    ...cardWithAvailability.card,
+    // Add availability info for future use
+    available: cardWithAvailability.available,
+    cardsToSell: cardWithAvailability.cardsToSell
+  }));
 };
 
 // --- BULK SEARCH (for BulkSell - returns all cards with filters) ---

@@ -21,9 +21,9 @@ export const getRarityColor = (rarity) => {
     
     switch (validRarity) {
       case 'common':
-        return 'from-gray-700 to-gray-900';
+        return 'from-white to-gray-100';
       case 'uncommon':
-        return 'from-gray-300 to-gray-500';
+        return 'from-gray-700 to-gray-900';
       case 'rare':
         return 'from-yellow-400 to-yellow-600';
       case 'mythic':
@@ -44,9 +44,9 @@ export const getRarityTextColor = (rarity) => {
     
     switch (validRarity) {
       case 'common':
-        return 'text-gray-800';
+        return 'text-gray-100';
       case 'uncommon':
-        return 'text-gray-400';
+        return 'text-gray-800';
       case 'rare':
         return 'text-yellow-500';
       case 'mythic':
@@ -71,9 +71,9 @@ export const getRaritySolidColor = (rarity) => {
     
     switch (validRarity) {
       case 'common':
-        return 'bg-gray-700';
+        return 'bg-white';
       case 'uncommon':
-        return 'bg-gray-300';
+        return 'bg-gray-700';
       case 'rare':
         return 'bg-yellow-400';
       case 'mythic':

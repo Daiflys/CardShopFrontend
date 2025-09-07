@@ -26,8 +26,7 @@ const Transactions = () => {
     
     acc[transactionId].purchases.push(purchase);
     const price = Number(purchase.price || 0);
-    const quantity = Number(purchase.quantity || 1);
-    acc[transactionId].total_price += (price * quantity);
+    acc[transactionId].total_price += price;
     return acc;
   }, {});
 
@@ -127,10 +126,10 @@ const Transactions = () => {
                       </div>
                       <div className="text-right">
                         <div className="font-semibold text-gray-900">
-                          €{(Number(purchase.price || 0) * Number(purchase.quantity || 1)).toFixed(2)}
+                          €{Number(purchase.price || 0).toFixed(2)}
                         </div>
                         <div className="text-sm text-gray-500">
-                          €{Number(purchase.price || 0).toFixed(2)} each
+                          €{(Number(purchase.price || 0) / Number(purchase.quantity || 1)).toFixed(2)} each
                         </div>
                       </div>
                     </div>
