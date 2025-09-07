@@ -3,6 +3,7 @@ import { getCardsToSell } from "../api/card";
 import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor } from "../utils/rarity";
 import ConditionIcon from "../components/ConditionIcon";
+import { getCardsToSellById } from "../api/card";
 
 const CardInfoTab = ({ card }) => {
   const [cardsToSell, setCardsToSell] = useState([]);
@@ -10,14 +11,14 @@ const CardInfoTab = ({ card }) => {
   const [error, setError] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
 
-  const fetchCardsToSell = useCallback(async (cardName) => {
+  const fetchCardsToSell = useCallback(async (cardName, cardId) => {
     if (!cardName) return;
     
     setLoading(true);
     setError("");
     
     try {
-      const data = await getCardsToSell(cardName);
+      const data = await getCardsToSellById(cardId);
       setCardsToSell(data);
     } catch (err) {
       setError(err.message);
@@ -28,9 +29,9 @@ const CardInfoTab = ({ card }) => {
 
   useEffect(() => {
     if (card?.name) {
-      fetchCardsToSell(card.name);
+      fetchCardsToSell(card.name, card.id);
     }
-  }, [card?.name, fetchCardsToSell]);
+  }, [card?.name, card?.id, fetchCardsToSell]);
 
   if (!card) return null;
 

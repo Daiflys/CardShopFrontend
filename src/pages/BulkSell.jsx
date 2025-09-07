@@ -73,7 +73,7 @@ const BulkSell = () => {
           language: 'en',
           condition: 'NM',
           quantity: 0,
-          price: 0.00,
+          price: 0,
           comments: ''
         };
       });
@@ -157,7 +157,7 @@ const BulkSell = () => {
           ...cardData[cardId],
           selected: false,
           quantity: 0,
-          price: 0.00,
+          price: 0,
           comments: ''
         };
       });
@@ -501,8 +501,8 @@ const BulkSell = () => {
                           min="0"
                           step="0.01"
                           className="border rounded px-2 py-1 w-20"
-                          value={cardData[cardKey]?.price || 0.00}
-                          onChange={(e) => updateCardData(cardKey, 'price', parseFloat(e.target.value) || 0.00)}
+                          value={cardData[cardKey]?.price || ''}
+                          onChange={(e) => updateCardData(cardKey, 'price', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                         />
                         <span className="ml-1">€</span>
                       </td>

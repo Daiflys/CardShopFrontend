@@ -165,7 +165,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
         </div>
         
         {/* Bottom section with price and actions */}
-        <div className="mt-auto">
+        <div className="mt-auto mb-3">
           {isAvailable && hasNMStock ? (
             /* Available with NM stock */
             <>

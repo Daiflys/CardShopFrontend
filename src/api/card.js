@@ -78,6 +78,14 @@ const realGetCardsToSell = async (cardName) => {
   return response.json();
 };
 
+const realGetCardsToSellById = async (cardId) => {
+  console.log("going to search for cards to sell with id", cardId);
+  const response = await fetch(`${API_BASE_URL}/cardsToSell/card/${encodeURIComponent(cardId)}`);
+  if (!response.ok) throw new Error("Error fetching cards to sell");
+  return response.json();
+};
+
 //export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail; 
 export const getCardDetail = realGetCardDetail;
 export const getCardsToSell = realGetCardsToSell; 
+export const getCardsToSellById = realGetCardsToSellById;
