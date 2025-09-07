@@ -2,33 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languageOptions } from '../utils/languageFlags.jsx';
 import { MTG_SETS, getSetIcon } from '../data/sets.js';
+import useSearchFiltersStore from '../store/searchFiltersStore.js';
 
 const SearchFilters = ({ initialQuery = '', onSearch }) => {
   const { t } = useTranslation();
   
-  // Filter states
-  const [searchText, setSearchText] = useState(initialQuery);
-  const [selectedCollection, setSelectedCollection] = useState('');
-  const [anyLanguage, setAnyLanguage] = useState(false);
-  const [languageFilters, setLanguageFilters] = useState({
-    en: true,
-    es: false,
-    fr: false,
-    de: false,
-    it: false,
-    ja: false,
-    pt: false,
-    ru: false,
-    zh: false,
-    ko: false
-  });
+  // Use Zustand store for persistent filter states
+  const {
+    searchText,
+    selectedCollection,
+    anyLanguage,
+    languageFilters,
+    setSearchText,
+    setSelectedCollection,
+    setAnyLanguage,
+    toggleLanguage,
+    getCurrentFilters
+  } = useSearchFiltersStore();
+  
+  // Local UI states (not persisted)
   const [isLanguageSectionOpen, setIsLanguageSectionOpen] = useState(false);
   const [isCollectionDropdownOpen, setIsCollectionDropdownOpen] = useState(false);
 
   // Update search text when initialQuery changes
   useEffect(() => {
     setSearchText(initialQuery);
-  }, [initialQuery]);
+  }, [initialQuery, setSearchText]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -53,18 +52,11 @@ const SearchFilters = ({ initialQuery = '', onSearch }) => {
   const languages = languageOptions;
 
   const handleLanguageToggle = (language) => {
-    setLanguageFilters(prev => ({
-      ...prev,
-      [language]: !prev[language]
-    }));
+    toggleLanguage(language);
   };
 
   const handleSearch = () => {
-    const filters = {
-      query: searchText,
-      collection: selectedCollection === 'All Collections' ? '' : selectedCollection,
-      languages: anyLanguage ? {} : languageFilters
-    };
+    const filters = getCurrentFilters();
     onSearch(filters);
   };
 
