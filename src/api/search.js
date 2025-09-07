@@ -64,7 +64,7 @@ const MOCK_CARDS = [
 
 const mockSearchCards = async (name) => {
   await new Promise(res => setTimeout(res, 300));
-  if (!name) return [];
+  if (!name || !name.trim()) return [];
   const query = name.trim().toLowerCase();
   return MOCK_CARDS.filter(card =>
     card.name.toLowerCase().includes(query)
@@ -78,12 +78,12 @@ const realSearchCards = async (name, filters = {}) => {
   
   console.log('Search filters received:', filters);
   
-  if (name) {
-    params.append('name', name);
+  if (name && name.trim()) {
+    params.append('name', name.trim());
   }
   
   if (filters.collection && filters.collection !== 'All Collections') {
-    params.append('collection', filters.collection);
+    params.append('set', filters.collection);
   }
   
   // Handle language filters
@@ -111,12 +111,12 @@ const realSearchCards = async (name, filters = {}) => {
 
 const mockSearchCardsWithFilters = async (name, filters = {}) => {
   await new Promise(res => setTimeout(res, 300));
-  if (!name && !filters.collection) return [];
+  if (!name?.trim() && !filters.collection) return [];
   
   let results = [...MOCK_CARDS];
   
   // Filter by name
-  if (name) {
+  if (name && name.trim()) {
     const query = name.trim().toLowerCase();
     results = results.filter(card =>
       card.name.toLowerCase().includes(query)

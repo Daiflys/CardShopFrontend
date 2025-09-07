@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { searchCards, searchCardsBySet } from '../api/search';
 import SearchGridCard from '../components/SearchGridCard';
 import SearchListCard from '../components/SearchListCard';
 import SearchFilters from '../components/SearchFilters';
+import useSearchFiltersStore from '../store/searchFiltersStore';
 
 const Search = () => {
   const { t } = useTranslation();
@@ -12,6 +13,7 @@ const Search = () => {
   const navigate = useNavigate();
   const query = searchParams.get('q');
   const setFilter = searchParams.get('set');
+  const { resetFilters } = useSearchFiltersStore();
   
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,14 +21,32 @@ const Search = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [rarityFilter, setRarityFilter] = useState('all');
   const [currentFilters, setCurrentFilters] = useState({});
+  const pendingFiltersRef = useRef(null);
+  const skipNextSearchRef = useRef(false);
 
   useEffect(() => {
+    // Skip search if it was already executed from handleFilteredSearch
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return;
+    }
+    
     if (query) {
-      performSearch(query);
+      // Use pendingFilters if available (from filtered search), otherwise just query
+      const filters = pendingFiltersRef.current || {};
+      pendingFiltersRef.current = null; // Reset after use
+      performSearch(query, filters);
     } else if (setFilter) {
       performSetSearch(setFilter);
     }
   }, [query, setFilter]);
+
+  // Reset filters when component unmounts (user leaves search page)
+  useEffect(() => {
+    return () => {
+      resetFilters();
+    };
+  }, [resetFilters]);
 
   const performSearch = async (searchQuery, filters = {}) => {
     try {
@@ -72,9 +92,25 @@ const Search = () => {
   };
 
   const handleFilteredSearch = (filters) => {
-    if (filters.query || Object.keys(filters).some(key => key !== 'query' && filters[key])) {
-      performSearch(filters.query, filters);
+    console.log('handleFilteredSearch received filters:', filters);
+    
+    // Simply execute the search with current filters
+    performSearch(filters.query || '', filters);
+    
+    // Skip the next useEffect search since we just executed one
+    skipNextSearchRef.current = true;
+    
+    // Update URL to reflect the search (for browser history/bookmarking)
+    const newParams = new URLSearchParams();
+    if (filters.query && filters.query.trim()) {
+      newParams.set('q', filters.query.trim());
     }
+    if (filters.collection && filters.collection !== 'All Collections') {
+      newParams.set('set', filters.collection);
+    }
+    
+    const newUrl = newParams.toString() ? `/search?${newParams.toString()}` : '/search';
+    navigate(newUrl);
   };
 
   const handleCardClick = (card) => {
