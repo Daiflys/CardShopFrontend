@@ -4,78 +4,92 @@ import ConditionIcon from "../../components/ConditionIcon";
 
 const Transactions = () => {
   const [purchases, setPurchases] = useState([]);
+  const [sells, setSells] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Agrupar purchases por transaction_id con manejo de errores
-  const groupedTransactions = (purchases || []).reduce((acc, purchase) => {
-    if (!purchase || !purchase.transactionId) {
-      console.warn("Purchase sin transactionId:", purchase);
+  // Helper function to group transactions
+  const groupTransactions = (transactionsList) => {
+    return (transactionsList || []).reduce((acc, purchase) => {
+      if (!purchase || !purchase.transactionId) {
+        console.warn("Purchase sin transactionId:", purchase);
+        return acc;
+      }
+      
+      const transactionId = purchase.transactionId;
+      if (!acc[transactionId]) {
+        acc[transactionId] = {
+          transaction_id: transactionId,
+          purchase_date: purchase.purchaseDate,
+          total_price: 0,
+          purchases: []
+        };
+      }
+      
+      acc[transactionId].purchases.push(purchase);
+      const price = Number(purchase.price || 0);
+      acc[transactionId].total_price += price;
       return acc;
-    }
-    
-    const transactionId = purchase.transactionId;
-    if (!acc[transactionId]) {
-      acc[transactionId] = {
-        transaction_id: transactionId,
-        purchase_date: purchase.purchaseDate,
-        total_price: 0,
-        purchases: []
-      };
-    }
-    
-    acc[transactionId].purchases.push(purchase);
-    const price = Number(purchase.price || 0);
-    const quantity = Number(purchase.quantity || 1);
-    acc[transactionId].total_price += (price * quantity);
-    return acc;
-  }, {});
+    }, {});
+  };
 
-  const transactions = Object.values(groupedTransactions);
+  const groupedPurchases = Object.values(groupTransactions(purchases));
+  const groupedSells = Object.values(groupTransactions(sells));
 
-  useEffect(() => {
-    setLoading(true);
-    getUserTransactions()
-      .then(data => {
-        console.log("📊 Transactions data received:", data);
-        setPurchases(data);
-      })
-      .catch(err => {
-        console.error("❌ Error loading transactions:", err);
-        setError(err.message);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  // Calculate current month sales total
+  const getCurrentMonthSalesTotal = () => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
 
+    return sells.filter(sale => {
+      if (!sale.purchaseDate) return false;
+      const saleDate = new Date(sale.purchaseDate);
+      return saleDate.getFullYear() === currentYear && saleDate.getMonth() === currentMonth;
+    }).reduce((total, sale) => {
+      return total + (Number(sale.price) || 0);
+    }, 0);
+  };
 
-  if (loading) {
-    return <div className="text-center">Loading transactions...</div>;
-  }
+  const currentMonthSalesTotal = getCurrentMonthSalesTotal();
 
-  if (error) {
-    return <div className="text-center text-red-600">Error: {error}</div>;
-  }
+  // Helper function to render transaction section
+  const renderTransactionSection = (transactions, sectionTitle, sectionType) => {
+    const headerBgColor = sectionType === 'purchase' ? 'bg-blue-50 border-blue-100' : 'bg-indigo-50 border-indigo-100';
+    const titleColor = sectionType === 'purchase' ? 'text-blue-900' : 'text-indigo-900';
+    const iconColor = sectionType === 'purchase' ? 'text-blue-600' : 'text-indigo-600';
 
-  return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">Transactions</h2>
-      {transactions.length === 0 ? (
-        <div className="text-gray-600 text-sm bg-gray-50 p-6 rounded-lg text-center">
-          No transactions found for this period.
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className={`text-lg font-semibold ${sectionType === 'purchase' ? 'text-blue-900' : 'text-indigo-900'}`}>
+            {sectionTitle}
+          </h3>
+          {sectionType === 'sold' && (
+            <div className="text-right">
+              <div className="text-sm text-gray-600">Current Month Sales</div>
+              <div className="text-xl font-bold text-green-600">
+                €{currentMonthSalesTotal.toFixed(2)}
+              </div>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="space-y-6">
-          {transactions.map(transaction => (
+        {transactions.length === 0 ? (
+          <div className="text-gray-600 text-sm bg-gray-50 p-6 rounded-lg text-center">
+            No {sectionType === 'purchase' ? 'purchases' : 'sales'} found for this period.
+          </div>
+        ) : (
+          transactions.map(transaction => (
             <div key={transaction.transaction_id || transaction.id} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
               {/* Transaction Header */}
-              <div className="bg-blue-50 px-6 py-4 border-b border-blue-100">
+              <div className={`${headerBgColor} px-6 py-4 border-b`}>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-5 h-5 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      <span className="font-semibold text-blue-900">
+                      <span className={`font-semibold ${titleColor}`}>
                         Transaction #{transaction.transaction_id || transaction.id}
                       </span>
                     </div>
@@ -121,16 +135,16 @@ const Transactions = () => {
                             Qty: {purchase.quantity}
                           </span>
                           <span className="text-sm text-gray-600">
-                            • Seller: {purchase.sellerId}
+                            • {sectionType === 'purchase' ? 'Seller' : 'Buyer'}: {sectionType === 'purchase' ? purchase.sellerId : purchase.buyerId || purchase.sellerId}
                           </span>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-semibold text-gray-900">
-                          €{(Number(purchase.price || 0) * Number(purchase.quantity || 1)).toFixed(2)}
+                          €{Number(purchase.price || 0).toFixed(2)}
                         </div>
                         <div className="text-sm text-gray-500">
-                          €{Number(purchase.price || 0).toFixed(2)} each
+                          €{(Number(purchase.price || 0) / Number(purchase.quantity || 1)).toFixed(2)} each
                         </div>
                       </div>
                     </div>
@@ -138,7 +152,52 @@ const Transactions = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    getUserTransactions()
+      .then(data => {
+        console.log("📊 Transactions data received:", data);
+        setPurchases(data.purchases || []);
+        setSells(data.sells || []);
+      })
+      .catch(err => {
+        console.error("❌ Error loading transactions:", err);
+        setError(err.message);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+
+  if (loading) {
+    return <div className="text-center">Loading transactions...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-600">Error: {error}</div>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <h2 className="text-xl font-semibold text-gray-900">Transactions</h2>
+      
+      {/* No transactions message */}
+      {groupedPurchases.length === 0 && groupedSells.length === 0 ? (
+        <div className="text-gray-600 text-sm bg-gray-50 p-6 rounded-lg text-center">
+          No transactions found for this period.
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {/* Purchases Section */}
+          {renderTransactionSection(groupedPurchases, "Purchases", "purchase")}
+          
+          {/* Sells Section */}
+          {renderTransactionSection(groupedSells, "Sales", "sold")}
         </div>
       )}
       

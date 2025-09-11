@@ -148,6 +148,36 @@ const Search = () => {
         return card.rarity.toLowerCase() === rarityFilter.toLowerCase();
       });
 
+  // Sort cards by availability first, then by collection number
+  const sortedResults = [...filteredResults].sort((a, b) => {
+    // First priority: availability (available cards first)
+    const aHasAvailability = getAvailableCount(a) > 0;
+    const bHasAvailability = getAvailableCount(b) > 0;
+    
+    if (aHasAvailability !== bHasAvailability) {
+      return bHasAvailability ? 1 : -1; // Available cards first
+    }
+    
+    // Second priority: collection number (ascending order)
+    const aCollectorNumber = a.collectorNumber || a.collector_number || '';
+    const bCollectorNumber = b.collectorNumber || b.collector_number || '';
+    
+    // Cards without collection number go to the end
+    if (!aCollectorNumber && !bCollectorNumber) return 0;
+    if (!aCollectorNumber) return 1; // a goes to end
+    if (!bCollectorNumber) return -1; // b goes to end
+    
+    // Parse as numbers if possible, otherwise compare as strings
+    const aNum = parseInt(aCollectorNumber);
+    const bNum = parseInt(bCollectorNumber);
+    
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      return aNum - bNum; // Numeric comparison
+    }
+    
+    return aCollectorNumber.localeCompare(bCollectorNumber); // String comparison
+  });
+
 
   if (loading) {
     return (
@@ -183,7 +213,7 @@ const Search = () => {
                 }
               </h1>
               <p className="text-gray-600 mt-1">
-                {filteredResults.length} of {results.length} {results.length === 1 ? 'result' : t('common.results')}
+                {sortedResults.length} of {results.length} {results.length === 1 ? 'result' : t('common.results')}
                 {rarityFilter !== 'all' && ` (${rarityFilter} only)`}
               </p>
             </div>
@@ -233,15 +263,15 @@ const Search = () => {
           </div>
 
           {/* Results */}
-          {filteredResults.length === 0 ? (
+          {sortedResults.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
                 {results.length === 0 ? t('common.noResults') : `No cards found with ${rarityFilter} rarity`}
               </p>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-              {filteredResults.map((card) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              {sortedResults.map((card) => (
                 <SearchGridCard 
                   key={card.id} 
                   card={card} 
@@ -268,7 +298,7 @@ const Search = () => {
               
               {/* List Items */}
               <div>
-                {filteredResults.map((card, index) => (
+                {sortedResults.map((card, index) => (
                   <SearchListCard 
                     key={card.id}
                     card={card}
