@@ -1,27 +1,51 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { getCardsToSell } from "../api/card";
 import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor } from "../utils/rarity";
 import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
+import Pagination from "../components/Pagination";
 
 const CardInfoTab = ({ card }) => {
   const [cardsToSell, setCardsToSell] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 20
+  });
 
-  const fetchCardsToSell = useCallback(async (cardName, cardId) => {
+  const fetchCardsToSell = useCallback(async (cardName, cardId, page = 0) => {
     if (!cardName) return;
     
     setLoading(true);
     setError("");
     
     try {
-      const data = await getCardsToSellById(cardId);
-      setCardsToSell(data);
+      const data = await getCardsToSellById(cardId, page, 20);
+      
+      if (data.content) {
+        setCardsToSell(data.content);
+        setPagination({
+          currentPage: data.number,
+          totalPages: data.totalPages,
+          totalElements: data.totalElements,
+          size: data.size
+        });
+      } else {
+        setCardsToSell(data);
+        setPagination({
+          currentPage: 0,
+          totalPages: 1,
+          totalElements: data.length,
+          size: data.length
+        });
+      }
     } catch (err) {
       setError(err.message);
+      setPagination({ currentPage: 0, totalPages: 0, totalElements: 0, size: 20 });
     } finally {
       setLoading(false);
     }
@@ -88,7 +112,14 @@ const CardInfoTab = ({ card }) => {
       
       {/* Sellers table */}
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-2">Sellers</h2>
+        <h2 className="text-xl font-bold mb-2">
+          Sellers
+          {pagination.totalElements > 0 && (
+            <span className="text-sm font-normal text-gray-500 ml-2">
+              ({pagination.totalElements} total listings)
+            </span>
+          )}
+        </h2>
         {loading ? (
           <div className="text-center py-4">
             <div className="text-gray-600">Loading sellers...</div>
@@ -97,7 +128,7 @@ const CardInfoTab = ({ card }) => {
           <div className="text-center py-4">
             <div className="text-red-600 mb-2">Error: {error}</div>
             <button 
-              onClick={() => fetchCardsToSell(card.name)} 
+              onClick={() => fetchCardsToSell(card.name, card.id, 0)} 
               className="bg-blue-700 text-white px-4 py-2 rounded"
             >
               Retry
@@ -107,6 +138,11 @@ const CardInfoTab = ({ card }) => {
           <div className="text-center py-4">
             <div className="text-gray-600">No cards for sale for "{card?.name}"</div>
             <div className="text-sm text-gray-500">Be the first to sell this card</div>
+            {pagination.totalElements > 0 && (
+              <div className="text-sm text-gray-500 mt-1">
+                {pagination.totalElements} total listings found
+              </div>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -201,6 +237,14 @@ const CardInfoTab = ({ card }) => {
                 )})}
               </tbody>
             </table>
+            
+            {/* Pagination for sellers */}
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={(page) => fetchCardsToSell(card.name, card.id, page)}
+              className="mt-4"
+            />
           </div>
         )}
       </div>

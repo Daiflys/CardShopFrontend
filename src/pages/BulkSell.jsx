@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MTG_SETS, getSetByCode } from '../data/sets';
+import { MTG_SETS } from '../data/sets';
 import { searchCardsBulk } from '../api/search';
 import { bulkSellCards } from '../api/bulkSell';
 import { getRaritySolidColor } from '../utils/rarity';
 import { languageOptions as centralizedLanguageOptions } from '../utils/languageFlags.jsx';
+import Pagination from '../components/Pagination';
 
 const BulkSell = () => {
   const [selectedExpansion, setSelectedExpansion] = useState('');
@@ -15,11 +16,15 @@ const BulkSell = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [showBulkModification, setShowBulkModification] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [openLanguageSelector, setOpenLanguageSelector] = useState(null);
-  const cardsPerPage = 50;
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 50
+  });
 
   const expansions = Object.values(MTG_SETS).map(set => ({
     code: set.code,
@@ -43,7 +48,7 @@ const BulkSell = () => {
   // Use centralized language options
   const languageOptions = centralizedLanguageOptions;
 
-  const handleFilter = async () => {
+  const handleFilter = async (page = 0) => {
     if (!selectedExpansion) {
       setError('Please select an expansion');
       return;
@@ -51,8 +56,10 @@ const BulkSell = () => {
 
     setLoading(true);
     setError('');
-    setFilteredCards([]);
-    setCardData({});
+    if (page === 0) {
+      setFilteredCards([]);
+      setCardData({});
+    }
     
     try {
       // Prepare filters for the API call
@@ -62,10 +69,29 @@ const BulkSell = () => {
         sortBy: selectedSorting
       };
 
-      const cards = await searchCardsBulk(filters);
+      const result = await searchCardsBulk(filters, page, 50);
+      
+      let cards;
+      if (result.content) {
+        cards = result.content;
+        setPagination({
+          currentPage: result.number,
+          totalPages: result.totalPages,
+          totalElements: result.totalElements,
+          size: result.size
+        });
+      } else {
+        cards = result;
+        setPagination({
+          currentPage: 0,
+          totalPages: 1,
+          totalElements: result.length,
+          size: result.length
+        });
+      }
+      
       setFilteredCards(cards);
       
-      // Initialize card data with default values
       const initialCardData = {};
       cards.forEach(card => {
         initialCardData[card.id] = {
@@ -77,11 +103,11 @@ const BulkSell = () => {
           comments: ''
         };
       });
-      setCardData(initialCardData);
-      setCurrentPage(1);
+      setCardData(prev => page === 0 ? initialCardData : { ...prev, ...initialCardData });
       
     } catch (err) {
       setError('Error fetching cards: ' + err.message);
+      setPagination({ currentPage: 0, totalPages: 0, totalElements: 0, size: 50 });
     } finally {
       setLoading(false);
     }
@@ -170,11 +196,7 @@ const BulkSell = () => {
     }
   };
 
-  // Pagination
-  const indexOfLastCard = currentPage * cardsPerPage;
-  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
-  const currentCards = filteredCards.slice(indexOfFirstCard, indexOfLastCard);
-  const totalPages = Math.ceil(filteredCards.length / cardsPerPage);
+  const currentCards = filteredCards;
 
   const selectedCount = Object.values(cardData).filter(data => data.selected).length;
 
@@ -257,7 +279,7 @@ const BulkSell = () => {
             {/* Filter Button */}
             <div>
               <button
-                onClick={handleFilter}
+                onClick={() => handleFilter(0)}
                 disabled={loading}
                 className="w-full bg-blue-700 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -298,26 +320,12 @@ const BulkSell = () => {
             {/* Results count and pagination */}
             <div className="flex justify-between items-center p-4 border-b">
               <div className="text-sm text-gray-600">
-                {filteredCards.length} Hits
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="p-2 border rounded disabled:opacity-50"
-                >
-                  ←
-                </button>
-                <span className="text-sm">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="p-2 border rounded disabled:opacity-50"
-                >
-                  →
-                </button>
+                {pagination.totalElements} Total Cards
+                {filteredCards.length > 0 && (
+                  <span className="ml-2">
+                    (Showing {filteredCards.length} on page {pagination.currentPage + 1} of {pagination.totalPages})
+                  </span>
+                )}
               </div>
             </div>
 
@@ -534,32 +542,13 @@ const BulkSell = () => {
               </table>
             </div>
 
-            {/* Footer */}
+            {/* Pagination */}
             <div className="p-4 border-t">
-              <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">
-                  {filteredCards.length} Hits
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="p-2 border rounded disabled:opacity-50"
-                  >
-                    ←
-                  </button>
-                  <span className="text-sm">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="p-2 border rounded disabled:opacity-50"
-                  >
-                    →
-                  </button>
-                </div>
-              </div>
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => handleFilter(page)}
+              />
 
               <div className="mt-4 text-sm text-gray-500">
                 Note: By changing page all input on the form will be lost if unsubmitted.

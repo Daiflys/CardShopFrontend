@@ -71,17 +71,36 @@ const realGetCardDetail = async (cardId) => {
   return responseRead;
 };
 
-const realGetCardsToSell = async (cardName) => {
+const realGetCardsToSell = async (cardName, page = 0, size = 20) => {
   console.log("going to search for cards to sell with name", cardName);
-  const response = await fetch(`${API_BASE_URL}/cardsToSell/${encodeURIComponent(cardName)}`);
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+  
+  const response = await fetch(`${API_BASE_URL}/cardsToSell/${encodeURIComponent(cardName)}?${params.toString()}`);
   if (!response.ok) throw new Error("Error fetching cards to sell");
   return response.json();
 };
 
-const realGetCardsToSellById = async (cardId) => {
+const realGetCardsToSellById = async (cardId, page = 0, size = 20) => {
   console.log("going to search for cards to sell with id", cardId);
-  const response = await fetch(`${API_BASE_URL}/cardsToSell/card/${encodeURIComponent(cardId)}`);
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+  
+  const response = await fetch(`${API_BASE_URL}/cardsToSell/card/${encodeURIComponent(cardId)}?${params.toString()}`);
   if (!response.ok) throw new Error("Error fetching cards to sell");
+  return response.json();
+};
+
+const realGetAllCards = async (page = 0, size = 20) => {
+  console.log("fetching all cards with pagination", { page, size });
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+  
+  const response = await fetch(`${API_BASE_URL}/cards?${params.toString()}`);
+  if (!response.ok) throw new Error("Error fetching all cards");
   return response.json();
 };
 
@@ -89,3 +108,4 @@ const realGetCardsToSellById = async (cardId) => {
 export const getCardDetail = realGetCardDetail;
 export const getCardsToSell = realGetCardsToSell; 
 export const getCardsToSellById = realGetCardsToSellById;
+export const getAllCards = realGetAllCards;
