@@ -7,10 +7,30 @@ const Transactions = () => {
   const [sells, setSells] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [purchasesPagination, setPurchasesPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    hasNext: false,
+    hasPrev: false
+  });
+  const [sellsPagination, setSellsPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    hasNext: false,
+    hasPrev: false
+  });
+  const [itemsPerPage] = useState(10);
 
   // Helper function to group transactions
   const groupTransactions = (transactionsList) => {
-    return (transactionsList || []).reduce((acc, purchase) => {
+    // Ensure we have an array to work with
+    const transactions = Array.isArray(transactionsList) ? transactionsList : 
+                        (transactionsList?.data && Array.isArray(transactionsList.data)) ? transactionsList.data : [];
+    
+    return transactions.reduce((acc, purchase) => {
       if (!purchase || !purchase.transactionId) {
         console.warn("Purchase sin transactionId:", purchase);
         return acc;
@@ -38,6 +58,8 @@ const Transactions = () => {
 
   // Calculate current month sales total
   const getCurrentMonthSalesTotal = () => {
+    if (!Array.isArray(sells)) return 0;
+    
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
@@ -158,19 +180,44 @@ const Transactions = () => {
     );
   };
 
-  useEffect(() => {
+  const loadTransactions = async (page = 1) => {
     setLoading(true);
-    getUserTransactions()
-      .then(data => {
-        console.log("📊 Transactions data received:", data);
-        setPurchases(data.purchases || []);
-        setSells(data.sells || []);
-      })
-      .catch(err => {
-        console.error("❌ Error loading transactions:", err);
-        setError(err.message);
-      })
-      .finally(() => setLoading(false));
+    try {
+      const data = await getUserTransactions(page, itemsPerPage);
+      console.log("📊 Transactions data received:", data);
+      console.log("📊 Purchases type:", typeof data.purchases, "Array?", Array.isArray(data.purchases), data.purchases);
+      console.log("📊 Sells type:", typeof data.sells, "Array?", Array.isArray(data.sells), data.sells);
+      setPurchases(data.purchases || []);
+      setSells(data.sells || []);
+      setPurchasesPagination(data.pagination?.purchases || {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        hasNext: false,
+        hasPrev: false
+      });
+      setSellsPagination(data.pagination?.sells || {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        hasNext: false,
+        hasPrev: false
+      });
+    } catch (err) {
+      console.error("❌ Error loading transactions:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    loadTransactions(newPage);
+  };
+
+  useEffect(() => {
+    loadTransactions(1);
   }, []);
 
 
@@ -181,6 +228,60 @@ const Transactions = () => {
   if (error) {
     return <div className="text-center text-red-600">Error: {error}</div>;
   }
+
+  const renderPagination = (pagination, sectionType) => {
+    if (pagination.totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <div className="flex justify-between items-center mt-6 p-4 bg-gray-50 rounded-lg">
+        <div className="text-sm text-gray-600">
+          Showing {((pagination.currentPage - 1) * itemsPerPage) + 1} to {Math.min(pagination.currentPage * itemsPerPage, pagination.totalItems)} of {pagination.totalItems} {sectionType}
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handlePageChange(pagination.currentPage - 1)}
+            disabled={!pagination.hasPrev}
+            className="px-3 py-2 text-sm bg-white border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          {pages.map(page => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-2 text-sm rounded ${
+                page === pagination.currentPage
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white border hover:bg-gray-50'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageChange(pagination.currentPage + 1)}
+            disabled={!pagination.hasNext}
+            className="px-3 py-2 text-sm bg-white border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -194,10 +295,16 @@ const Transactions = () => {
       ) : (
         <div className="space-y-8">
           {/* Purchases Section */}
-          {renderTransactionSection(groupedPurchases, "Purchases", "purchase")}
+          <div>
+            {renderTransactionSection(groupedPurchases, "Purchases", "purchase")}
+            {renderPagination(purchasesPagination, "purchases")}
+          </div>
           
           {/* Sells Section */}
-          {renderTransactionSection(groupedSells, "Sales", "sold")}
+          <div>
+            {renderTransactionSection(groupedSells, "Sales", "sold")}
+            {renderPagination(sellsPagination, "sales")}
+          </div>
         </div>
       )}
       
