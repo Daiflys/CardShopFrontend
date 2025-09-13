@@ -1,4 +1,6 @@
 // src/api/search.js
+import { createPaginationParams } from '../utils/pagination.js';
+
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || !import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
 
@@ -72,18 +74,18 @@ const mockSearchCards = async (name) => {
 };
 
 // --- REAL ---
-const realSearchCards = async (name, filters = {}, page = 0, size = 20) => {
-  // Build query parameters
-  const params = new URLSearchParams();
+const realSearchCards = async (name, filters = {}, page = 1, size = 20) => {
+  // Build additional parameters for search
+  const additionalParams = {};
   
   console.log('Search filters received:', filters);
   
   if (name && name.trim()) {
-    params.append('name', name.trim());
+    additionalParams.name = name.trim();
   }
   
   if (filters.collection && filters.collection !== 'All Collections') {
-    params.append('set', filters.collection);
+    additionalParams.set = filters.collection;
   }
   
   // Handle language filters
@@ -97,14 +99,12 @@ const realSearchCards = async (name, filters = {}, page = 0, size = 20) => {
     console.log('Active languages:', activeLanguages);
     
     if (activeLanguages) {
-      params.append('languages', activeLanguages);
+      additionalParams.languages = activeLanguages;
     }
   }
   
-  // Add pagination parameters - ensure page is a valid number
-  const validPage = isNaN(page) ? 0 : Math.max(0, Math.floor(Number(page)));
-  params.append('page', validPage.toString());
-  params.append('size', size.toString());
+  // Create pagination parameters with additional search params
+  const params = createPaginationParams(page, size, additionalParams);
   
   const finalUrl = `${API_BASE_URL}/cards/search?${params.toString()}`;
   console.log('Final search URL:', finalUrl);
@@ -151,13 +151,8 @@ const mockSearchCardsWithFilters = async (name, filters = {}) => {
 };
 
 // --- SEARCH BY SET ---
-const realSearchCardsBySet = async (setCode, page = 0, size = 20) => {
-  const params = new URLSearchParams();
-  params.append('set', setCode);
-  // Ensure page is a valid number, default to 0 if NaN
-  const validPage = isNaN(page) ? 0 : Math.max(0, Math.floor(Number(page)));
-  params.append('page', validPage.toString());
-  params.append('size', size.toString());
+const realSearchCardsBySet = async (setCode, page = 1, size = 20) => {
+  const params = createPaginationParams(page, size, { set: setCode });
   
   const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
   if (!response.ok) throw new Error("Search by set error");
@@ -175,17 +170,17 @@ const realSearchCardsBySet = async (setCode, page = 0, size = 20) => {
 };
 
 // --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
-const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
-  const params = new URLSearchParams();
-  
+const realSearchCardsBulk = async (filters = {}, page = 1, size = 50) => {
   console.log('Bulk search filters:', filters);
   
+  const additionalParams = {};
+  
   if (filters.set) {
-    params.append('set', filters.set);
+    additionalParams.set = filters.set;
   }
   
   if (filters.rarity && filters.rarity !== 'All') {
-    params.append('rarity', filters.rarity);
+    additionalParams.rarity = filters.rarity;
   }
   
   if (filters.sortBy) {
@@ -197,13 +192,11 @@ const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
       'Rarity, Number': 'rarity'
     };
     const serverSortBy = sortByMapping[filters.sortBy] || filters.sortBy;
-    params.append('sortBy', serverSortBy);
+    additionalParams.sortBy = serverSortBy;
   }
   
-  // Add pagination parameters (default 50 for bulk) - ensure page is a valid number
-  const validPage = isNaN(page) ? 0 : Math.max(0, Math.floor(Number(page)));
-  params.append('page', validPage.toString());
-  params.append('size', size.toString());
+  // Create pagination parameters with bulk filters
+  const params = createPaginationParams(page, size, additionalParams);
   
   const finalUrl = `${API_BASE_URL}/cards/search/bulk?${params.toString()}`;
   console.log('Final bulk search URL:', finalUrl);
