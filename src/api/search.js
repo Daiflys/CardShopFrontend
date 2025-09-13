@@ -72,7 +72,7 @@ const mockSearchCards = async (name) => {
 };
 
 // --- REAL ---
-const realSearchCards = async (name, filters = {}) => {
+const realSearchCards = async (name, filters = {}, page = 0, size = 20) => {
   // Build query parameters
   const params = new URLSearchParams();
   
@@ -101,6 +101,11 @@ const realSearchCards = async (name, filters = {}) => {
     }
   }
   
+  // Add pagination parameters - ensure page is a valid number
+  const validPage = isNaN(page) ? 0 : Math.max(0, Math.floor(Number(page)));
+  params.append('page', validPage.toString());
+  params.append('size', size.toString());
+  
   const finalUrl = `${API_BASE_URL}/cards/search?${params.toString()}`;
   console.log('Final search URL:', finalUrl);
   
@@ -108,13 +113,17 @@ const realSearchCards = async (name, filters = {}) => {
   if (!response.ok) throw new Error("Search error");
   const data = await response.json();
   
-  // Extract card field from CardWithAvailability structure
-  return data.map(cardWithAvailability => ({
-    ...cardWithAvailability.card,
-    // Add availability info for future use
-    available: cardWithAvailability.available,
-    cardsToSell: cardWithAvailability.cardsToSell
-  }));
+  console.log('API response data:', data);
+  
+  if (data.content) {
+    return data;
+  } else {
+    return data.map(cardWithAvailability => ({
+      ...cardWithAvailability.card,
+      available: cardWithAvailability.available,
+      cardsToSell: cardWithAvailability.cardsToSell
+    }));
+  }
 };
 
 const mockSearchCardsWithFilters = async (name, filters = {}) => {
@@ -142,22 +151,31 @@ const mockSearchCardsWithFilters = async (name, filters = {}) => {
 };
 
 // --- SEARCH BY SET ---
-const realSearchCardsBySet = async (setCode) => {
-  const response = await fetch(`${API_BASE_URL}/cards/search/set?set=${setCode}`);
+const realSearchCardsBySet = async (setCode, page = 0, size = 20) => {
+  const params = new URLSearchParams();
+  params.append('set', setCode);
+  // Ensure page is a valid number, default to 0 if NaN
+  const validPage = isNaN(page) ? 0 : Math.max(0, Math.floor(Number(page)));
+  params.append('page', validPage.toString());
+  params.append('size', size.toString());
+  
+  const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
   if (!response.ok) throw new Error("Search by set error");
   const data = await response.json();
   
-  // Extract card field from CardWithAvailability structure
-  return data.map(cardWithAvailability => ({
-    ...cardWithAvailability.card,
-    // Add availability info for future use
-    available: cardWithAvailability.available,
-    cardsToSell: cardWithAvailability.cardsToSell
-  }));
+  if (data.content) {
+    return data;
+  } else {
+    return data.map(cardWithAvailability => ({
+      ...cardWithAvailability.card,
+      available: cardWithAvailability.available,
+      cardsToSell: cardWithAvailability.cardsToSell
+    }));
+  }
 };
 
 // --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
-const realSearchCardsBulk = async (filters = {}) => {
+const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
   const params = new URLSearchParams();
   
   console.log('Bulk search filters:', filters);
@@ -181,6 +199,11 @@ const realSearchCardsBulk = async (filters = {}) => {
     const serverSortBy = sortByMapping[filters.sortBy] || filters.sortBy;
     params.append('sortBy', serverSortBy);
   }
+  
+  // Add pagination parameters (default 50 for bulk) - ensure page is a valid number
+  const validPage = isNaN(page) ? 0 : Math.max(0, Math.floor(Number(page)));
+  params.append('page', validPage.toString());
+  params.append('size', size.toString());
   
   const finalUrl = `${API_BASE_URL}/cards/search/bulk?${params.toString()}`;
   console.log('Final bulk search URL:', finalUrl);
@@ -236,22 +259,49 @@ const realSearchCardsBulk = async (filters = {}) => {
     try {
       const data = await response.json();
       
-      // Map server response to expected format
-      return data.map(card => ({
-        id: card.id,
-        oracle_id: card.oracleId,
-        set_name: card.setName,
-        set_code: card.set,
-        name: card.name,
-        printed_name: card.printedName,
-        rarity: card.rarity,
-        collector_number: card.collectorNumber,
-        number: card.collectorNumber, // alias for collector_number
-        image_url: card.imageUrl,
-        imageUrl: card.imageUrl, // keep both for compatibility
-        language: card.lang, // Include language from server
-        idAsUUID: card.idAsUUID
-      }));
+      // Handle paginated response
+      if (data.content) {
+        return {
+          content: data.content.map(card => ({
+            id: card.id,
+            oracle_id: card.oracleId,
+            set_name: card.setName,
+            set_code: card.set,
+            name: card.name,
+            printed_name: card.printedName,
+            rarity: card.rarity,
+            collector_number: card.collectorNumber,
+            number: card.collectorNumber, // alias for collector_number
+            image_url: card.imageUrl,
+            imageUrl: card.imageUrl, // keep both for compatibility
+            language: card.lang, // Include language from server
+            idAsUUID: card.idAsUUID
+          })),
+          totalPages: data.totalPages,
+          totalElements: data.totalElements,
+          currentPage: data.number,
+          size: data.size,
+          first: data.first,
+          last: data.last
+        };
+      } else {
+        // Fallback for non-paginated response
+        return data.map(card => ({
+          id: card.id,
+          oracle_id: card.oracleId,
+          set_name: card.setName,
+          set_code: card.set,
+          name: card.name,
+          printed_name: card.printedName,
+          rarity: card.rarity,
+          collector_number: card.collectorNumber,
+          number: card.collectorNumber, // alias for collector_number
+          image_url: card.imageUrl,
+          imageUrl: card.imageUrl, // keep both for compatibility
+          language: card.lang, // Include language from server
+          idAsUUID: card.idAsUUID
+        }));
+      }
     } catch (jsonError) {
       console.error('Failed to parse successful response as JSON:', jsonError);
       throw new Error('Server returned invalid JSON response. Please try again or contact support.');
