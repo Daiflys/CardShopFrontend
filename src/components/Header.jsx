@@ -96,12 +96,15 @@ const Header = () => {
       // Debounce search by 300ms
       searchTimeoutRef.current = setTimeout(async () => {
         try {
-          const res = await searchCards(value);
+          const res = await searchCards(value, {}, 0, 20); // First page, 20 results
+          
+          // Handle paginated response
+          const searchResults = res.content || res;
           
           // Only update if this is still the latest search
           if (currentSearchId === currentSearchRef.current) {
             // Remove duplicates by card name (prioritizing exact matches and lower IDs)
-            const uniqueResults = res.filter((card, index, self) => {
+            const uniqueResults = searchResults.filter((card, index, self) => {
               const cardName = card.name || card.card_name;
               return index === self.findIndex(c => {
                 const cName = c.name || c.card_name;

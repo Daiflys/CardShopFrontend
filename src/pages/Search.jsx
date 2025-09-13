@@ -5,7 +5,9 @@ import { searchCards, searchCardsBySet } from '../api/search';
 import SearchGridCard from '../components/SearchGridCard';
 import SearchListCard from '../components/SearchListCard';
 import SearchFilters from '../components/SearchFilters';
+import Pagination from '../components/Pagination';
 import useSearchFiltersStore from '../store/searchFiltersStore';
+import usePaginationStore from '../store/paginationStore';
 
 const Search = () => {
   const { t } = useTranslation();
@@ -14,6 +16,15 @@ const Search = () => {
   const query = searchParams.get('q');
   const setFilter = searchParams.get('set');
   const { resetFilters } = useSearchFiltersStore();
+  const { 
+    currentPage, 
+    totalPages, 
+    totalElements, 
+    size, 
+    setCurrentPage, 
+    setPaginationData, 
+    resetPagination 
+  } = usePaginationStore();
   
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -35,9 +46,9 @@ const Search = () => {
       // Use pendingFilters if available (from filtered search), otherwise just query
       const filters = pendingFiltersRef.current || {};
       pendingFiltersRef.current = null; // Reset after use
-      performSearch(query, filters);
+      performSearch(query, filters, 0);
     } else if (setFilter) {
-      performSetSearch(setFilter);
+      performSetSearch(setFilter, 0);
     }
   }, [query, setFilter]);
 
@@ -48,44 +59,98 @@ const Search = () => {
     };
   }, [resetFilters]);
 
-  const performSearch = async (searchQuery, filters = {}) => {
+  const performSearch = async (searchQuery, filters = {}, page = 0) => {
     try {
       setLoading(true);
-      const searchResults = await searchCards(searchQuery, filters);
-      // Show ALL results - no filtering, no cropping
-      // Each result might be different editions, conditions, sellers, etc.
       
-      // Debug: Let's see what properties each card actually has
-      if (searchResults.length > 0) {
-        console.log('First search result structure:', searchResults[0]);
-        console.log('All search results:', searchResults);
+      // Only reset pagination if starting from page 0 (new search)
+      if (page === 0) {
+        resetPagination();
+      }
+      const searchResults = await searchCards(searchQuery, filters, page, 20);
+      
+      console.log('Raw search response:', searchResults);
+      
+      if (searchResults.content) {
+        console.log('Pagination data:', {
+          number: searchResults.number,
+          totalPages: searchResults.totalPages,
+          totalElements: searchResults.totalElements,
+          size: searchResults.size
+        });
+        
+        const cards = searchResults.content.map(item => ({
+          ...item.card,
+          cardsToSell: item.cardsToSell || [],
+          available: item.cardsToSell ? item.cardsToSell.length : 0
+        }));
+        
+        setResults(cards);
+        setPaginationData({
+          currentPage: page, // Use the page we requested, not server response
+          totalPages: searchResults.totalPages,
+          totalElements: searchResults.totalElements,
+          size: searchResults.size
+        });
+      } else {
+        setResults(searchResults);
+        setPaginationData({
+          currentPage: 0,
+          totalPages: Math.ceil(searchResults.length / 20),
+          totalElements: searchResults.length,
+          size: 20
+        });
       }
       
-      setResults(searchResults);
       setCurrentFilters(filters);
     } catch (error) {
       console.error('Search error:', error);
       setResults([]);
+      resetPagination();
     } finally {
       setLoading(false);
     }
   };
 
-  const performSetSearch = async (setCode) => {
+  const performSetSearch = async (setCode, page = 0) => {
     try {
       setLoading(true);
-      const searchResults = await searchCardsBySet(setCode);
       
-      if (searchResults.length > 0) {
-        console.log('Set search result structure:', searchResults[0]);
-        console.log('All set search results:', searchResults);
+      // Only reset pagination if starting from page 0 (new search)
+      if (page === 0) {
+        resetPagination();
+      }
+      const searchResults = await searchCardsBySet(setCode, page, 20);
+      
+      if (searchResults.content) {
+        const cards = searchResults.content.map(item => ({
+          ...item.card,
+          cardsToSell: item.cardsToSell || [],
+          available: item.cardsToSell ? item.cardsToSell.length : 0
+        }));
+        
+        setResults(cards);
+        setPaginationData({
+          currentPage: page, // Use the page we requested, not server response
+          totalPages: searchResults.totalPages,
+          totalElements: searchResults.totalElements,
+          size: searchResults.size
+        });
+      } else {
+        setResults(searchResults);
+        setPaginationData({
+          currentPage: 0,
+          totalPages: Math.ceil(searchResults.length / 20),
+          totalElements: searchResults.length,
+          size: 20
+        });
       }
       
-      setResults(searchResults);
       setCurrentFilters({ set: setCode });
     } catch (error) {
       console.error('Set search error:', error);
       setResults([]);
+      resetPagination();
     } finally {
       setLoading(false);
     }
@@ -111,6 +176,26 @@ const Search = () => {
     
     const newUrl = newParams.toString() ? `/search?${newParams.toString()}` : '/search';
     navigate(newUrl);
+  };
+
+  const handlePageChange = (newPage) => {
+    // Ensure newPage is a valid number, default to 0 if invalid
+    const validPage = isNaN(newPage) ? 0 : Math.max(0, Math.floor(Number(newPage)));
+    
+    console.log('Search.jsx: handlePageChange called with', newPage, 'validated to', validPage);
+    console.log('Search.jsx: current page in store', currentPage);
+    
+    // Update the page in store first
+    setCurrentPage(validPage);
+    
+    if (query) {
+      performSearch(query, currentFilters, validPage);
+    } else if (setFilter) {
+      performSetSearch(setFilter, validPage);
+    }
+    
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCardClick = (card) => {
@@ -313,6 +398,13 @@ const Search = () => {
               </div>
             </div>
           )}
+          
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       </div>
     </div>
