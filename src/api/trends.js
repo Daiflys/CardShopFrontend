@@ -26,9 +26,7 @@ const mockGetBestBargains = async () => {
 
 // --- REAL ---
 const realGetBestSellers = async () => {
-  console.log("get best sellers");
   const response = await fetch(`${API_BASE_URL}/trends/cards/random?amount=3`);
-  console.log("get best sellers2");
   if (!response.ok) throw new Error("Error fetching best sellers");
   return response.json();
 };
