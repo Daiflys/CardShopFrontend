@@ -2,5 +2,11 @@
   "buildCommand": "npm run build:stage",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "http://cardshop-backend-env.eba-8jnth2pt.ap-southeast-2.elasticbeanstalk.com/$1"
+    }
+  ]
 }
