@@ -5,7 +5,7 @@ const usePaginationStore = create((set, get) => ({
   currentPage: 0,
   totalPages: 0,
   totalElements: 0,
-  size: 20,
+  size: 21,
   
   // Actions
   setCurrentPage: (page) => set({ currentPage: Math.max(0, page) }),
@@ -14,14 +14,14 @@ const usePaginationStore = create((set, get) => ({
     currentPage: Math.max(0, currentPage || 0),
     totalPages: Math.max(0, totalPages || 0),
     totalElements: Math.max(0, totalElements || 0),
-    size: size || 20
+    size: size || 21
   }),
   
   resetPagination: () => set({
     currentPage: 0,
     totalPages: 0,
     totalElements: 0,
-    size: 20
+    size: 21
   }),
   
   // Helper to get current pagination state
