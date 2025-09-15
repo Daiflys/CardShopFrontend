@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
+import GoogleSignInSafe from "../components/GoogleSignInSafe";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const navigate = useNavigate();
 
   const passwordsMatch = password === repeatPassword;
@@ -49,8 +51,9 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh]">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+    <div className="px-6 py-8">
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-blue-800 mb-6 text-center">Create account</h2>
         {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-center">{error}</div>}
         {success && <div className="bg-green-100 text-green-700 p-2 rounded mb-4 text-center">Registration successful! You can now log in.</div>}
@@ -93,14 +96,27 @@ const Register = () => {
           <button
             type="submit"
             className="bg-blue-700 text-white font-bold px-4 py-2 rounded hover:bg-blue-800 transition"
-            disabled={loading || !passwordsMatch}
+            disabled={loading || !passwordsMatch || oauthLoading}
           >
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
+        
+        <div className="mt-4 mb-4 flex items-center">
+          <div className="flex-1 border-t border-gray-300"></div>
+          <div className="mx-4 text-gray-500 text-sm">or</div>
+          <div className="flex-1 border-t border-gray-300"></div>
+        </div>
+        
+        <GoogleSignInSafe
+          onError={(err) => setError(err)}
+          onLoading={setOauthLoading}
+        />
+        
         <div className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{' '}
           <Link to="/login" className="text-blue-700 hover:underline font-semibold">Log in</Link>
+        </div>
         </div>
       </div>
     </div>

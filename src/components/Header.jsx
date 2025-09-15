@@ -1,16 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { searchCards } from "../api/search";
 import { validateToken } from "../api/auth";
+import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
+import LanguageSwitcherFlags from "./LanguageSwitcherFlags";
+import { getSetIcon } from "../data/sets";
 
 const Header = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const inputRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
+  const currentSearchRef = useRef(0);
   const [userEmail, setUserEmail] = useState(null);
   const [userName, setUserName] = useState(null);
 
@@ -24,10 +31,11 @@ const Header = () => {
       const token = localStorage.getItem("authToken");
       if (token && token.split(".").length === 3) {
         try {
-          const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-          const payloadJson = JSON.parse(atob(payloadBase64));
-          const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
-          if (nameFromToken) setUserName(nameFromToken);
+          const payloadJson = decodeJWTToken(token);
+          if (payloadJson) {
+            const nameFromToken = payloadJson.username || payloadJson.name || payloadJson.sub || payloadJson.email || null;
+            if (nameFromToken) setUserName(nameFromToken);
+          }
         } catch {
           // ignore decoding errors
         }
@@ -65,21 +73,64 @@ const Header = () => {
   const handleInputChange = async (e) => {
     const value = e.target.value;
     setSearch(value);
+    
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Increment search counter for race condition prevention
+    currentSearchRef.current += 1;
+    const currentSearchId = currentSearchRef.current;
+    
     if (value.trim()) {
-      setLoading(true);
-      try {
-        const res = await searchCards(value);
-        setResults(res);
-        setShowDropdown(res.length > 0);
-      } catch {
+      if (value.length < 3) {
         setResults([]);
         setShowDropdown(false);
-      } finally {
         setLoading(false);
+        return;
       }
+      
+      setLoading(true);
+      
+      // Debounce search by 300ms
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const res = await searchCards(value, {}, 0, 20); // First page, 20 results
+          
+          // Handle paginated response
+          const searchResults = res.content || res;
+          
+          // Only update if this is still the latest search
+          if (currentSearchId === currentSearchRef.current) {
+            // Remove duplicates by card name (prioritizing exact matches and lower IDs)
+            const uniqueResults = searchResults.filter((card, index, self) => {
+              const cardName = card.name || card.card_name;
+              return index === self.findIndex(c => {
+                const cName = c.name || c.card_name;
+                return cName && cardName && cName.toLowerCase() === cardName.toLowerCase();
+              });
+            });
+            setResults(uniqueResults.slice(0, 10));
+            setShowDropdown(uniqueResults.length > 0);
+          }
+        } catch {
+          // Only update if this is still the latest search
+          if (currentSearchId === currentSearchRef.current) {
+            setResults([]);
+            setShowDropdown(false);
+          }
+        } finally {
+          // Only update if this is still the latest search
+          if (currentSearchId === currentSearchRef.current) {
+            setLoading(false);
+          }
+        }
+      }, 300);
     } else {
       setResults([]);
       setShowDropdown(false);
+      setLoading(false);
     }
   };
 
@@ -87,15 +138,14 @@ const Header = () => {
     e.preventDefault();
     setShowDropdown(false);
     if (search.trim()) {
-      const slug = search.trim().toLowerCase().replace(/\s+/g, "-");
-      navigate(`/card/${slug}`);
+      navigate(`/search?q=${encodeURIComponent(search.trim())}`);
     }
   };
 
   const handleResultClick = (card) => {
     setSearch(card.name);
     setShowDropdown(false);
-    navigate(`/card/${card.id}`); 
+    navigate(`/search?q=${encodeURIComponent(card.name)}`); 
   };
 
   // Hide dropdown if clicked outside
@@ -112,25 +162,27 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
+    <header className="w-screen bg-gradient-to-r from-sky-50 to-blue-50 shadow-md border-b border-sky-200" style={{ marginLeft: 'calc(50% - 50vw)' }}>
+      <div className="flex items-center justify-between px-8 py-4 w-full max-w-none">
       <div className="flex items-center gap-4">
         <span 
-          className="text-2xl font-bold text-blue-800 cursor-pointer hover:text-blue-600 transition-colors"
+          className="text-2xl font-bold text-sky-700 cursor-pointer hover:text-sky-600 transition-colors"
           onClick={() => navigate('/')}
         >
-          cardmarket
+          トレカ市場
         </span>
-        <nav className="hidden md:flex gap-4 text-gray-700">
-          <a href="#" className="hover:text-blue-600">PRODUCTS</a>
-          <a href="#" className="hover:text-blue-600">TRENDS</a>
+        <nav className="hidden md:flex gap-4 text-slate-600">
+          <a href="#" className="hover:text-sky-600 transition-colors">{t('homepage.trendingCards').toUpperCase()}</a>
         </nav>
       </div>
       <div className="flex-1 mx-6 relative" ref={inputRef}>
         <form onSubmit={handleSearch}>
           <input
             type="text"
-            placeholder="Search Cardmarket..."
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            id="search-cards"
+            name="search"
+            placeholder={t('common.search') + ' トレカ市場...'}
+            className="w-full px-3 py-2 border border-sky-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 bg-white/80"
             value={search}
             onChange={handleInputChange}
             onFocus={() => setShowDropdown(results.length > 0)}
@@ -140,19 +192,27 @@ const Header = () => {
         {showDropdown && (
           <ul className="absolute z-20 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
             {loading ? (
-              <li className="px-4 py-2 text-gray-500">Searching...</li>
+              <li className="px-4 py-2 text-gray-500">{t('common.loading')}</li>
             ) : results.length === 0 ? (
-              <li className="px-4 py-2 text-gray-500">No results</li>
+              <li className="px-4 py-2 text-gray-500">{t('common.noResults')}</li>
             ) : (
               results.map(card => (
                 <li
                   key={card.id}
-                  className="px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                  className="px-4 py-3 hover:bg-sky-50 border-b border-sky-100 last:border-b-0 cursor-pointer"
                   onClick={() => handleResultClick(card)}
                 >
-                  <div className="font-medium text-gray-900">{card.name}</div>
+                  <div className="flex items-center gap-2">
+                    {card.set_code && getSetIcon(card.set_code) && (
+                      <img 
+                        src={getSetIcon(card.set_code)} 
+                        alt={card.set_code}
+                        className="w-4 h-4 flex-shrink-0"
+                      />
+                    )}
+                    <div className="font-medium text-gray-900">{card.name}</div>
+                  </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
-                    {card.set && <span>{card.set}</span>}
                     {card.price && <span className="text-green-600 font-semibold">${card.price}</span>}
                   </div>
                 </li>
@@ -167,27 +227,30 @@ const Header = () => {
           <div className="relative">
             <details className="group">
               <summary className="list-none flex items-center gap-2 cursor-pointer select-none">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white font-bold">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600 text-white font-bold shadow-md">
                   {(userName || userEmail || '?').toString().charAt(0).toUpperCase()}
                 </span>
-                <span className="text-blue-700 font-semibold hidden sm:inline">{userName || userEmail}</span>
+                <span className="text-sky-700 font-semibold hidden sm:inline">{userName || userEmail}</span>
                 <svg className="h-4 w-4 text-gray-500 group-open:rotate-180 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
                   <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
                 </svg>
               </summary>
               <ul className="absolute right-0 mt-2 w-52 bg-white border rounded-md shadow-lg overflow-hidden z-30">
                 <li>
-                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/profile')}>My account</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/profile')}>{t('account.profile')}</button>
                 </li>
-                <li className="border-t">
-                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/transactions')}>Transactions</button>
+                <li className="border-t border-sky-100">
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/transactions')}>{t('account.transactions')}</button>
                 </li>
-                <li className="border-t">
-                  <button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={() => navigate('/account/settings')}>Settings</button>
+                <li className="border-t border-sky-100">
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/account/settings')}>{t('account.settings')}</button>
                 </li>
-                <li className="border-t">
+                <li className="border-t border-sky-100">
+                  <button className="w-full text-left px-4 py-2 hover:bg-sky-50 text-slate-700" onClick={() => navigate('/bulk-sell')}>Bulk Sell</button>
+                </li>
+                <li className="border-t border-sky-100">
                   <button
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 text-red-600"
+                    className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600"
                     onClick={() => {
                       localStorage.removeItem("authToken");
                       localStorage.removeItem("userEmail");
@@ -196,30 +259,28 @@ const Header = () => {
                       window.dispatchEvent(new CustomEvent('authChange'));
                       navigate('/');
                     }}
-                  >Sign out</button>
+                  >{t('navigation.logout')}</button>
                 </li>
               </ul>
             </details>
           </div>
         ) : (
-          <span className="text-gray-500">Sign in</span>
+          <span className="text-slate-500">{t('navigation.login')}</span>
         )}
         {!userEmail && !userName && (
           <>
             <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
-              onClick={() => navigate('/list-products')}
-            >List Products</button>
-            <button
-              className="px-4 py-2 border rounded hover:bg-blue-50"
+              className="px-4 py-2 border border-sky-300 rounded hover:bg-sky-50 text-sky-700 transition-colors"
               onClick={() => navigate('/login')}
-            >LOG IN</button>
+            >{t('navigation.login').toUpperCase()}</button>
             <button
-              className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+              className="px-4 py-2 bg-gradient-to-r from-sky-600 to-blue-600 text-white rounded hover:from-sky-700 hover:to-blue-700 transition-all shadow-md"
               onClick={() => navigate('/register')}
-            >SIGN UP</button>
+            >{t('auth.signUp').toUpperCase()}</button>
           </>
         )}
+        <LanguageSwitcherFlags />
+      </div>
       </div>
     </header>
   );

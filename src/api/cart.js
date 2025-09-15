@@ -8,13 +8,24 @@ let mockCart = [];
 const mockAddToCart = async (card) => {
   await new Promise(res => setTimeout(res, 200));
   
+  const quantityToAdd = card.quantity || 1;
+  const availableStock = card.availableStock || card.available || Infinity;
+  
   const existingItem = mockCart.find(item => item.id === card.id);
+  const currentInCart = existingItem ? existingItem.quantity : 0;
+  
+  // Check if we have enough stock
+  if (currentInCart + quantityToAdd > availableStock) {
+    const remaining = availableStock - currentInCart;
+    throw new Error(`Only ${remaining} items available. You already have ${currentInCart} in cart.`);
+  }
+  
   if (existingItem) {
-    existingItem.quantity += 1;
+    existingItem.quantity += quantityToAdd;
   } else {
     mockCart.push({
       ...card,
-      quantity: 1,
+      quantity: quantityToAdd,
       addedAt: new Date().toISOString()
     });
   }
@@ -56,13 +67,15 @@ const realAddToCart = async (card) => {
     throw new Error("User not authenticated");
   }
 
+  const payload = { cardId: card.id, quantity: card.quantity || 1 };
+
   const response = await fetch(`${API_BASE_URL}/cart/add`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: JSON.stringify({ cardId: card.id, quantity: 1 })
+    body: JSON.stringify(payload)
   });
 
   if (!response.ok) {
@@ -136,16 +149,32 @@ const realUpdateQuantity = async (cardId, quantity) => {
 };
 
 // --- CHECKOUT ---
-const mockCheckout = async (cardId) => {
+const mockCheckout = async (items) => {
   await new Promise(res => setTimeout(res, 300));
-  return { success: true };
+  return { 
+    success: true, 
+    transaction_id: "mock-transaction-" + Date.now(),
+    purchases: items,
+    message: "All items purchased successfully"
+  };
 };
 
-const realCheckout = async (cardId) => {
+const realCheckout = async (items) => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
   }
+
+  console.log("📦 Cart Items received:", items);
+
+  const batchRequest = {
+    items: items.map(item => ({
+      card_to_sell_id: typeof item.id === 'string' ? Number(item.id) : item.id,
+      quantity: item.quantity || 1
+    }))
+  };
+
+  console.log("🛒 Batch Purchase Request:", JSON.stringify(batchRequest, null, 2));
 
   const response = await fetch(`${API_BASE_URL}/purchases/buy`, {
     method: "POST",
@@ -153,14 +182,21 @@ const realCheckout = async (cardId) => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: cardId
+    body: JSON.stringify(batchRequest)
   });
 
+  console.log("🌐 Response status:", response.status);
+  console.log("🌐 Response headers:", response.headers);
+
   if (!response.ok) {
-    throw new Error("Error performing checkout");
+    const errorText = await response.text();
+    console.error("❌ Checkout failed:", errorText);
+    throw new Error(`Error performing checkout: ${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  console.log("✅ Checkout response:", result);
+  return result;
 };
 
 // Export functions

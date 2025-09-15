@@ -9,7 +9,7 @@ const tabs = [
 
 const AccountLayout = () => {
   return (
-    <div className="px-4 py-6">
+    <div className="px-6 py-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-4">My account</h1>
       <div className="bg-white rounded-lg border shadow-sm">
         <div className="border-b px-4">

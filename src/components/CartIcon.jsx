@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useCart } from "../context/CartContext";
+import useCartStore from "../store/cartStore";
 import { useNavigate } from "react-router-dom";
+import ConditionIcon from "./ConditionIcon";
 
 const CartIcon = () => {
-  const { getCartCount, cartItems } = useCart();
+  const { getCartCount, cartItems } = useCartStore();
   const [showCartPreview, setShowCartPreview] = useState(false);
   const cartCount = getCartCount();
   const hasItems = cartCount > 0;
@@ -55,7 +56,12 @@ const CartIcon = () => {
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {item.card_name || item.name}
                       </p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                        {item.condition && (
+                          <ConditionIcon condition={item.condition} size="xs" />
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

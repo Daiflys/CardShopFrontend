@@ -1,4 +1,6 @@
 // src/api/card.js
+import { createPaginationParams } from '../utils/pagination.js';
+
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -7,7 +9,7 @@ const mockCard = {
   id: "dragon-wings",
   name: "Dragon Wings",
   set: "Scourge",
-  rarity: "Common",
+  rarity: "common",
   number: 34,
   printedIn: "Scourge",
   available: 2685,
@@ -64,20 +66,42 @@ const mockGetCardsToSell = async (cardName) => {
 // --- REAL ---
 const realGetCardDetail = async (cardId) => {
   console.log("going to search for cardId", cardId);
-  const response = await fetch(`${API_BASE_URL}/cards/id/multi/${cardId}`);
+  const response = await fetch(`${API_BASE_URL}/cards/id/${cardId}`);
   if (!response.ok) throw new Error("Error fetching card details");
   const responseRead = await response.json();
   console.log("response json: ", responseRead);
   return responseRead;
 };
 
-const realGetCardsToSell = async (cardName) => {
+const realGetCardsToSell = async (cardName, page = 1, size = 20) => {
   console.log("going to search for cards to sell with name", cardName);
-  const response = await fetch(`${API_BASE_URL}/cardsToSell/${encodeURIComponent(cardName)}`);
+  const params = createPaginationParams(page, size);
+  
+  const response = await fetch(`${API_BASE_URL}/cardsToSell/${encodeURIComponent(cardName)}?${params.toString()}`);
   if (!response.ok) throw new Error("Error fetching cards to sell");
+  return response.json();
+};
+
+const realGetCardsToSellById = async (cardId, page = 1, size = 20) => {
+  console.log("going to search for cards to sell with id", cardId);
+  const params = createPaginationParams(page, size);
+  
+  const response = await fetch(`${API_BASE_URL}/cardsToSell/card/${encodeURIComponent(cardId)}?${params.toString()}`);
+  if (!response.ok) throw new Error("Error fetching cards to sell");
+  return response.json();
+};
+
+const realGetAllCards = async (page = 1, size = 20) => {
+  console.log("fetching all cards with pagination", { page, size });
+  const params = createPaginationParams(page, size);
+  
+  const response = await fetch(`${API_BASE_URL}/cards?${params.toString()}`);
+  if (!response.ok) throw new Error("Error fetching all cards");
   return response.json();
 };
 
 //export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail; 
 export const getCardDetail = realGetCardDetail;
 export const getCardsToSell = realGetCardsToSell; 
+export const getCardsToSellById = realGetCardsToSellById;
+export const getAllCards = realGetAllCards;

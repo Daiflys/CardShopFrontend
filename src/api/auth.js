@@ -55,7 +55,6 @@ const validateToken = async () => {
     const response = await fetch(`${API_BASE_URL}/auth/validate`, {
       method: "GET",
       headers: { 
-        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
       },
     });
@@ -74,6 +73,30 @@ const validateToken = async () => {
   }
 };
 
+// OAuth2 Login
+const oauthLogin = async (provider, token, userData) => {
+  const response = await fetch(`${API_BASE_URL}/auth/${provider}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken: token }),
+  });
+  
+  if (!response.ok) {
+    console.log("OAuth login response not ok, error: ", response);
+    throw new Error("OAuth login failed");
+  }
+  
+  const authToken = await response.text();
+  localStorage.setItem("authToken", authToken);
+  
+  // Store user email for header fallback
+  if (userData?.email) {
+    localStorage.setItem("userEmail", userData.email);
+  }
+  
+  return response;
+};
+
 export const login = realLogin;
 export const register = realRegister;
-export { validateToken }; 
+export { oauthLogin, validateToken }; 

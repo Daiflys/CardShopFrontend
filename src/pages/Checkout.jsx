@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useCart } from "../context/CartContext";
+import useCartStore from "../store/cartStore";
 import { useNavigate } from "react-router-dom";
 import { checkout } from "../api/cart";
+import ConditionIcon from "../components/ConditionIcon";
 
 const Checkout = () => {
   const {
@@ -12,7 +13,7 @@ const Checkout = () => {
     loading,
     error,
     clearCart,
-  } = useCart();
+  } = useCartStore();
 
   const navigate = useNavigate();
 
@@ -20,6 +21,7 @@ const Checkout = () => {
   const [step, setStep] = useState("cart");
   const [placing, setPlacing] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
   const [shipping, setShipping] = useState({
     fullName: "",
@@ -65,32 +67,34 @@ const Checkout = () => {
   const handlePlaceOrder = async () => {
     if (!validateShipping()) return;
     setPlacing(true);
+    setCheckoutError("");
     try {
-      let anySuccess = false;
-      for (const item of cartItems) {
-        const quantity = Math.max(1, Number(item.quantity || 1));
-        const numericId = typeof item.id === 'string' ? Number(item.id) : item.id;
-        for (let i = 0; i < quantity; i++) {
-          try {
-            await checkout(numericId);
-            anySuccess = true;
-            const newQty = quantity - (i + 1);
-            await updateItemQuantity(item.id, newQty);
-          } catch (e) {
-            // ignore failed unit and continue with next
-          }
+      console.log("🚀 Starting checkout with items:", cartItems.length);
+      const result = await checkout(cartItems);
+      console.log("📋 Checkout result:", result);
+      
+      if (result.success) {
+        // Clear cart after successful batch purchase
+        console.log("✅ Checkout successful, clearing cart");
+        for (const item of cartItems) {
+          await updateItemQuantity(item.id, 0);
         }
-      }
-      if (anySuccess) {
         setOrderSuccess(true);
+      } else {
+        // Handle partial failure or complete failure
+        console.log("⚠️ Checkout failed:", result.message);
+        setCheckoutError(result.message || "Some items could not be purchased");
       }
+    } catch (e) {
+      console.error("❌ Checkout exception:", e);
+      setCheckoutError(e.message || "Error processing your order");
     } finally {
       setPlacing(false);
     }
   };
 
   return (
-    <div className="px-4 py-8">
+    <div className="px-6 py-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">
         {orderSuccess ? "Order placed" : step === "cart" ? "Your cart" : "Checkout"}
       </h1>
@@ -114,6 +118,18 @@ const Checkout = () => {
             </button>
           </div>
         </div>
+      ) : checkoutError ? (
+        <div className="max-w-xl bg-white border rounded-lg shadow p-6">
+          <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
+            {checkoutError}
+          </div>
+          <button
+            className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
+            onClick={() => setCheckoutError("")}
+          >
+            Try again
+          </button>
+        </div>
       ) : cartItems.length === 0 ? (
         <div className="text-center text-gray-600 py-16">
           Your cart is empty
@@ -132,7 +148,12 @@ const Checkout = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-gray-900 truncate">{item.card_name || item.name}</div>
-                  <div className="text-sm text-gray-500 truncate">{item.set}</div>
+                  <div className="text-sm text-gray-500 truncate">{item.set_name || item.set}</div>
+                  {item.condition && (
+                    <div className="mt-1">
+                      <ConditionIcon condition={item.condition} size="xs" />
+                    </div>
+                  )}
                 </div>
                 <div className="w-24 text-right font-semibold text-green-700">
                   €{Number(item.price || 0).toFixed(2)}

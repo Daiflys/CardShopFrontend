@@ -1,0 +1,74 @@
+{
+  "navigation": {
+    "home": "ホーム",
+    "products": "商品",
+    "account": "アカウント",
+    "cart": "カート",
+    "login": "ログイン",
+    "register": "登録",
+    "logout": "ログアウト"
+  },
+  "auth": {
+    "loginTitle": "アカウントにログイン",
+    "registerTitle": "新しいアカウントを作成",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード確認",
+    "loginButton": "ログイン",
+    "registerButton": "登録",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "signUp": "登録",
+    "signIn": "ログイン"
+  },
+  "cart": {
+    "title": "ショッピングカート",
+    "addToCart": "カートに追加",
+    "removeFromCart": "削除",
+    "quantity": "数量",
+    "total": "合計",
+    "checkout": "決済",
+    "empty": "カートは空です",
+    "continueShopping": "買い物を続ける"
+  },
+  "product": {
+    "price": "価格",
+    "condition": "状態",
+    "seller": "販売者",
+    "addToCart": "カートに追加",
+    "outOfStock": "在庫切れ",
+    "inStock": "在庫あり",
+    "description": "商品説明",
+    "details": "詳細"
+  },
+  "account": {
+    "profile": "プロフィール",
+    "transactions": "取引履歴",
+    "settings": "設定",
+    "personalInfo": "個人情報",
+    "orderHistory": "注文履歴",
+    "preferences": "設定"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "edit": "編集",
+    "delete": "削除",
+    "search": "検索",
+    "filter": "フィルタ",
+    "sort": "並び替え",
+    "language": "言語",
+    "noResults": "結果なし"
+  },
+  "homepage": {
+    "welcome": "トレカ市場へようこそ",
+    "subtitle": "素晴らしいカードを発見して取引しよう",
+    "featuredProducts": "おすすめ商品",
+    "trendingCards": "人気カード",
+    "browseCategories": "カテゴリを見る"
+  }
+}

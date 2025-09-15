@@ -1,4 +1,6 @@
 // src/api/search.js
+import { createPaginationParams } from '../utils/pagination.js';
+
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || !import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
 
@@ -64,7 +66,7 @@ const MOCK_CARDS = [
 
 const mockSearchCards = async (name) => {
   await new Promise(res => setTimeout(res, 300));
-  if (!name) return [];
+  if (!name || !name.trim()) return [];
   const query = name.trim().toLowerCase();
   return MOCK_CARDS.filter(card =>
     card.name.toLowerCase().includes(query)
@@ -72,10 +74,242 @@ const mockSearchCards = async (name) => {
 };
 
 // --- REAL ---
-const realSearchCards = async (name) => {
-  const response = await fetch(`${API_BASE_URL}/cards/search?name=${encodeURIComponent(name)}`);
-  if (!response.ok) throw new Error("Error en la búsqueda");
-  return response.json();
+const realSearchCards = async (name, filters = {}, page = 1, size = 20) => {
+  // Build additional parameters for search
+  const additionalParams = {};
+  
+  console.log('Search filters received:', filters);
+  
+  if (name && name.trim()) {
+    additionalParams.name = name.trim();
+  }
+  
+  if (filters.collection && filters.collection !== 'All Collections') {
+    additionalParams.set = filters.collection;
+  }
+  
+  // Handle language filters
+  if (filters.languages && Object.keys(filters.languages).length > 0) {
+    // Only include languages that are enabled (true)
+    const activeLanguages = Object.entries(filters.languages)
+      .filter(([, isEnabled]) => isEnabled === true)
+      .map(([lang]) => lang)
+      .join(',');
+    
+    console.log('Active languages:', activeLanguages);
+    
+    if (activeLanguages) {
+      additionalParams.languages = activeLanguages;
+    }
+  }
+  
+  // Create pagination parameters with additional search params
+  const params = createPaginationParams(page, size, additionalParams);
+  
+  const finalUrl = `${API_BASE_URL}/cards/search?${params.toString()}`;
+  console.log('Final search URL:', finalUrl);
+  
+  const response = await fetch(finalUrl);
+  if (!response.ok) throw new Error("Search error");
+  const data = await response.json();
+  
+  console.log('API response data:', data);
+  
+  if (data.content) {
+    return data;
+  } else {
+    return data.map(cardWithAvailability => ({
+      ...cardWithAvailability.card,
+      available: cardWithAvailability.available,
+      cardsToSell: cardWithAvailability.cardsToSell
+    }));
+  }
+};
+
+const mockSearchCardsWithFilters = async (name, filters = {}) => {
+  await new Promise(res => setTimeout(res, 300));
+  if (!name?.trim() && !filters.collection) return [];
+  
+  let results = [...MOCK_CARDS];
+  
+  // Filter by name
+  if (name && name.trim()) {
+    const query = name.trim().toLowerCase();
+    results = results.filter(card =>
+      card.name.toLowerCase().includes(query)
+    );
+  }
+  
+  // Filter by collection
+  if (filters.collection) {
+    results = results.filter(card => card.set === filters.collection);
+  }
+  
+  // Language filtering would be implemented here if we had language data in mock
+  
+  return results;
+};
+
+// --- SEARCH BY SET ---
+const realSearchCardsBySet = async (setCode, page = 1, size = 20) => {
+  const params = createPaginationParams(page, size, { set: setCode });
+  
+  const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
+  if (!response.ok) throw new Error("Search by set error");
+  const data = await response.json();
+  
+  if (data.content) {
+    return data;
+  } else {
+    return data.map(cardWithAvailability => ({
+      ...cardWithAvailability.card,
+      available: cardWithAvailability.available,
+      cardsToSell: cardWithAvailability.cardsToSell
+    }));
+  }
+};
+
+// --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
+const realSearchCardsBulk = async (filters = {}, page = 1, size = 50) => {
+  console.log('Bulk search filters:', filters);
+  
+  const additionalParams = {};
+  
+  if (filters.set) {
+    additionalParams.set = filters.set;
+  }
+  
+  if (filters.rarity && filters.rarity !== 'All') {
+    additionalParams.rarity = filters.rarity;
+  }
+  
+  if (filters.sortBy) {
+    // Map UI sortBy values to server expected values
+    const sortByMapping = {
+      'Collectors Number': 'collector_number',
+      'English Name': 'name',
+      'Local Name': 'printed_name', 
+      'Rarity, Number': 'rarity'
+    };
+    const serverSortBy = sortByMapping[filters.sortBy] || filters.sortBy;
+    additionalParams.sortBy = serverSortBy;
+  }
+  
+  // Create pagination parameters with bulk filters
+  const params = createPaginationParams(page, size, additionalParams);
+  
+  const finalUrl = `${API_BASE_URL}/cards/search/bulk?${params.toString()}`;
+  console.log('Final bulk search URL:', finalUrl);
+  
+  try {
+    const token = localStorage.getItem("authToken");
+    const response = await fetch(finalUrl, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      let errorMessage = `Bulk search failed with status ${response.status}`;
+      
+      // Check if response has content and is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (jsonError) {
+          console.warn('Could not parse error response as JSON:', jsonError);
+          errorMessage = `Server error (${response.status}): Unable to parse error details`;
+        }
+      } else {
+        // Response is not JSON, likely HTML error page or empty
+        try {
+          const textResponse = await response.text();
+          if (textResponse.trim()) {
+            errorMessage = `Server error (${response.status}): ${textResponse.substring(0, 100)}${textResponse.length > 100 ? '...' : ''}`;
+          } else {
+            errorMessage = `Server error (${response.status}): No response body`;
+          }
+        } catch (textError) {
+          errorMessage = `Server error (${response.status}): Unable to read response`;
+        }
+      }
+      
+      // Add context about what failed
+      const setName = filters.set ? ` for set "${filters.set}"` : '';
+      const rarityFilter = filters.rarity && filters.rarity !== 'All' ? ` with rarity "${filters.rarity}"` : '';
+      
+      throw new Error(`${errorMessage}${setName}${rarityFilter}`);
+    }
+    
+    // Check if successful response is JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server returned non-JSON response. Expected JSON data.');
+    }
+    
+    try {
+      const data = await response.json();
+      
+      // Handle paginated response
+      if (data.content) {
+        return {
+          content: data.content.map(card => ({
+            id: card.id,
+            oracle_id: card.oracleId,
+            set_name: card.setName,
+            set_code: card.set,
+            name: card.name,
+            printed_name: card.printedName,
+            rarity: card.rarity,
+            collector_number: card.collectorNumber,
+            number: card.collectorNumber, // alias for collector_number
+            image_url: card.imageUrl,
+            imageUrl: card.imageUrl, // keep both for compatibility
+            language: card.lang, // Include language from server
+            idAsUUID: card.idAsUUID
+          })),
+          totalPages: data.totalPages,
+          totalElements: data.totalElements,
+          currentPage: data.number,
+          size: data.size,
+          first: data.first,
+          last: data.last
+        };
+      } else {
+        // Fallback for non-paginated response
+        return data.map(card => ({
+          id: card.id,
+          oracle_id: card.oracleId,
+          set_name: card.setName,
+          set_code: card.set,
+          name: card.name,
+          printed_name: card.printedName,
+          rarity: card.rarity,
+          collector_number: card.collectorNumber,
+          number: card.collectorNumber, // alias for collector_number
+          image_url: card.imageUrl,
+          imageUrl: card.imageUrl, // keep both for compatibility
+          language: card.lang, // Include language from server
+          idAsUUID: card.idAsUUID
+        }));
+      }
+    } catch (jsonError) {
+      console.error('Failed to parse successful response as JSON:', jsonError);
+      throw new Error('Server returned invalid JSON response. Please try again or contact support.');
+    }
+  } catch (error) {
+    // Network or other fetch errors
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
+    }
+    
+    // Re-throw our custom errors
+    throw error;
+  }
 };
 
 export const searchCards = realSearchCards;
+export const searchCardsBySet = realSearchCardsBySet;
+export const searchCardsBulk = realSearchCardsBulk;
