@@ -98,7 +98,7 @@ const Header = () => {
       // Debounce search by 300ms
       searchTimeoutRef.current = setTimeout(async () => {
         try {
-          const res = await searchCards(value, {}, 0, 20); // First page, 20 results
+          const res = await searchCards(value, {}, 0, 21); // First page, 21 results
           
           // Handle paginated response
           const searchResults = res.content || res;

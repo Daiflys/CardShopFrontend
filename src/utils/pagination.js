@@ -101,18 +101,42 @@ export const processPaginatedResponse = (response, requestedUIPage = 1) => {
  */
 export const createPaginationParams = (uiPage = 1, limit = 20, additionalParams = {}) => {
   const params = new URLSearchParams();
-  
+
   // Convert UI page to server page
   const serverPage = uiPageToServerPage(uiPage);
   params.append('page', serverPage.toString());
   params.append('size', limit.toString());
-  
+
   // Add any additional parameters
   Object.entries(additionalParams).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       params.append(key, value.toString());
     }
   });
-  
+
+  return params;
+};
+
+/**
+ * Creates URL search params with pagination parameters (no conversion needed)
+ * @param {number} serverPage - Server page number (0-based, already converted)
+ * @param {number} limit - Items per page
+ * @param {Object} additionalParams - Additional parameters to include
+ * @returns {URLSearchParams} - Ready to use URL search params
+ */
+export const createPaginationParamsRaw = (serverPage = 0, limit = 20, additionalParams = {}) => {
+  const params = new URLSearchParams();
+
+  // Use page directly (no conversion)
+  params.append('page', serverPage.toString());
+  params.append('size', limit.toString());
+
+  // Add any additional parameters
+  Object.entries(additionalParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.append(key, value.toString());
+    }
+  });
+
   return params;
 };
