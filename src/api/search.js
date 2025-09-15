@@ -1,5 +1,5 @@
 // src/api/search.js
-import { createPaginationParams } from '../utils/pagination.js';
+import { createPaginationParams, createPaginationParamsRaw } from '../utils/pagination.js';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || !import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
@@ -74,7 +74,7 @@ const mockSearchCards = async (name) => {
 };
 
 // --- REAL ---
-const realSearchCards = async (name, filters = {}, page = 1, size = 20) => {
+const realSearchCards = async (name, filters = {}, page = 0, size = 21) => {
   // Build additional parameters for search
   const additionalParams = {};
   
@@ -103,8 +103,8 @@ const realSearchCards = async (name, filters = {}, page = 1, size = 20) => {
     }
   }
   
-  // Create pagination parameters with additional search params
-  const params = createPaginationParams(page, size, additionalParams);
+  // Create pagination parameters with additional search params (page is already 0-based)
+  const params = createPaginationParamsRaw(page, size, additionalParams);
   
   const finalUrl = `${API_BASE_URL}/cards/search?${params.toString()}`;
   console.log('Final search URL:', finalUrl);
@@ -151,8 +151,8 @@ const mockSearchCardsWithFilters = async (name, filters = {}) => {
 };
 
 // --- SEARCH BY SET ---
-const realSearchCardsBySet = async (setCode, page = 1, size = 20) => {
-  const params = createPaginationParams(page, size, { set: setCode });
+const realSearchCardsBySet = async (setCode, page = 0, size = 21) => {
+  const params = createPaginationParamsRaw(page, size, { set: setCode });
   
   const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
   if (!response.ok) throw new Error("Search by set error");
@@ -170,7 +170,7 @@ const realSearchCardsBySet = async (setCode, page = 1, size = 20) => {
 };
 
 // --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
-const realSearchCardsBulk = async (filters = {}, page = 1, size = 50) => {
+const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
   console.log('Bulk search filters:', filters);
   
   const additionalParams = {};
@@ -195,8 +195,8 @@ const realSearchCardsBulk = async (filters = {}, page = 1, size = 50) => {
     additionalParams.sortBy = serverSortBy;
   }
   
-  // Create pagination parameters with bulk filters
-  const params = createPaginationParams(page, size, additionalParams);
+  // Create pagination parameters with bulk filters (page is already 0-based)
+  const params = createPaginationParamsRaw(page, size, additionalParams);
   
   const finalUrl = `${API_BASE_URL}/cards/search/bulk?${params.toString()}`;
   console.log('Final bulk search URL:', finalUrl);
