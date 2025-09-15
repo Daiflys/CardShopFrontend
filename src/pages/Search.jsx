@@ -16,22 +16,23 @@ const Search = () => {
   const query = searchParams.get('q');
   const setFilter = searchParams.get('set');
   const { resetFilters } = useSearchFiltersStore();
-  const { 
-    currentPage, 
-    totalPages, 
-    totalElements, 
-    size, 
-    setCurrentPage, 
-    setPaginationData, 
-    resetPagination 
+  const {
+    currentPage,
+    totalPages,
+    totalElements,
+    size,
+    setCurrentPage,
+    setPaginationData,
+    resetPagination
   } = usePaginationStore();
-  
+
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [hoveredCard, setHoveredCard] = useState(null);
   const [rarityFilter, setRarityFilter] = useState('all');
   const [currentFilters, setCurrentFilters] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const pendingFiltersRef = useRef(null);
   const skipNextSearchRef = useRef(false);
 
@@ -277,41 +278,84 @@ const Search = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex gap-6">
+      <div className="lg:flex gap-6">
+        {/* Mobile Filter Button */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filters & Search
+          </button>
+        </div>
+
+        {/* Sidebar Overlay for Mobile */}
+        {sidebarOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setSidebarOpen(false)} />
+        )}
+
         {/* Left Sidebar - Search Filters */}
-        <div className="w-80 flex-shrink-0">
-          <SearchFilters 
-            initialQuery={query || ''} 
-            onSearch={handleFilteredSearch}
-          />
+        <div className={`
+          lg:w-80 lg:flex-shrink-0 lg:relative lg:translate-x-0 lg:bg-transparent lg:shadow-none
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          fixed lg:static inset-y-0 left-0 z-50 w-80 bg-white shadow-xl transition-transform duration-300 ease-in-out
+          lg:block
+        `}>
+          <div className="lg:sticky lg:top-8 h-full lg:h-auto overflow-y-auto lg:overflow-visible">
+            {/* Mobile close button */}
+            <div className="lg:hidden flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-900">Filters & Search</h2>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-4 lg:p-0">
+              <SearchFilters
+                initialQuery={query || ''}
+                onSearch={(filters) => {
+                  handleFilteredSearch(filters);
+                  setSidebarOpen(false); // Close sidebar after search on mobile
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1">
+        <div className="flex-1 lg:min-w-0">
           {/* Header with search query and view controls */}
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {setFilter 
-                  ? `Set: ${setFilter.toUpperCase()}` 
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 truncate">
+                {setFilter
+                  ? `Set: ${setFilter.toUpperCase()}`
                   : `${t('common.search')}: "${query || currentFilters.query || 'All Cards'}"`
                 }
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 text-sm lg:text-base">
                 {sortedResults.length} of {results.length} {results.length === 1 ? 'result' : t('common.results')}
                 {rarityFilter !== 'all' && ` (${rarityFilter} only)`}
               </p>
             </div>
-            
-            {/* Rarity filter and view toggle buttons */}
-            <div className="flex gap-4 items-center">
+
+            {/* Controls - Stack on mobile, row on desktop */}
+            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 lg:items-center">
               {/* Rarity filter dropdown */}
-              <div className="flex gap-2 items-center">
-                <label className="text-sm font-medium text-gray-700">Filter by rarity:</label>
+              <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
+                <label className="text-sm font-medium text-gray-700 mb-1 sm:mb-0">Filter by rarity:</label>
                 <select
                   value={rarityFilter}
                   onChange={(e) => setRarityFilter(e.target.value)}
-                  className="px-3 py-1 border border-gray-300 rounded bg-white text-sm"
+                  className="px-3 py-2 border border-gray-300 rounded bg-white text-sm min-w-0"
                 >
                   <option value="all">All rarities</option>
                   <option value="common">Common</option>
@@ -320,28 +364,28 @@ const Search = () => {
                   <option value="mythic">Mythic</option>
                 </select>
               </div>
-              
+
               {/* View toggle buttons */}
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 text-sm font-medium border transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-blue-600 text-white border-blue-600' 
+                  className={`flex-1 sm:flex-none px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium border transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  📋 LIST VIEW
+                  📋 LIST
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-4 py-2 text-sm font-medium border transition-colors ${
-                    viewMode === 'grid' 
-                      ? 'bg-blue-600 text-white border-blue-600' 
+                  className={`flex-1 sm:flex-none px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium border transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  ⚏ GRID VIEW
+                  ⚏ GRID
                 </button>
               </div>
             </div>
@@ -355,11 +399,11 @@ const Search = () => {
               </p>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
               {sortedResults.map((card) => (
-                <SearchGridCard 
-                  key={card.id} 
-                  card={card} 
+                <SearchGridCard
+                  key={card.id}
+                  card={card}
                   onClick={() => handleCardClick(card)}
                   formatPrice={formatPrice}
                   getAvailableCount={getAvailableCount}
@@ -368,8 +412,8 @@ const Search = () => {
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow overflow-hidden">
-              {/* List Header */}
-              <div className="bg-blue-900 text-white px-4 py-3">
+              {/* List Header - Hidden on very small screens */}
+              <div className="hidden sm:block bg-blue-900 text-white px-4 py-3">
                 <div className="grid gap-4 text-sm font-medium" style={{gridTemplateColumns: '40px 1fr 50px 70px 50px 80px 120px'}}>
                   <div></div>
                   <div>Name</div>
@@ -380,11 +424,11 @@ const Search = () => {
                   <div className="text-right">From</div>
                 </div>
               </div>
-              
+
               {/* List Items */}
               <div>
                 {sortedResults.map((card, index) => (
-                  <SearchListCard 
+                  <SearchListCard
                     key={card.id}
                     card={card}
                     index={index}
@@ -398,7 +442,7 @@ const Search = () => {
               </div>
             </div>
           )}
-          
+
           {/* Pagination */}
           <Pagination
             currentPage={currentPage}
