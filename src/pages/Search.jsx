@@ -68,7 +68,7 @@ const Search = () => {
       if (page === 0) {
         resetPagination();
       }
-      const searchResults = await searchCards(searchQuery, filters, page, 20);
+      const searchResults = await searchCards(searchQuery, filters, page, 21);
       
       console.log('Raw search response:', searchResults);
       
@@ -97,9 +97,9 @@ const Search = () => {
         setResults(searchResults);
         setPaginationData({
           currentPage: 0,
-          totalPages: Math.ceil(searchResults.length / 20),
+          totalPages: Math.ceil(searchResults.length / 21),
           totalElements: searchResults.length,
-          size: 20
+          size: 21
         });
       }
       
@@ -121,7 +121,7 @@ const Search = () => {
       if (page === 0) {
         resetPagination();
       }
-      const searchResults = await searchCardsBySet(setCode, page, 20);
+      const searchResults = await searchCardsBySet(setCode, page, 21);
       
       if (searchResults.content) {
         const cards = searchResults.content.map(item => ({
@@ -141,9 +141,9 @@ const Search = () => {
         setResults(searchResults);
         setPaginationData({
           currentPage: 0,
-          totalPages: Math.ceil(searchResults.length / 20),
+          totalPages: Math.ceil(searchResults.length / 21),
           totalElements: searchResults.length,
-          size: 20
+          size: 21
         });
       }
       
