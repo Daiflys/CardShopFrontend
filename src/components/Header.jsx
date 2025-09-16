@@ -99,10 +99,15 @@ const Header = () => {
       searchTimeoutRef.current = setTimeout(async () => {
         try {
           const res = await searchCards(value, {}, 0, 21); // First page, 21 results
-          
-          // Handle paginated response
-          const searchResults = res.content || res;
-          
+
+          // Handle paginated response (same pattern as Search.jsx)
+          const searchResults = res.content ?
+            res.content.map(item => ({
+              ...item.card,
+              cardsToSell: item.cardsToSell || [],
+              available: item.cardsToSell ? item.cardsToSell.length : 0
+            })) : res;
+
           // Only update if this is still the latest search
           if (currentSearchId === currentSearchRef.current) {
             // Remove duplicates by card name (prioritizing exact matches and lower IDs)
@@ -147,7 +152,7 @@ const Header = () => {
   const handleResultClick = (card) => {
     setSearch(card.name);
     setShowDropdown(false);
-    navigate(`/search?q=${encodeURIComponent(card.name)}`); 
+    navigate(`/search?q=${encodeURIComponent(card.name)}`);
   };
 
   // Hide dropdown if clicked outside
@@ -193,7 +198,7 @@ const Header = () => {
             />
           </form>
           {showDropdown && (
-            <ul className="absolute z-20 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+            <ul className="absolute z-[60] left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
               {loading ? (
                 <li className="px-4 py-2 text-gray-500">{t('common.loading')}</li>
               ) : results.length === 0 ? (
@@ -336,7 +341,7 @@ const Header = () => {
                 />
               </form>
               {showDropdown && (
-                <ul className="absolute z-20 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+                <ul className="absolute z-[60] left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
                   {loading ? (
                     <li className="px-4 py-2 text-gray-500">{t('common.loading')}</li>
                   ) : results.length === 0 ? (

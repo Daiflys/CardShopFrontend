@@ -342,7 +342,7 @@ const Search = () => {
                 }
               </h1>
               <p className="text-gray-600 mt-1 text-sm lg:text-base">
-                {sortedResults.length} of {results.length} {results.length === 1 ? 'result' : t('common.results')}
+                {sortedResults.length} of {totalElements} {totalElements === 1 ? 'result' : t('common.results')}
                 {rarityFilter !== 'all' && ` (${rarityFilter} only)`}
               </p>
             </div>
@@ -399,7 +399,7 @@ const Search = () => {
               </p>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 lg:gap-6">
               {sortedResults.map((card) => (
                 <SearchGridCard
                   key={card.id}
