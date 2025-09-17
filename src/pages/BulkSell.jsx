@@ -5,6 +5,7 @@ import { bulkSellCards } from '../api/bulkSell';
 import { getRaritySolidColor } from '../utils/rarity';
 import { languageOptions as centralizedLanguageOptions } from '../utils/languageFlags.jsx';
 import Pagination from '../components/Pagination';
+import usePaginationStore from '../store/paginationStore';
 
 const BulkSell = () => {
   const [selectedExpansion, setSelectedExpansion] = useState('');
@@ -19,12 +20,15 @@ const BulkSell = () => {
   const [showBulkModification, setShowBulkModification] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [openLanguageSelector, setOpenLanguageSelector] = useState(null);
-  const [pagination, setPagination] = useState({
-    currentPage: 0,
-    totalPages: 0,
-    totalElements: 0,
-    size: 50
-  });
+
+  const {
+    currentPage,
+    totalPages,
+    resetPagination,
+    getPaginationRange,
+    handlePaginatedResponse,
+    handlePageChange
+  } = usePaginationStore();
 
   const expansions = Object.values(MTG_SETS).map(set => ({
     code: set.code,
@@ -59,6 +63,7 @@ const BulkSell = () => {
     if (page === 0) {
       setFilteredCards([]);
       setCardData({});
+      resetPagination();
     }
     
     try {
@@ -70,25 +75,9 @@ const BulkSell = () => {
       };
 
       const result = await searchCardsBulk(filters, page, 50);
-      
-      let cards;
-      if (result.content) {
-        cards = result.content;
-        setPagination({
-          currentPage: result.number,
-          totalPages: result.totalPages,
-          totalElements: result.totalElements,
-          size: result.size
-        });
-      } else {
-        cards = result;
-        setPagination({
-          currentPage: 0,
-          totalPages: 1,
-          totalElements: result.length,
-          size: result.length
-        });
-      }
+
+      // Use centralized pagination response handler
+      const cards = handlePaginatedResponse(result, page, 50);
       
       setFilteredCards(cards);
       
@@ -107,7 +96,8 @@ const BulkSell = () => {
       
     } catch (err) {
       setError('Error fetching cards: ' + err.message);
-      setPagination({ currentPage: 0, totalPages: 0, totalElements: 0, size: 50 });
+      resetPagination();
+      setPaginationData({ size: 50 });
     } finally {
       setLoading(false);
     }
@@ -173,7 +163,7 @@ const BulkSell = () => {
     setSuccessMessage('');
 
     try {
-      const result = await bulkSellCards(selectedCardEntries, filteredCards);
+      const submitResult = await bulkSellCards(selectedCardEntries, filteredCards);
       setSuccessMessage(`Successfully listed ${selectedCards.length} cards for sale!`);
       
       // Clear selection after successful submission
@@ -320,12 +310,10 @@ const BulkSell = () => {
             {/* Results count and pagination */}
             <div className="flex justify-between items-center p-4 border-b">
               <div className="text-sm text-gray-600">
-                {pagination.totalElements} Total Cards
-                {filteredCards.length > 0 && (
-                  <span className="ml-2">
-                    (Showing {filteredCards.length} on page {pagination.currentPage + 1} of {pagination.totalPages})
-                  </span>
-                )}
+                {(() => {
+                  const { start, end, total } = getPaginationRange();
+                  return total === 0 ? 'No cards found' : `${start}-${end} of ${total} Total Cards`;
+                })()}
               </div>
             </div>
 
@@ -545,9 +533,9 @@ const BulkSell = () => {
             {/* Pagination */}
             <div className="p-4 border-t">
               <Pagination
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
-                onPageChange={(page) => handleFilter(page)}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => handlePageChange(page, (validPage) => handleFilter(validPage))}
               />
 
               <div className="mt-4 text-sm text-gray-500">
