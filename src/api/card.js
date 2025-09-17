@@ -1,5 +1,6 @@
 // src/api/card.js
 import { createPaginationParams } from '../utils/pagination.js';
+import { formatCardDetailResponse } from '../utils/cardFormatters.js';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -70,7 +71,8 @@ const realGetCardDetail = async (cardId) => {
   if (!response.ok) throw new Error("Error fetching card details");
   const responseRead = await response.json();
   console.log("response json: ", responseRead);
-  return responseRead;
+
+  return formatCardDetailResponse(responseRead);
 };
 
 const realGetCardsToSell = async (cardName, page = 1, size = 20) => {

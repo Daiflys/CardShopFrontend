@@ -100,13 +100,8 @@ const Header = () => {
         try {
           const res = await searchCards(value, {}, 0, 21); // First page, 21 results
 
-          // Handle paginated response (same pattern as Search.jsx)
-          const searchResults = res.content ?
-            res.content.map(item => ({
-              ...item.card,
-              cardsToSell: item.cardsToSell || [],
-              available: item.cardsToSell ? item.cardsToSell.length : 0
-            })) : res;
+          // Handle paginated response - now formatted by API layer
+          const searchResults = res.content ? res.content : res;
 
           // Only update if this is still the latest search
           if (currentSearchId === currentSearchRef.current) {

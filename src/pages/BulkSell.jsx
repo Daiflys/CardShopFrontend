@@ -27,7 +27,8 @@ const BulkSell = () => {
     resetPagination,
     getPaginationRange,
     handlePaginatedResponse,
-    handlePageChange
+    handlePageChange,
+    setPaginationData
   } = usePaginationStore();
 
   const expansions = Object.values(MTG_SETS).map(set => ({
