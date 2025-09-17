@@ -71,32 +71,11 @@ const Search = () => {
       
       console.log('Raw search response:', searchResults);
       
-      // Transform search results to card format
-      let processedResults;
-      if (searchResults.content) {
-        console.log('Pagination data:', {
-          number: searchResults.number,
-          totalPages: searchResults.totalPages,
-          totalElements: searchResults.totalElements,
-          size: searchResults.size
-        });
-
-        processedResults = {
-          content: searchResults.content.map(item => ({
-            ...item.card,
-            cardsToSell: item.cardsToSell || [],
-            available: item.cardsToSell ? item.cardsToSell.length : 0
-          })),
-          totalPages: searchResults.totalPages,
-          totalElements: searchResults.totalElements,
-          size: searchResults.size
-        };
-      } else {
-        processedResults = searchResults.map ? searchResults : [];
-      }
+      // Transform search results is now handled by formatPaginatedCardsResponse in API layer
+      console.log('Search results after formatting:', searchResults);
 
       // Use centralized pagination response handler
-      const cards = handlePaginatedResponse(processedResults, page, 21);
+      const cards = handlePaginatedResponse(searchResults, page, 21);
       setResults(cards);
       
       setCurrentFilters(filters);
@@ -119,25 +98,11 @@ const Search = () => {
       }
       const searchResults = await searchCardsBySet(setCode, page, 21);
       
-      // Transform search results to card format
-      let processedResults;
-      if (searchResults.content) {
-        processedResults = {
-          content: searchResults.content.map(item => ({
-            ...item.card,
-            cardsToSell: item.cardsToSell || [],
-            available: item.cardsToSell ? item.cardsToSell.length : 0
-          })),
-          totalPages: searchResults.totalPages,
-          totalElements: searchResults.totalElements,
-          size: searchResults.size
-        };
-      } else {
-        processedResults = searchResults.map ? searchResults : [];
-      }
+      // Transform search results is now handled by formatPaginatedCardsResponse in API layer
+      console.log('Set search results after formatting:', searchResults);
 
       // Use centralized pagination response handler
-      const cards = handlePaginatedResponse(processedResults, page, 21);
+      const cards = handlePaginatedResponse(searchResults, page, 21);
       setResults(cards);
       
       setCurrentFilters({ set: setCode });

@@ -1,5 +1,6 @@
 // src/api/search.js
 import { createPaginationParams, createPaginationParamsRaw } from '../utils/pagination.js';
+import { formatPaginatedCardsResponse } from '../utils/cardFormatters.js';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || !import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
@@ -114,16 +115,8 @@ const realSearchCards = async (name, filters = {}, page = 0, size = 21) => {
   const data = await response.json();
   
   console.log('API response data:', data);
-  
-  if (data.content) {
-    return data;
-  } else {
-    return data.map(cardWithAvailability => ({
-      ...cardWithAvailability.card,
-      available: cardWithAvailability.available,
-      cardsToSell: cardWithAvailability.cardsToSell
-    }));
-  }
+
+  return formatPaginatedCardsResponse(data);
 };
 
 const mockSearchCardsWithFilters = async (name, filters = {}) => {
@@ -157,16 +150,8 @@ const realSearchCardsBySet = async (setCode, page = 0, size = 21) => {
   const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
   if (!response.ok) throw new Error("Search by set error");
   const data = await response.json();
-  
-  if (data.content) {
-    return data;
-  } else {
-    return data.map(cardWithAvailability => ({
-      ...cardWithAvailability.card,
-      available: cardWithAvailability.available,
-      cardsToSell: cardWithAvailability.cardsToSell
-    }));
-  }
+
+  return formatPaginatedCardsResponse(data);
 };
 
 // --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
