@@ -19,11 +19,10 @@ const Search = () => {
   const {
     currentPage,
     totalPages,
-    totalElements,
-    size,
-    setCurrentPage,
-    setPaginationData,
-    resetPagination
+    resetPagination,
+    getPaginationRange,
+    handlePaginatedResponse,
+    handlePageChange
   } = usePaginationStore();
 
   const [results, setResults] = useState([]);
@@ -72,6 +71,8 @@ const Search = () => {
       
       console.log('Raw search response:', searchResults);
       
+      // Transform search results to card format
+      let processedResults;
       if (searchResults.content) {
         console.log('Pagination data:', {
           number: searchResults.number,
@@ -79,29 +80,24 @@ const Search = () => {
           totalElements: searchResults.totalElements,
           size: searchResults.size
         });
-        
-        const cards = searchResults.content.map(item => ({
-          ...item.card,
-          cardsToSell: item.cardsToSell || [],
-          available: item.cardsToSell ? item.cardsToSell.length : 0
-        }));
-        
-        setResults(cards);
-        setPaginationData({
-          currentPage: page, // Use the page we requested, not server response
+
+        processedResults = {
+          content: searchResults.content.map(item => ({
+            ...item.card,
+            cardsToSell: item.cardsToSell || [],
+            available: item.cardsToSell ? item.cardsToSell.length : 0
+          })),
           totalPages: searchResults.totalPages,
           totalElements: searchResults.totalElements,
           size: searchResults.size
-        });
+        };
       } else {
-        setResults(searchResults);
-        setPaginationData({
-          currentPage: 0,
-          totalPages: Math.ceil(searchResults.length / 21),
-          totalElements: searchResults.length,
-          size: 21
-        });
+        processedResults = searchResults.map ? searchResults : [];
       }
+
+      // Use centralized pagination response handler
+      const cards = handlePaginatedResponse(processedResults, page, 21);
+      setResults(cards);
       
       setCurrentFilters(filters);
     } catch (error) {
@@ -123,29 +119,26 @@ const Search = () => {
       }
       const searchResults = await searchCardsBySet(setCode, page, 21);
       
+      // Transform search results to card format
+      let processedResults;
       if (searchResults.content) {
-        const cards = searchResults.content.map(item => ({
-          ...item.card,
-          cardsToSell: item.cardsToSell || [],
-          available: item.cardsToSell ? item.cardsToSell.length : 0
-        }));
-        
-        setResults(cards);
-        setPaginationData({
-          currentPage: page, // Use the page we requested, not server response
+        processedResults = {
+          content: searchResults.content.map(item => ({
+            ...item.card,
+            cardsToSell: item.cardsToSell || [],
+            available: item.cardsToSell ? item.cardsToSell.length : 0
+          })),
           totalPages: searchResults.totalPages,
           totalElements: searchResults.totalElements,
           size: searchResults.size
-        });
+        };
       } else {
-        setResults(searchResults);
-        setPaginationData({
-          currentPage: 0,
-          totalPages: Math.ceil(searchResults.length / 21),
-          totalElements: searchResults.length,
-          size: 21
-        });
+        processedResults = searchResults.map ? searchResults : [];
       }
+
+      // Use centralized pagination response handler
+      const cards = handlePaginatedResponse(processedResults, page, 21);
+      setResults(cards);
       
       setCurrentFilters({ set: setCode });
     } catch (error) {
@@ -179,24 +172,15 @@ const Search = () => {
     navigate(newUrl);
   };
 
-  const handlePageChange = (newPage) => {
-    // Ensure newPage is a valid number, default to 0 if invalid
-    const validPage = isNaN(newPage) ? 0 : Math.max(0, Math.floor(Number(newPage)));
-    
-    console.log('Search.jsx: handlePageChange called with', newPage, 'validated to', validPage);
-    console.log('Search.jsx: current page in store', currentPage);
-    
-    // Update the page in store first
-    setCurrentPage(validPage);
-    
-    if (query) {
-      performSearch(query, currentFilters, validPage);
-    } else if (setFilter) {
-      performSetSearch(setFilter, validPage);
-    }
-    
-    // Scroll to top when page changes
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleLocalPageChange = (newPage) => {
+    // Use centralized page change handler
+    handlePageChange(newPage, (validPage) => {
+      if (query) {
+        performSearch(query, currentFilters, validPage);
+      } else if (setFilter) {
+        performSetSearch(setFilter, validPage);
+      }
+    });
   };
 
   const handleCardClick = (card) => {
@@ -342,7 +326,10 @@ const Search = () => {
                 }
               </h1>
               <p className="text-gray-600 mt-1 text-sm lg:text-base">
-                {sortedResults.length} of {totalElements} {totalElements === 1 ? 'result' : t('common.results')}
+                {(() => {
+                  const { start, end, total } = getPaginationRange();
+                  return total === 0 ? 'No results' : `${start}-${end} of ${total} ${total === 1 ? 'result' : t('common.results')}`;
+                })()}
                 {rarityFilter !== 'all' && ` (${rarityFilter} only)`}
               </p>
             </div>
@@ -447,7 +434,7 @@ const Search = () => {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onPageChange={handleLocalPageChange}
           />
         </div>
       </div>
