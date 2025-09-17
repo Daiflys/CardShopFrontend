@@ -51,7 +51,7 @@ const usePaginationStore = create((set, get) => ({
   },
 
   // Helper to handle paginated API response
-  handlePaginatedResponse: (result, requestedPage, defaultSize = 21) => {
+  handlePaginatedResponse: (result, requestedPage, pageElements = 21) => {
     const { setPaginationData } = get();
 
     if (result.content) {
@@ -67,9 +67,9 @@ const usePaginationStore = create((set, get) => ({
       // Non-paginated response (array)
       setPaginationData({
         currentPage: 0,
-        totalPages: Math.ceil(result.length / defaultSize),
+        totalPages: Math.ceil(result.length / pageElements),
         totalElements: result.length,
-        size: defaultSize
+        size: pageElements
       });
       return result;
     }
