@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ProductCard from "./ProductCard";
 import { getBestSellers, getBestBargains } from "../api/trends";
+import { formatTrendingCardsResponse } from "../utils/cardFormatters";
 
 const Trends = () => {
   const { t } = useTranslation();
@@ -14,20 +15,8 @@ const Trends = () => {
     setLoading(true);
     Promise.all([getBestSellers(), getBestBargains()])
       .then(([sellers, bargains]) => {
-        const normalizeSellers = (arr) => arr.map(item => ({
-          id: item.id,
-          card_name: item.card_name || item.name,
-          image_url: item.image_url || item.imageUrl,
-        }));
-
-        const normalizeBargains = (arr) => arr.map(item => ({
-          id: item.cardId || item.card_id || item.id,
-          card_name: item.card_name || item.name,
-          image_url: item.image_url || item.imageUrl,
-        }));
-  
-        setBestSellers(normalizeSellers(sellers));
-        setBestBargains(normalizeBargains(bargains));
+        setBestSellers(formatTrendingCardsResponse(sellers));
+        setBestBargains(formatTrendingCardsResponse(bargains));
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));

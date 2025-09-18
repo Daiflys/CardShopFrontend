@@ -237,49 +237,7 @@ const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
     try {
       const data = await response.json();
       
-      // Handle paginated response
-      if (data.content) {
-        return {
-          content: data.content.map(card => ({
-            id: card.id,
-            oracle_id: card.oracleId,
-            set_name: card.setName,
-            set_code: card.set,
-            name: card.name,
-            printed_name: card.printedName,
-            rarity: card.rarity,
-            collector_number: card.collectorNumber,
-            number: card.collectorNumber, // alias for collector_number
-            image_url: card.imageUrl,
-            imageUrl: card.imageUrl, // keep both for compatibility
-            language: card.lang, // Include language from server
-            idAsUUID: card.idAsUUID
-          })),
-          totalPages: data.totalPages,
-          totalElements: data.totalElements,
-          currentPage: data.number,
-          size: data.size,
-          first: data.first,
-          last: data.last
-        };
-      } else {
-        // Fallback for non-paginated response
-        return data.map(card => ({
-          id: card.id,
-          oracle_id: card.oracleId,
-          set_name: card.setName,
-          set_code: card.set,
-          name: card.name,
-          printed_name: card.printedName,
-          rarity: card.rarity,
-          collector_number: card.collectorNumber,
-          number: card.collectorNumber, // alias for collector_number
-          image_url: card.imageUrl,
-          imageUrl: card.imageUrl, // keep both for compatibility
-          language: card.lang, // Include language from server
-          idAsUUID: card.idAsUUID
-        }));
-      }
+      return formatPaginatedCardsResponse(data);
     } catch (jsonError) {
       console.error('Failed to parse successful response as JSON:', jsonError);
       throw new Error('Server returned invalid JSON response. Please try again or contact support.');
