@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor } from "../utils/rarity";
 import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
+import { getColorSymbols, parseManaCost } from "../data/colorSymbols";
 
 const CardInfoTab = ({ card }) => {
+  const navigate = useNavigate();
   const [cardsToSell, setCardsToSell] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,6 +36,14 @@ const CardInfoTab = ({ card }) => {
       fetchCardsToSell(card.name, card.id);
     }
   }, [card?.name, card?.id, fetchCardsToSell]);
+
+  const handleExpansionClick = (e) => {
+    e.preventDefault();
+    const setCode = card.set || card.setCode || card.set_code;
+    if (setCode) {
+      navigate(`/search?set=${encodeURIComponent(setCode)}`);
+    }
+  };
 
   if (!card) return null;
 
@@ -224,11 +235,53 @@ const CardInfoTab = ({ card }) => {
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Color</td>
-                <td className="px-4 py-3">{card.cardColors?.join(", ") || "White"}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {card.cardColors && card.cardColors.length > 0 ? (
+                      getColorSymbols(card.cardColors).map((colorData, index) => (
+                        <div key={index} className="flex items-center gap-1">
+                          <img
+                            src={colorData.svg_uri}
+                            alt={colorData.name}
+                            className="w-4 h-4"
+                            title={colorData.name}
+                          />
+                          <span className="text-sm">{colorData.name}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <span>Colorless</span>
+                    )}
+                  </div>
+                </td>
               </tr>
               <tr className="bg-gray-100">
                 <td className="px-4 py-3 font-medium text-gray-700">Cost</td>
-                <td className="px-4 py-3">{card.manaCost || "(3)(W)"}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1">
+                    {card.manaCost ? (
+                      parseManaCost(card.manaCost).map((manaSymbol, index) => (
+                        <img
+                          key={index}
+                          src={manaSymbol.svg_uri}
+                          alt={manaSymbol.symbol}
+                          className="w-5 h-5"
+                          title={`{${manaSymbol.symbol}}`}
+                        />
+                      ))
+                    ) : (
+                      parseManaCost("{3}{W}").map((manaSymbol, index) => (
+                        <img
+                          key={index}
+                          src={manaSymbol.svg_uri}
+                          alt={manaSymbol.symbol}
+                          className="w-5 h-5"
+                          title={`{${manaSymbol.symbol}}`}
+                        />
+                      ))
+                    )}
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Cardtype</td>
@@ -252,14 +305,17 @@ const CardInfoTab = ({ card }) => {
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Flavor Text</td>
-                <td className="px-4 py-3 italic">{card.flavorText || "Treasures, trinkets, trash—the relics of the past are brought forth again."}</td>
+                <td className="px-4 py-3 italic">{card.flavorText || "-"}</td>
               </tr>
               <tr className="bg-gray-100">
                 <td className="px-4 py-3 font-medium text-gray-700">Expansion</td>
                 <td className="px-4 py-3">
-                  <a href="#" className="text-blue-600 hover:underline">
+                  <button
+                    onClick={handleExpansionClick}
+                    className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
+                  >
                     {card.set_name || card.setName || "Urza's Destiny"}
-                  </a>
+                  </button>
                 </td>
               </tr>
               <tr>
