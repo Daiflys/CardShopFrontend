@@ -147,3 +147,37 @@ export const parseManaCost = (manaCostString) => {
     return getManaSymbol(symbol);
   }).filter(Boolean);
 };
+
+// Function to parse Oracle text and return React elements with symbols
+export const parseOracleText = (oracleText) => {
+  if (!oracleText) return null;
+
+  // Split text by symbol patterns while keeping the symbols
+  const parts = oracleText.split(/(\{[^}]+\})/g);
+
+  return parts.map((part, index) => {
+    // Check if this part is a symbol
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const symbol = part.slice(1, -1);
+      const manaSymbol = getManaSymbol(symbol);
+
+      if (manaSymbol) {
+        return (
+          <img
+            key={index}
+            src={manaSymbol.svg_uri}
+            alt={part}
+            className="inline w-4 h-4 mx-0.5 align-text-bottom"
+            title={part}
+          />
+        );
+      } else {
+        // If we don't have the symbol, return the original text
+        return <span key={index}>{part}</span>;
+      }
+    }
+
+    // Return regular text
+    return <span key={index}>{part}</span>;
+  });
+};

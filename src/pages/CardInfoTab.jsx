@@ -4,7 +4,7 @@ import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor } from "../utils/rarity";
 import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
-import { getColorSymbols, parseManaCost } from "../data/colorSymbols";
+import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols";
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
@@ -301,7 +301,13 @@ const CardInfoTab = ({ card }) => {
               </tr>
               <tr className="bg-gray-100">
                 <td className="px-4 py-3 font-medium text-gray-700">Oracle</td>
-                <td className="px-4 py-3">{card.oracleText || "Return all enchantment cards from your graveyard to the battlefield. (Auras with nothing to enchant remain in your graveyard.)"}</td>
+                <td className="px-4 py-3">
+                  {card.oracleText ? (
+                    parseOracleText(card.oracleText)
+                  ) : (
+                    parseOracleText("Return all enchantment cards from your graveyard to the battlefield. (Auras with nothing to enchant remain in your graveyard.)")
+                  )}
+                </td>
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Flavor Text</td>
