@@ -6,10 +6,13 @@ import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
 import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
 import { getSetIcon } from "../data/sets.js";
+import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
+import RecentlyViewed from "../components/RecentlyViewed.jsx";
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
   const [cardsToSell, setCardsToSell] = useState([]);
+  const addRecentlyViewed = useRecentlyViewedStore(state => state.addRecentlyViewed);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
@@ -37,6 +40,13 @@ const CardInfoTab = ({ card }) => {
       fetchCardsToSell(card.name, card.id);
     }
   }, [card?.name, card?.id, fetchCardsToSell]);
+
+  // Add card to recently viewed when component mounts
+  useEffect(() => {
+    if (card && card.id && card.name) {
+      addRecentlyViewed(card);
+    }
+  }, [card, addRecentlyViewed]);
 
   const handleExpansionClick = (e) => {
     e.preventDefault();
@@ -478,6 +488,9 @@ const CardInfoTab = ({ card }) => {
           </div>
         </div>
       </div>
+
+      {/* Recently Viewed Section */}
+      <RecentlyViewed />
 
       {/* Zoom Modal */}
       {showZoomModal && (
