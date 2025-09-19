@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../components/AddToCartButton";
-import { getRarityTextColor } from "../utils/rarity";
+import { getRarityTextColor, getRaritySolidColor, getRarityIcon } from "../utils/rarity";
 import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
 import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
+import { getSetIcon } from "../data/sets.js";
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
@@ -132,8 +133,41 @@ const CardInfoTab = ({ card }) => {
               </button>
             </div>
           ) : cardsToSell.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-gray-600">No cards for sale</div>
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="bg-blue-50 px-4 py-2 border-b">
+                <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
+                  <div>Condition</div>
+                  <div>Price</div>
+                  <div>Stock</div>
+                  <div>Qty</div>
+                </div>
+              </div>
+              <div className="divide-y">
+                {['NM', 'EX', 'GD', 'LP'].map((condition, index) => (
+                  <div key={condition} className={`px-4 py-2 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <div className="grid grid-cols-4 gap-4 items-center">
+                      <div className="flex items-center">
+                        <ConditionIcon condition={condition} />
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        -
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        0
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="px-3 py-1 bg-gray-300 text-gray-500 border border-gray-400 rounded text-sm cursor-not-allowed"
+                          disabled
+                          title="No stock available"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -164,15 +198,15 @@ const CardInfoTab = ({ card }) => {
                   };
 
                   return (
-                    <div key={listingId} className="px-4 py-3 hover:bg-gray-50">
+                    <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                       <div className="grid grid-cols-4 gap-4 items-center">
                         <div className="flex items-center">
                           <ConditionIcon condition={cardToSell.condition} />
                         </div>
-                        <div className="font-semibold text-green-600">
+                        <div className="font-semibold text-green-600 text-sm">
                           ¥ {cardToSell.cardPrice?.toLocaleString() ?? "Unknown"}
                         </div>
-                        <div className="font-semibold text-blue-600">
+                        <div className="font-semibold text-blue-600 text-sm">
                           {cardToSell.quantity ?? 0}
                         </div>
                         <div className="flex items-center gap-2">
@@ -229,13 +263,13 @@ const CardInfoTab = ({ card }) => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <tbody className="divide-y divide-gray-200">
-              <tr className="bg-gray-100">
-                <td className="px-4 py-3 font-medium text-gray-700 w-32">Name</td>
-                <td className="px-4 py-3">{card.name || "Unknown"}</td>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100 w-32">Name</td>
+                <td className="px-4 py-3 bg-white">{card.name || "Unknown"}</td>
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Color</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 bg-gray-200">
                   <div className="flex items-center gap-2">
                     {card.cardColors && card.cardColors.length > 0 ? (
                       getColorSymbols(card.cardColors).map((colorData, index) => (
@@ -255,9 +289,9 @@ const CardInfoTab = ({ card }) => {
                   </div>
                 </td>
               </tr>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-3 font-medium text-gray-700">Cost</td>
-                <td className="px-4 py-3">
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Cost</td>
+                <td className="px-4 py-3 bg-white">
                   <div className="flex items-center gap-1">
                     {card.manaCost ? (
                       parseManaCost(card.manaCost).map((manaSymbol, index) => (
@@ -285,23 +319,35 @@ const CardInfoTab = ({ card }) => {
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Cardtype</td>
-                <td className="px-4 py-3">{card.typeLine || "Sorcery"}</td>
+                <td className="px-4 py-3 bg-gray-200">{card.typeLine || "Sorcery"}</td>
               </tr>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-3 font-medium text-gray-700">Subtype</td>
-                <td className="px-4 py-3">-</td>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Subtype</td>
+                <td className="px-4 py-3 bg-white">-</td>
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Rarity</td>
-                <td className="px-4 py-3">
-                  <span className={getRarityTextColor(card.rarity)}>
-                    {card.rarity || "Rare"}
-                  </span>
+                <td className="px-4 py-3 bg-gray-200">
+                  <div className="flex items-center gap-2">
+                    <span className={`${(() => {
+                      const normalizedRarity = card.rarity?.toLowerCase();
+                      const mainRarities = ['common', 'uncommon', 'rare', 'mythic'];
+
+                      if (mainRarities.includes(normalizedRarity)) {
+                        return getRaritySolidColor(card.rarity);
+                      } else {
+                        return 'bg-blue-500';
+                      }
+                    })()} rounded-full w-4 h-4 ${card.rarity?.toLowerCase() === 'common' ? 'border border-black' : ''}`}></span>
+                    <span className="capitalize">
+                      {card.rarity || "Rare"}
+                    </span>
+                  </div>
                 </td>
               </tr>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-3 font-medium text-gray-700">Oracle</td>
-                <td className="px-4 py-3">
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Oracle</td>
+                <td className="px-4 py-3 bg-white">
                   {card.oracleText ? (
                     parseOracleText(card.oracleText)
                   ) : (
@@ -311,41 +357,40 @@ const CardInfoTab = ({ card }) => {
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Flavor Text</td>
-                <td className="px-4 py-3 italic">{card.flavorText || "-"}</td>
+                <td className="px-4 py-3 bg-gray-200 italic">{card.flavorText || "-"}</td>
               </tr>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-3 font-medium text-gray-700">Expansion</td>
-                <td className="px-4 py-3">
-                  <button
-                    onClick={handleExpansionClick}
-                    className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
-                  >
-                    {card.set_name || card.setName || "Urza's Destiny"}
-                  </button>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Expansion</td>
+                <td className="px-4 py-3 bg-white">
+                  <div className="flex items-center gap-1">
+                    {(() => {
+                      const setCode = card.set || card.setCode || card.set_code;
+                      const setIconUrl = getSetIcon(setCode);
+                      return setIconUrl ? (
+                        <img
+                          src={setIconUrl}
+                          alt={`${card.set_name || card.setName || "Urza's Destiny"} icon`}
+                          className="w-4 h-4"
+                        />
+                      ) : null;
+                    })()}
+                    <button
+                      onClick={handleExpansionClick}
+                      className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
+                    >
+                      {card.set_name || card.setName || "Urza's Destiny"}
+                    </button>
+                  </div>
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Block</td>
-                <td className="px-4 py-3">{card.block || "Urza"}</td>
-              </tr>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-3 font-medium text-gray-700">Illustrator</td>
-                <td className="px-4 py-3">
-                  <a href="#" className="text-blue-600 hover:underline">
-                    {card.artistName || "Jim Nelson"}
-                  </a>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Illustrator</td>
+                <td className="px-4 py-3 bg-gray-200">
+                  {card.artistName || "Jim Nelson"}
                 </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Legality</td>
-                <td className="px-4 py-3">Legacy, Vintage, Commander, Middle School</td>
               </tr>
             </tbody>
           </table>
-        </div>
-        <div className="px-4 py-3 text-center text-sm text-blue-600 space-x-4">
-          <a href="#" className="hover:underline">Regarding Item Images on the Website.</a>
-          <a href="#" className="hover:underline">View our returns policy here.</a>
         </div>
       </div>
 
