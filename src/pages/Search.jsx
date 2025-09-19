@@ -8,6 +8,7 @@ import SearchFilters from '../components/SearchFilters';
 import Pagination from '../components/Pagination';
 import useSearchFiltersStore from '../store/searchFiltersStore';
 import usePaginationStore from '../store/paginationStore';
+import RecentlyViewed from '../components/RecentlyViewed';
 
 const Search = () => {
   const { t } = useTranslation();
@@ -401,6 +402,9 @@ const Search = () => {
             totalPages={totalPages}
             onPageChange={handleLocalPageChange}
           />
+
+          {/* Recently Viewed Section */}
+          <RecentlyViewed />
         </div>
       </div>
     </div>

@@ -16,6 +16,7 @@ import Settings from "./pages/account/Settings";
 import BulkSell from "./pages/BulkSell";
 import RequireAuth from "./pages/RequireAuth";
 import CartInitializer from "./components/CartInitializer";
+import RecentlyViewed from "./components/RecentlyViewed";
 import "./App.css";
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
                         <Trends />
                       </div>
                     </div>
+                    <RecentlyViewed />
                   </div>
                 </main>
               </>
