@@ -4,7 +4,7 @@ import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor } from "../utils/rarity";
 import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
-import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols";
+import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
