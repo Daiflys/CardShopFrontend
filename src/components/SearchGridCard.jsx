@@ -10,23 +10,30 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
   const { addItemToCart, loading } = useCartStore();
   
   const availableCount = getAvailableCount(card);
-  const hasStock = availableCount > 0;
   const isAvailable = card.available !== false; // Default to true if not specified
-  
+
   // State for quantity selector
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
 
   // Analyze cardsToSell for NM availability
   const cardsToSell = card.cardsToSell || [];
-  const nmCards = cardsToSell.filter(cardToSell => 
+  const nmCards = cardsToSell.filter(cardToSell =>
     cardToSell.condition && cardToSell.condition.toUpperCase() === 'NM'
   );
-  
-  const hasNMStock = nmCards.length > 0;
-  const nmStock = nmCards.reduce((total, cardToSell) => 
+
+  const nmStock = nmCards.reduce((total, cardToSell) =>
     total + (cardToSell.quantity || 0), 0
   );
+  const hasNMStock = nmStock > 0;
+
+  // Calculate total stock from cardsToSell (all conditions)
+  const totalStock = cardsToSell.reduce((total, cardToSell) =>
+    total + (cardToSell.quantity || 0), 0
+  );
+
+  // hasStock should be true if there are actual cardsToSell with quantity > 0
+  const hasStock = totalStock > 0;
   const cheapestNMPrice = hasNMStock 
     ? Math.min(...nmCards.map(cardToSell => cardToSell.price || 0))
     : 0;
@@ -166,8 +173,8 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
         
         {/* Bottom section with price and actions */}
         <div className="mt-auto mb-2 sm:mb-3">
-          {isAvailable && hasNMStock ? (
-            /* Available with NM stock */
+          {hasNMStock ? (
+            /* Has NM stock - can add to cart */
             <>
               {/* NM Price and Stock info */}
               <div className="flex justify-end items-center mb-2">
@@ -229,8 +236,8 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
                 )}
               </button>
             </>
-          ) : isAvailable && hasStock ? (
-            /* Available but no NM stock */
+          ) : hasStock && !hasNMStock ? (
+            /* Has stock but no NM - has other conditions only */
             <>
               {/* Regular price */}
               <div className="flex justify-end items-center mb-2">
@@ -251,7 +258,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
               </button>
             </>
           ) : (
-            /* Not available */
+            /* No stock at all */
             <>
               {/* Regular price */}
               <div className="flex justify-end items-center mb-2">
