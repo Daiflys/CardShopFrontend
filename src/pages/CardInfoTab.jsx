@@ -8,6 +8,7 @@ import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSy
 import { getSetIcon } from "../data/sets.js";
 import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
 import RecentlyViewed from "../components/RecentlyViewed.jsx";
+import OtherVersions from "../components/OtherVersions.jsx";
 import { getLanguageFlag } from "../utils/languageFlags.jsx";
 
 const CardInfoTab = ({ card }) => {
@@ -59,45 +60,6 @@ const CardInfoTab = ({ card }) => {
 
   if (!card) return null;
 
-  // Mock related cards for now (will be implemented later)
-  const relatedCards = [
-    {
-      id: 1,
-      name: "Replenish",
-      language: "JP",
-      price: 14000,
-      stock: 8,
-      condition: "NM",
-      imageUrl: card.imageUrl
-    },
-    {
-      id: 2,
-      name: "Replenish",
-      language: "EN",
-      price: 18000,
-      stock: 5,
-      condition: "NM",
-      imageUrl: card.imageUrl
-    },
-    {
-      id: 3,
-      name: "Replenish",
-      language: "EN",
-      price: 70000,
-      stock: 0,
-      condition: "Foil",
-      imageUrl: card.imageUrl
-    },
-    {
-      id: 4,
-      name: "Replenish",
-      language: "JP",
-      price: 75000,
-      stock: 2,
-      condition: "Foil",
-      imageUrl: card.imageUrl
-    },
-  ];
 
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-8">
@@ -416,90 +378,9 @@ const CardInfoTab = ({ card }) => {
         </div>
       </div>
 
-      {/* Section 3: Related Cards */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Items: {relatedCards.length}</h2>
-            <div className="flex items-center gap-2">
-              <label className="text-sm">
-                <input type="checkbox" className="mr-1" />
-                In stock only
-              </label>
-              <div className="flex gap-1">
-                <span className="px-2 py-1 bg-gray-200 text-xs rounded">Normal</span>
-                <span className="px-2 py-1 bg-green-200 text-xs rounded">Foil</span>
-                <span className="px-2 py-1 bg-red-200 text-xs rounded">JP</span>
-                <span className="px-2 py-1 bg-pink-200 text-xs rounded">EN</span>
-                <span className="px-2 py-1 bg-purple-200 text-xs rounded">Other</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center justify-between mt-2 text-sm">
-            <div>
-              Display Order: <strong>Price Descending</strong> • Price Ascending
-            </div>
-            <div>Page 1/1 / Last</div>
-          </div>
-        </div>
 
-        <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {relatedCards.map((relatedCard) => (
-              <div key={relatedCard.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="text-center mb-3">
-                  <img
-                    src={relatedCard.imageUrl}
-                    alt={relatedCard.name}
-                    className="w-24 h-32 object-cover mx-auto rounded border"
-                  />
-                </div>
-                <div className="text-center text-xs mb-2">
-                  [{relatedCard.language}] 『{relatedCard.name}』 [{relatedCard.condition}]
-                </div>
-                <div className="text-center text-lg font-bold mb-2">
-                  ¥ {relatedCard.price.toLocaleString()}
-                </div>
-                <div className="text-center text-sm text-gray-600 mb-3">
-                  {relatedCard.stock > 0
-                    ? `[NM Stock:${relatedCard.stock}]`
-                    : `[NM Stock:${relatedCard.stock}]`
-                  }
-                </div>
-
-                {relatedCard.stock > 0 ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <label className="text-sm">Qty</label>
-                      <button className="border px-2 py-1 text-sm">−</button>
-                      <span className="px-3 py-1 border text-sm">1</span>
-                      <button className="border px-2 py-1 text-sm">+</button>
-                    </div>
-                    <button className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded text-sm">
-                      Add to Cart 🛒
-                    </button>
-                    <div className="text-xs text-center text-gray-500">
-                      Weekly Sold : 3 items
-                    </div>
-                    <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-1 rounded text-sm">
-                      Same Name Search
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <button className="w-full bg-gray-300 text-gray-600 py-2 rounded text-sm cursor-not-allowed">
-                      Want Notice ✉
-                    </button>
-                    <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-1 rounded text-sm">
-                      Same Name Search
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Other Versions Section */}
+      <OtherVersions card={card} currentCardId={card?.id} />
 
       {/* Recently Viewed Section */}
       <RecentlyViewed />
