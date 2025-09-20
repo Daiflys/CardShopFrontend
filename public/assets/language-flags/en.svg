@@ -1,0 +1,17 @@
+<svg width="20" height="15" viewBox="0 0 20 15" xmlns="http://www.w3.org/2000/svg">
+  <!-- British flag -->
+  <rect width="20" height="15" fill="#012169"/>
+  <polygon points="0,0 20,0 20,15 0,15" fill="#012169"/>
+  <!-- White diagonals -->
+  <polygon points="0,0 20,15 20,12.5 2.5,0" fill="#fff"/>
+  <polygon points="0,15 20,0 17.5,0 0,12.5" fill="#fff"/>
+  <!-- Red diagonals -->
+  <polygon points="0,0 20,15 20,11.25 3.75,0" fill="#C8102E"/>
+  <polygon points="0,15 20,0 16.25,0 0,11.25" fill="#C8102E"/>
+  <!-- White cross -->
+  <rect width="20" height="5" y="5" fill="#fff"/>
+  <rect width="3.33" height="15" x="8.33" fill="#fff"/>
+  <!-- Red cross -->
+  <rect width="20" height="3" y="6" fill="#C8102E"/>
+  <rect width="2" height="15" x="9" fill="#C8102E"/>
+</svg>

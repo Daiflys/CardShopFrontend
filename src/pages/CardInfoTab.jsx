@@ -8,6 +8,7 @@ import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSy
 import { getSetIcon } from "../data/sets.js";
 import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
 import RecentlyViewed from "../components/RecentlyViewed.jsx";
+import { getLanguageFlag } from "../utils/languageFlags.jsx";
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
@@ -120,9 +121,20 @@ const CardInfoTab = ({ card }) => {
         {/* Cards to Sell Table */}
         <div className="flex-1">
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-red-600 mb-2">
-              {card.name ?? "Unknown"} [UDS]
-            </h1>
+            <div className="flex items-center gap-3 mb-2">
+              {/* Language Flag */}
+              <div className="transform scale-150">
+                {(() => {
+                  const language = (card.language || card.lang || 'en').toLowerCase();
+                  // Handle common variations
+                  const normalizedLanguage = language === 'jp' ? 'ja' : language;
+                  return getLanguageFlag(normalizedLanguage, 'normal');
+                })()}
+              </div>
+              <h1 className="text-2xl font-bold text-gray-700 mb-0">
+                {card.name ?? "Unknown"}
+              </h1>
+            </div>
             <div className="text-sm text-gray-600 mb-4">
               Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; Mythic Rare &amp; Rare
             </div>

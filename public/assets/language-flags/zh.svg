@@ -1,0 +1,5 @@
+<svg width="20" height="15" viewBox="0 0 20 15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chinese flag -->
+  <rect width="20" height="15" fill="#EE1C25"/>
+  <polygon points="4,3 5,5 3,4 5,4 3,5" fill="#FFFF00"/>
+</svg>
