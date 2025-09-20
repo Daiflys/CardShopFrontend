@@ -36,13 +36,13 @@ export const minimalTheme = {
   components: {
     header: {
       container: "w-full bg-white border-b border-gray-200",
-      desktopContainer: "flex items-center justify-between px-6 py-3 max-w-7xl mx-auto",
-      mobileContainer: "md:hidden",
+      desktopContainer: "hidden lg:flex items-center justify-between px-8 py-4 w-full max-w-none",
+      mobileContainer: "lg:hidden",
       logo: "text-xl font-semibold text-gray-900 cursor-pointer hover:text-gray-700 transition-colors",
       logoMobile: "text-xl font-semibold text-gray-900 cursor-pointer hover:text-gray-700 transition-colors",
       navigation: "flex gap-6 text-gray-600",
       navigationLink: "hover:text-gray-900 transition-colors text-sm font-medium",
-      searchContainer: "flex-1 max-w-lg mx-8",
+      searchContainer: "w-96 mx-6 relative",
       searchInput: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-gray-50",
       searchDropdown: "absolute z-50 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto",
       searchItem: "px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 cursor-pointer",

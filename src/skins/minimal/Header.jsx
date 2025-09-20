@@ -14,43 +14,79 @@ const MinimalHeader = ({
 }) => {
   return (
     <header
-      className="w-full bg-white border-b border-gray-200"
+      className={theme.components.header.container}
     >
-      {/* Single row layout - Minimal design */}
-      <div className="flex items-center justify-between px-6 py-3 max-w-7xl mx-auto">
-        {/* Logo */}
-        <div className="flex-shrink-0">
+      {/* Desktop Header */}
+      <div className={theme.components.header.desktopContainer}>
+        {/* Logo and Navigation */}
+        <div className="flex items-center gap-4">
           {logo}
+          <nav className={theme.components.header.navigation}>
+            {navigation}
+          </nav>
         </div>
 
-        {/* Desktop: Search in center */}
-        <div className="hidden md:flex flex-1 max-w-lg mx-8">
+        {/* Search */}
+        <div className={theme.components.header.searchContainer}>
           {searchComponent}
         </div>
 
-        {/* Right side: User menu + language */}
-        <div className="flex items-center gap-4">
-          {/* Mobile search toggle */}
-          <button
-            onClick={onMobileSearchToggle}
-            className="md:hidden p-2 text-gray-600 hover:text-gray-900"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
-
+        {/* User Menu and Language */}
+        <div className="flex gap-4 items-center">
           {userMenu}
           {languageSwitcher}
         </div>
       </div>
 
-      {/* Mobile search dropdown */}
-      {mobileSearchOpen && (
-        <div className="md:hidden px-6 py-3 border-t border-gray-100 bg-gray-50">
-          {searchComponent}
+      {/* Mobile Header */}
+      <div className={theme.components.header.mobileContainer}>
+        {/* Top bar with logo and hamburger */}
+        <div className={theme.components.header.mobileTopBar}>
+          {logo}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onMobileSearchToggle}
+              className={theme.components.header.mobileMenuButton}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+            <button
+              onClick={onMobileMenuToggle}
+              className={theme.components.header.mobileMenuButton}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Search */}
+        {mobileSearchOpen && (
+          <div className={theme.components.header.mobileSearch}>
+            {searchComponent}
+          </div>
+        )}
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className={theme.components.header.mobileMenu}>
+            <nav className={theme.components.header.mobileMenuNav}>
+              {navigation}
+              {userMenu}
+              <div className={theme.components.header.mobileLanguageSwitcher}>
+                {languageSwitcher}
+              </div>
+            </nav>
+          </div>
+        )}
+      </div>
     </header>
   );
 };
