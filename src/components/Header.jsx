@@ -6,6 +6,7 @@ import { validateToken } from "../api/auth";
 import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
 import LanguageSwitcherFlags from "./LanguageSwitcherFlags";
+import Logo from "./Logo";
 import { getSetIcon } from "../data/sets";
 import { useComponent } from "../hooks/useComponent.js";
 import { useTheme } from "../hooks/useTheme.js";
@@ -183,12 +184,12 @@ const Header = ({ onThemeSettingsClick }) => {
 
   // Prepare components for the skin
   const logoComponent = (
-    <span
-      className={mobileMenuOpen || mobileSearchOpen ? theme.components.header.logoMobile : theme.components.header.logo}
+    <div
+      className={`${mobileMenuOpen || mobileSearchOpen ? theme.components.header.logoMobile : theme.components.header.logo} cursor-pointer`}
       onClick={() => navigate('/')}
     >
-      トレカ市場
-    </span>
+      <Logo className="w-8 h-8" />
+    </div>
   );
 
   const navigationComponent = null;
