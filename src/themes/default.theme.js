@@ -66,6 +66,16 @@ export const defaultTheme = {
       mobileSignupButton: "block w-full px-4 py-3 bg-gradient-to-r from-sky-600 to-blue-600 text-white rounded-md hover:from-sky-700 hover:to-blue-700 transition-all shadow-md text-center font-medium",
       mobileLanguageSwitcher: "pt-3 border-t border-sky-200",
       themeButton: "p-2 text-sky-700 hover:bg-sky-100 rounded-md transition-colors"
+    },
+    footer: {
+      container: "bg-gradient-to-r from-slate-900 to-slate-800 text-white",
+      content: "max-w-7xl mx-auto px-4 py-12",
+      columnTitle: "text-lg font-semibold mb-4 text-sky-300",
+      link: "text-slate-300 hover:text-sky-300 transition-colors cursor-pointer inline-block",
+      divider: "border-t border-slate-700 pt-8",
+      logoContainer: "text-sky-300",
+      socialLink: "text-slate-400 hover:text-sky-300 transition-colors",
+      copyright: "text-sm text-slate-400"
     }
   }
 };

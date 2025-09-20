@@ -66,6 +66,16 @@ export const minimalTheme = {
       mobileSignupButton: "block w-full px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-center font-medium text-sm",
       mobileLanguageSwitcher: "pt-3 border-t border-gray-200",
       themeButton: "p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+    },
+    footer: {
+      container: "bg-gray-900 text-white",
+      content: "max-w-7xl mx-auto px-4 py-12",
+      columnTitle: "text-lg font-semibold mb-4 text-gray-100",
+      link: "text-gray-300 hover:text-white transition-colors cursor-pointer inline-block",
+      divider: "border-t border-gray-700 pt-8",
+      logoContainer: "text-gray-300",
+      socialLink: "text-gray-400 hover:text-white transition-colors",
+      copyright: "text-sm text-gray-400"
     }
   }
 };

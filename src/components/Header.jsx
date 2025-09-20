@@ -201,7 +201,7 @@ const Header = ({ onThemeSettingsClick }) => {
           type="text"
           id={mobileSearchOpen ? "mobile-search-cards" : "search-cards"}
           name="search"
-          placeholder={t('common.search') + ' トレカ市場...'}
+          placeholder={t('common.search')}
           className={theme.components.header.searchInput}
           value={search}
           onChange={handleInputChange}

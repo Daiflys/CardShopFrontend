@@ -171,11 +171,56 @@ components: {
 5. **❌ Usar positioning absoluto sin relative container** - Causa overflow
 6. **❌ No incluir todas las clases requeridas** - Causa errores cuando se cambia de tema
 
+## Footer Component
+
+### Estructura del Footer
+```jsx
+<footer className={theme.components.footer.container}>
+  <div className={theme.components.footer.content}>
+    {/* 3 columnas en desktop, 1 en mobile */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+      {/* Columna 1: About */}
+      {/* Columna 2: Customer Service */}
+      {/* Columna 3: Legal */}
+    </div>
+
+    <div className={theme.components.footer.divider}>
+      {/* Logo centrado */}
+      <div className="flex justify-center mb-6">
+        <Logo />
+      </div>
+
+      {/* Social + Copyright */}
+      <div className="flex flex-col md:flex-row justify-between items-center">
+        {/* Social Media */}
+        {/* Copyright */}
+      </div>
+    </div>
+  </div>
+</footer>
+```
+
+### Clases CSS Requeridas para Footer
+```javascript
+footer: {
+  container: "bg-[color] text-white",
+  content: "max-w-7xl mx-auto px-4 py-12",
+  columnTitle: "text-lg font-semibold mb-4 text-[color]",
+  link: "text-[color] hover:text-[color] transition-colors cursor-pointer block",
+  divider: "border-t border-[color] pt-8",
+  logoContainer: "text-[color]",
+  socialLink: "text-[color] hover:text-[color] transition-colors",
+  copyright: "text-sm text-[color]"
+}
+```
+
 ## ✅ Componentes Verificados
 
-- [x] Default Skin + Default Theme
-- [x] Minimal Skin + Minimal Theme
-- [x] Default Skin + Minimal Theme
-- [x] Minimal Skin + Default Theme
+- [x] Header: Default Skin + Default Theme
+- [x] Header: Minimal Skin + Minimal Theme
+- [x] Header: Default Skin + Minimal Theme
+- [x] Header: Minimal Skin + Default Theme
+- [x] Footer: Default Theme
+- [x] Footer: Minimal Theme
 
-Todos los skins y temas ahora siguen las mismas reglas responsive y son intercambiables.
+Todos los componentes ahora siguen las mismas reglas responsive y son intercambiables.

@@ -18,6 +18,7 @@ import RequireAuth from "./pages/RequireAuth";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
 import ThemeDemo from "./components/ThemeDemo";
+import Footer from "./components/Footer";
 import "./App.css";
 
 function App() {
@@ -73,6 +74,7 @@ function App() {
               <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>
+          <Footer />
         </div>
       </BrowserRouter>
     </CartInitializer>
