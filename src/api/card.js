@@ -96,14 +96,26 @@ const realGetCardsToSellById = async (cardId, page = 1, size = 20) => {
 const realGetAllCards = async (page = 1, size = 20) => {
   console.log("fetching all cards with pagination", { page, size });
   const params = createPaginationParams(page, size);
-  
+
   const response = await fetch(`${API_BASE_URL}/cards?${params.toString()}`);
   if (!response.ok) throw new Error("Error fetching all cards");
   return response.json();
 };
 
+const realGetCardsByOracleId = async (oracleId, page = 1, size = 50) => {
+  console.log("going to search for cards with oracle ID", oracleId);
+  const params = createPaginationParams(page, size);
+
+  const response = await fetch(`${API_BASE_URL}/cards/oracleId/${encodeURIComponent(oracleId)}?${params.toString()}`);
+  if (!response.ok) throw new Error("Error fetching cards by oracle ID");
+  const data = await response.json();
+  console.log("Oracle ID response:", data);
+  return data;
+};
+
 //export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail; 
 export const getCardDetail = realGetCardDetail;
-export const getCardsToSell = realGetCardsToSell; 
+export const getCardsToSell = realGetCardsToSell;
 export const getCardsToSellById = realGetCardsToSellById;
 export const getAllCards = realGetAllCards;
+export const getCardsByOracleId = realGetCardsByOracleId;

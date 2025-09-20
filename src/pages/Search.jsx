@@ -9,6 +9,7 @@ import Pagination from '../components/Pagination';
 import useSearchFiltersStore from '../store/searchFiltersStore';
 import usePaginationStore from '../store/paginationStore';
 import RecentlyViewed from '../components/RecentlyViewed';
+import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
 
 const Search = () => {
   const { t } = useTranslation();
@@ -153,29 +154,7 @@ const Search = () => {
     navigate(`/card/${card.id}`);
   };
 
-  const formatPrice = (card) => {
-    const price = getLowestPrice(card);
-    if (!price || price === 0) {
-      return t('product.outOfStock');
-    }
-    return `€${price.toFixed(2)}`;
-  };
-
-  const getLowestPrice = (card) => {
-    if (card.price) return card.price;
-    if (card.from) return card.from;
-    if (card.prices && card.prices.length > 0) {
-      return Math.min(...card.prices.map(p => p.price));
-    }
-    return null;
-  };
-
-  const getAvailableCount = (card) => {
-    if (card.available) return card.available;
-    if (card.stock) return card.stock;
-    if (card.quantity) return card.quantity;
-    return 0;
-  };
+  const formatPrice = createFormatPrice(t);
 
   const filteredResults = rarityFilter === 'all' 
     ? results 
