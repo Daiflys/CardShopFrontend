@@ -253,6 +253,44 @@ const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
   }
 };
 
+// --- ADVANCED SEARCH ---
+const realAdvancedSearchCards = async (criteria = {}, page = 0, size = 20, sortBy = null, sortDirection = null) => {
+  const additionalParams = {};
+
+  // Add search criteria
+  Object.keys(criteria).forEach(key => {
+    const value = criteria[key];
+    if (value !== undefined && value !== null && value !== '') {
+      // Handle arrays (like languages, colors)
+      if (Array.isArray(value) && value.length > 0) {
+        additionalParams[key] = value.join(',');
+      } else if (!Array.isArray(value)) {
+        additionalParams[key] = value;
+      }
+    }
+  });
+
+  // Add sorting
+  if (sortBy) {
+    additionalParams.sortBy = sortBy;
+  }
+  if (sortDirection) {
+    additionalParams.sortDirection = sortDirection;
+  }
+
+  const params = createPaginationParamsRaw(page, size, additionalParams);
+
+  const finalUrl = `${API_BASE_URL}/cards/advanced-search?${params.toString()}`;
+  console.log('Advanced search URL:', finalUrl);
+
+  const response = await fetch(finalUrl);
+  if (!response.ok) throw new Error("Advanced search failed");
+  const data = await response.json();
+
+  return formatPaginatedCardsResponse(data);
+};
+
 export const searchCards = realSearchCards;
 export const searchCardsBySet = realSearchCardsBySet;
 export const searchCardsBulk = realSearchCardsBulk;
+export const advancedSearchCards = realAdvancedSearchCards;

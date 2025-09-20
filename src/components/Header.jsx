@@ -192,7 +192,30 @@ const Header = ({ onThemeSettingsClick }) => {
     </div>
   );
 
-  const navigationComponent = null;
+  const navigationComponent = (
+    <nav className={theme.components.header.navigation}>
+      <a
+        href="/search"
+        className={theme.components.header.navigationLink}
+        onClick={(e) => {
+          e.preventDefault();
+          navigate('/search');
+        }}
+      >
+        Search
+      </a>
+      <a
+        href="/advanced-search"
+        className={theme.components.header.navigationLink}
+        onClick={(e) => {
+          e.preventDefault();
+          navigate('/advanced-search');
+        }}
+      >
+        Advanced Search
+      </a>
+    </nav>
+  );
 
   const searchComponent = (
     <div className="relative" ref={inputRef}>
