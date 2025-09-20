@@ -170,7 +170,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
             {card.rarity && <span className="capitalize">{card.rarity}</span>}
           </div>
         </div>
-        
+
         {/* Bottom section with price and actions */}
         <div className="mt-auto mb-2 sm:mb-3">
           {hasNMStock ? (

@@ -1,0 +1,6 @@
+<svg width="20" height="15" viewBox="0 0 20 15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Russian flag -->
+  <rect width="20" height="5" fill="#fff"/>
+  <rect width="20" height="5" y="5" fill="#0033A0"/>
+  <rect width="20" height="5" y="10" fill="#DA020E"/>
+</svg>

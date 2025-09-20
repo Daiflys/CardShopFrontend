@@ -1,0 +1,6 @@
+<svg width="20" height="15" viewBox="0 0 20 15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Korean flag -->
+  <rect width="20" height="15" fill="#fff"/>
+  <circle cx="10" cy="7.5" r="6" fill="#003478" fill-opacity="0.3"/>
+  <circle cx="10" cy="7.5" r="3" fill="#CD2E3A" fill-opacity="0.6"/>
+</svg>

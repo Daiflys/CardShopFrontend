@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import BannerNew from "./components/BannerNew";
@@ -17,14 +17,21 @@ import BulkSell from "./pages/BulkSell";
 import RequireAuth from "./pages/RequireAuth";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
+import ThemeDemo from "./components/ThemeDemo";
 import "./App.css";
 
 function App() {
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+
   return (
     <CartInitializer>
       <BrowserRouter>
         <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f0f9ff)' }}>
-          <Header />
+          <Header onThemeSettingsClick={() => setIsThemeModalOpen(true)} />
+          <ThemeDemo
+            isOpen={isThemeModalOpen}
+            onClose={() => setIsThemeModalOpen(false)}
+          />
           <Routes>
             <Route path="/" element={
               <>

@@ -1,0 +1,6 @@
+<svg width="20" height="15" viewBox="0 0 20 15" xmlns="http://www.w3.org/2000/svg">
+  <!-- French flag -->
+  <rect width="20" height="15" fill="#fff"/>
+  <rect width="6.67" height="15" fill="#002654"/>
+  <rect width="6.67" height="15" x="13.33" fill="#CE1126"/>
+</svg>
