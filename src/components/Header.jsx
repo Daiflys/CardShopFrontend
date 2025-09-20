@@ -191,11 +191,7 @@ const Header = ({ onThemeSettingsClick }) => {
     </span>
   );
 
-  const navigationComponent = (
-    <a href="#" className={theme.components.header.navigationLink}>
-      {t('homepage.trendingCards').toUpperCase()}
-    </a>
-  );
+  const navigationComponent = null;
 
   const searchComponent = (
     <div className="relative" ref={inputRef}>

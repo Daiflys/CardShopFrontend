@@ -42,7 +42,7 @@ export const defaultTheme = {
       logoMobile: "text-xl font-bold text-sky-700 cursor-pointer hover:text-sky-600 transition-colors",
       navigation: "flex gap-4 text-slate-600",
       navigationLink: "hover:text-sky-600 transition-colors",
-      searchContainer: "flex-1 mx-6 relative",
+      searchContainer: "w-96 mx-6 relative",
       searchInput: "w-full px-3 py-2 border border-sky-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 bg-white/80",
       searchDropdown: "absolute z-[60] left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto",
       searchItem: "px-4 py-3 hover:bg-sky-50 border-b border-sky-100 last:border-b-0 cursor-pointer",
