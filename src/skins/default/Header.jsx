@@ -78,7 +78,30 @@ const DefaultHeader = ({
         {mobileMenuOpen && (
           <div className={theme.components.header.mobileMenu}>
             <nav className={theme.components.header.mobileMenuNav}>
-              {navigation}
+              {navigation && (
+                <div className="space-y-2 mb-4 pb-4 border-b border-sky-200">
+                  <a
+                    href="/search"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = '/search';
+                    }}
+                    className={theme.components.header.mobileMenuLink}
+                  >
+                    Search
+                  </a>
+                  <a
+                    href="/advanced-search"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = '/advanced-search';
+                    }}
+                    className={theme.components.header.mobileMenuLink}
+                  >
+                    Advanced Search
+                  </a>
+                </div>
+              )}
               {userMenu}
               <div className={theme.components.header.mobileLanguageSwitcher}>
                 {languageSwitcher}
