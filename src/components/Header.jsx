@@ -185,8 +185,17 @@ const Header = ({ onThemeSettingsClick }) => {
   // Prepare components for the skin
   const logoComponent = (
     <div
-      className={`${mobileMenuOpen || mobileSearchOpen ? theme.components.header.logoMobile : theme.components.header.logo} cursor-pointer`}
+      className={`${mobileMenuOpen || mobileSearchOpen ? theme.components.header.logoMobile : theme.components.header.logo} cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 rounded-md`}
       onClick={() => navigate('/')}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          navigate('/');
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label="Go to homepage"
     >
       <Logo className="w-8 h-8" />
     </div>
@@ -229,11 +238,27 @@ const Header = ({ onThemeSettingsClick }) => {
           value={search}
           onChange={handleInputChange}
           onFocus={() => setShowDropdown(results.length > 0)}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowDown' && results.length > 0) {
+              e.preventDefault();
+              const firstItem = document.querySelector('[data-search-item="0"]');
+              if (firstItem) firstItem.focus();
+            }
+          }}
           autoComplete="off"
+          aria-label={t('common.search') || 'Search for cards'}
+          aria-expanded={showDropdown}
+          aria-haspopup="listbox"
+          aria-describedby={showDropdown ? 'search-results' : undefined}
         />
       </form>
       {showDropdown && (
-        <ul className={theme.components.header.searchDropdown}>
+        <ul
+          id="search-results"
+          className={theme.components.header.searchDropdown}
+          role="listbox"
+          aria-label="Search results"
+        >
           {loading ? (
             <li className="px-4 py-2 text-gray-500">{t('common.loading')}</li>
           ) : results.length === 0 ? (
@@ -242,11 +267,34 @@ const Header = ({ onThemeSettingsClick }) => {
             results.map(card => (
               <li
                 key={card.id}
-                className={theme.components.header.searchItem}
+                className={`${theme.components.header.searchItem} focus:outline-none focus:ring-2 focus:ring-sky-400`}
                 onClick={() => {
                   handleResultClick(card);
                   if (mobileSearchOpen) setMobileSearchOpen(false);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleResultClick(card);
+                    if (mobileSearchOpen) setMobileSearchOpen(false);
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prevItem = document.querySelector(`[data-search-item="${results.indexOf(card) - 1}"]`);
+                    if (prevItem) {
+                      prevItem.focus();
+                    } else {
+                      document.getElementById(mobileSearchOpen ? 'mobile-search-cards' : 'search-cards')?.focus();
+                    }
+                  } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const nextItem = document.querySelector(`[data-search-item="${results.indexOf(card) + 1}"]`);
+                    if (nextItem) nextItem.focus();
+                  }
+                }}
+                tabIndex={0}
+                role="option"
+                data-search-item={results.indexOf(card)}
+                aria-selected={false}
               >
                 <div className="flex items-center gap-2">
                   {card.set_code && getSetIcon(card.set_code) && (

@@ -39,7 +39,7 @@ function App() {
               <>
                 <BannerNew />
                 <main className="w-full">
-                  <div className="w-full px-3 py-6">
+                  <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
                     <div className="flex gap-0 items-start max-w-7xl mx-auto">
                       <div className="flex-shrink-0 hidden xl:block" style={{ marginLeft: '-3rem' }}>
                         <SetsSidebar />
@@ -53,17 +53,17 @@ function App() {
                 </main>
               </>
             } />
-            <Route path="/login" element={<main className="max-w-6xl mx-auto"><Login /></main>} />
-            <Route path="/register" element={<main className="max-w-6xl mx-auto"><Register /></main>} />
+            <Route path="/login" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Login /></main>} />
+            <Route path="/register" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Register /></main>} />
             <Route path="/search" element={<main className="max-w-7xl mx-auto"><Search /></main>} />
             <Route path="/advanced-search" element={<AdvancedSearch />} />
-            <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto"><CardDetail /></main>} />
-            <Route path="/checkout" element={<main className="max-w-6xl mx-auto"><Checkout /></main>} />
+            <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><CardDetail /></main>} />
+            <Route path="/checkout" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Checkout /></main>} />
             <Route path="/bulk-sell" element={<RequireAuth><BulkSell /></RequireAuth>} />
             <Route
               path="/account/*"
               element={
-                <main className="max-w-6xl mx-auto">
+                <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                   <RequireAuth>
                     <AccountLayout />
                   </RequireAuth>
