@@ -9,23 +9,32 @@ const MinimalFooter = ({
   socialMediaSection,
   copyrightSection
 }) => {
+  const footerStyles = theme?.components?.footer || {
+    container: "bg-gray-800 text-white",
+    content: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8",
+    logoContainer: "",
+    link: "text-gray-300 hover:text-white transition-colors cursor-pointer",
+    divider: "border-t border-gray-700 pt-6",
+    copyright: "text-gray-400"
+  };
+
   return (
-    <footer className={theme.components.footer.container}>
-      <div className={theme.components.footer.content}>
+    <footer className={footerStyles.container}>
+      <div className={footerStyles.content}>
         {/* Simplified single row layout for minimal design */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 mb-8">
           {/* Logo and main links */}
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className={theme.components.footer.logoContainer}>
+            <div className={footerStyles.logoContainer}>
               {logo}
             </div>
 
             {/* Simplified navigation - just essential links */}
             <div className="flex flex-wrap gap-4 text-center md:text-left text-sm">
-              <span className={theme.components.footer.link}>About</span>
-              <span className={theme.components.footer.link}>Contact</span>
-              <span className={theme.components.footer.link}>Help</span>
-              <span className={theme.components.footer.link}>Privacy</span>
+              <span className={footerStyles.link}>About</span>
+              <span className={footerStyles.link}>Contact</span>
+              <span className={footerStyles.link}>Help</span>
+              <span className={footerStyles.link}>Privacy</span>
             </div>
           </div>
 
@@ -36,8 +45,8 @@ const MinimalFooter = ({
         </div>
 
         {/* Copyright only */}
-        <div className={`${theme.components.footer.divider} text-center`}>
-          <div className={theme.components.footer.copyright}>
+        <div className={`${footerStyles.divider} text-center`}>
+          <div className={footerStyles.copyright}>
             {copyrightSection}
           </div>
         </div>

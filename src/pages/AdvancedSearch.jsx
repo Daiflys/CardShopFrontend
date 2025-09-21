@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdvancedSearchComponent from '../components/AdvancedSearch';
 import { advancedSearchCards } from '../api/search';
-import SearchGridCard from '../components/SearchGridCard';
+import SearchResultsGrid from '../components/SearchResultsGrid';
 import Pagination from '../components/Pagination';
+import PageLayout from '../components/PageLayout';
 import { useTheme } from '../hooks/useTheme';
 import { useTranslation } from 'react-i18next';
-import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
 
 const AdvancedSearchPage = () => {
   const navigate = useNavigate();
@@ -22,8 +22,6 @@ const AdvancedSearchPage = () => {
   const [sortBy, setSortBy] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
 
-  // Use centralized price formatting function
-  const formatPrice = createFormatPrice(t);
 
   const handleSearch = async (criteria, page = 0) => {
     setIsLoading(true);
@@ -55,33 +53,34 @@ const AdvancedSearchPage = () => {
     setCurrentPage(0);
   };
 
-  const handleCardClick = (cardId) => {
-    navigate(`/card/${cardId}`);
+  const handleCardClick = (card) => {
+    navigate(`/card/${card.id}`);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Back Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <PageLayout>
+        <div className="max-w-4xl mx-auto">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+          </div>
 
-        {/* Search Form */}
-        <div className="mb-8">
-          <AdvancedSearchComponent
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-        </div>
+          {/* Search Form */}
+          <div className="mb-8">
+            <AdvancedSearchComponent
+              onSearch={handleSearch}
+              onReset={handleReset}
+            />
+          </div>
 
         {/* Loading State */}
         {isLoading && (
@@ -150,64 +149,52 @@ const AdvancedSearchPage = () => {
             </div>
 
             {/* Cards Grid */}
-            {searchResults.totalElements > 0 ? (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
-                  {searchResults.content.map((card) => (
-                    <SearchGridCard
-                      key={card.id}
-                      card={card}
-                      onClick={() => handleCardClick(card.id)}
-                      formatPrice={formatPrice}
-                      getAvailableCount={getAvailableCount}
-                    />
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {searchResults.totalPages > 1 && (
-                  <div className="flex justify-center">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={searchResults.totalPages}
-                      onPageChange={handlePageChange}
-                    />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-12">
+            <SearchResultsGrid
+              cards={searchResults.totalElements > 0 ? searchResults.content : []}
+              onCardClick={handleCardClick}
+              loading={false}
+              error={null}
+              emptyMessage="Try adjusting your search criteria or removing some filters."
+              emptyIcon={
                 <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.438-.896-6.03-2.364C5.412 15.347 6.963 17 12 17s6.588-1.653 6.03-4.364A7.962 7.962 0 0112 15z" />
                 </svg>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No cards found</h3>
-                <p className="text-gray-600 mb-4">
-                  Try adjusting your search criteria or removing some filters.
-                </p>
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Reset Search
-                </button>
+              }
+              columnsConfig={{
+                mobile: 2,
+                tablet: 2,
+                desktop: 3
+              }}
+              containerClassName="mb-8"
+            />
+
+            {/* Pagination */}
+            {searchResults && searchResults.totalPages > 1 && (
+              <div className="flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={searchResults.totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             )}
           </div>
         )}
 
-        {/* Initial State */}
-        {!searchResults && !isLoading && !error && (
-          <div className="text-center py-12">
-            <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Advanced Search</h3>
-            <p className="text-gray-600">
-              Use the form above to search for cards with specific criteria.
-            </p>
-          </div>
-        )}
-      </div>
+          {/* Initial State */}
+          {!searchResults && !isLoading && !error && (
+            <div className="text-center py-12">
+              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Advanced Search</h3>
+              <p className="text-gray-600">
+                Use the form above to search for cards with specific criteria.
+              </p>
+            </div>
+          )}
+        </div>
+      </PageLayout>
     </div>
   );
 };

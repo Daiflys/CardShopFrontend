@@ -285,6 +285,62 @@ Each component receives pre-processed data:
 
 **You don't need to look for APIs or process data! Everything arrives automatically to your components.**
 
+## 🏗️ Layout System Requirements
+
+**CRITICAL: All content must respect the PageLayout system boundaries**
+
+### ✅ **Mandatory Layout Rules:**
+
+1. **Container Compliance:**
+   - ALL page content (except Header and Footer) MUST be placed inside PageLayout components
+   - Components must respect the defined maximum width containers:
+     - `max-w-7xl` (default pages)
+     - `max-w-4xl` (Advanced Search)
+     - `max-w-6xl` (Card Detail)
+
+2. **Sidebar Integration:**
+   - Use PageLayout's sidebar prop for left-side content (filters, collections)
+   - Sidebar width is standardized at 280px on desktop
+   - Mobile automatically converts to overlay behavior
+
+3. **Responsive Behavior:**
+   - Desktop: Sidebar visible alongside main content
+   - Mobile (<1024px): Sidebar becomes overlay with hamburger button
+   - Content must adapt gracefully to container changes
+
+### ❌ **Forbidden Practices:**
+
+- **DON'T** place content outside PageLayout containers
+- **DON'T** use custom max-width wrappers that conflict with the system
+- **DON'T** hardcode container widths instead of using PageLayout
+- **DON'T** break responsive behavior with fixed positioning
+
+### 🎯 **Layout Examples:**
+
+**✅ Correct Usage:**
+```jsx
+<PageLayout sidebar={<FiltersSidebar />}>
+  <YourContent />
+</PageLayout>
+```
+
+**❌ Incorrect Usage:**
+```jsx
+<div className="max-w-custom">
+  <YourContent />
+</div>
+```
+
+### 🔧 **Grid System:**
+
+All card grids use SearchResultsGrid with standardized configurations:
+- **Mobile**: 2 cards per row
+- **Tablet**: 2 cards per row
+- **Desktop**: 3 cards per row (max)
+
+**Exception:** Only Header and Footer components are allowed outside PageLayout as they require full-width behavior.
+
 ## 📄 Version History
 
+- **v1.1** - Added Layout System Requirements and container compliance rules
 - **v1.0** - Initial guide with basic examples

@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import BannerNew from "./components/BannerNew";
 import Trends from "./components/Trends";
 import SetsSidebar from "./components/SetsSidebar";
+import PageLayout from "./components/PageLayout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Search from "./pages/Search";
@@ -36,22 +37,18 @@ function App() {
           />
           <Routes>
             <Route path="/" element={
-              <>
-                <BannerNew />
-                <main className="w-full">
-                  <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-                    <div className="flex gap-0 items-start max-w-7xl mx-auto">
-                      <div className="flex-shrink-0 hidden xl:block" style={{ marginLeft: '-3rem' }}>
-                        <SetsSidebar />
-                      </div>
-                      <div className="flex-1 w-full">
-                        <Trends />
-                      </div>
-                    </div>
-                    <RecentlyViewed />
-                  </div>
-                </main>
-              </>
+              <main className="w-full">
+                <PageLayout
+                  sidebar={<SetsSidebar />}
+                  sidebarTitle="Collections"
+                  showMobileSidebarButton={false}
+                  containerClassName="py-6 lg:py-8"
+                >
+                  <BannerNew />
+                  <Trends />
+                  <RecentlyViewed />
+                </PageLayout>
+              </main>
             } />
             <Route path="/login" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Login /></main>} />
             <Route path="/register" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Register /></main>} />

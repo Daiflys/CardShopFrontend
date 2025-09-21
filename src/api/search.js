@@ -78,17 +78,17 @@ const mockSearchCards = async (name) => {
 const realSearchCards = async (name, filters = {}, page = 0, size = 21) => {
   // Build additional parameters for search
   const additionalParams = {};
-  
+
   console.log('Search filters received:', filters);
-  
+
   if (name && name.trim()) {
     additionalParams.name = name.trim();
   }
-  
+
   if (filters.collection && filters.collection !== 'All Collections') {
     additionalParams.set = filters.collection;
   }
-  
+
   // Handle language filters
   if (filters.languages && Object.keys(filters.languages).length > 0) {
     // Only include languages that are enabled (true)
@@ -96,14 +96,17 @@ const realSearchCards = async (name, filters = {}, page = 0, size = 21) => {
       .filter(([, isEnabled]) => isEnabled === true)
       .map(([lang]) => lang)
       .join(',');
-    
+
     console.log('Active languages:', activeLanguages);
-    
+
     if (activeLanguages) {
       additionalParams.languages = activeLanguages;
     }
   }
-  
+
+  // Add default sortBy parameter
+  additionalParams.sortBy = 'collector_number';
+
   // Create pagination parameters with additional search params (page is already 0-based)
   const params = createPaginationParamsRaw(page, size, additionalParams);
   
@@ -145,8 +148,8 @@ const mockSearchCardsWithFilters = async (name, filters = {}) => {
 
 // --- SEARCH BY SET ---
 const realSearchCardsBySet = async (setCode, page = 0, size = 21) => {
-  const params = createPaginationParamsRaw(page, size, { set: setCode });
-  
+  const params = createPaginationParamsRaw(page, size, { set: setCode, sortBy: 'collector_number' });
+
   const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
   if (!response.ok) throw new Error("Search by set error");
   const data = await response.json();
