@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { searchCards, searchCardsBySet } from '../api/search';
-import SearchGridCard from '../components/SearchGridCard';
+import SearchResultsGrid from '../components/SearchResultsGrid';
 import SearchListCard from '../components/SearchListCard';
 import SearchFilters from '../components/SearchFilters';
 import Pagination from '../components/Pagination';
 import useSearchFiltersStore from '../store/searchFiltersStore';
 import usePaginationStore from '../store/paginationStore';
+import RecentlyViewed from '../components/RecentlyViewed';
+import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
 
 const Search = () => {
   const { t } = useTranslation();
@@ -71,32 +73,11 @@ const Search = () => {
       
       console.log('Raw search response:', searchResults);
       
-      // Transform search results to card format
-      let processedResults;
-      if (searchResults.content) {
-        console.log('Pagination data:', {
-          number: searchResults.number,
-          totalPages: searchResults.totalPages,
-          totalElements: searchResults.totalElements,
-          size: searchResults.size
-        });
-
-        processedResults = {
-          content: searchResults.content.map(item => ({
-            ...item.card,
-            cardsToSell: item.cardsToSell || [],
-            available: item.cardsToSell ? item.cardsToSell.length : 0
-          })),
-          totalPages: searchResults.totalPages,
-          totalElements: searchResults.totalElements,
-          size: searchResults.size
-        };
-      } else {
-        processedResults = searchResults.map ? searchResults : [];
-      }
+      // Transform search results is now handled by formatPaginatedCardsResponse in API layer
+      console.log('Search results after formatting:', searchResults);
 
       // Use centralized pagination response handler
-      const cards = handlePaginatedResponse(processedResults, page, 21);
+      const cards = handlePaginatedResponse(searchResults, page, 21);
       setResults(cards);
       
       setCurrentFilters(filters);
@@ -119,25 +100,11 @@ const Search = () => {
       }
       const searchResults = await searchCardsBySet(setCode, page, 21);
       
-      // Transform search results to card format
-      let processedResults;
-      if (searchResults.content) {
-        processedResults = {
-          content: searchResults.content.map(item => ({
-            ...item.card,
-            cardsToSell: item.cardsToSell || [],
-            available: item.cardsToSell ? item.cardsToSell.length : 0
-          })),
-          totalPages: searchResults.totalPages,
-          totalElements: searchResults.totalElements,
-          size: searchResults.size
-        };
-      } else {
-        processedResults = searchResults.map ? searchResults : [];
-      }
+      // Transform search results is now handled by formatPaginatedCardsResponse in API layer
+      console.log('Set search results after formatting:', searchResults);
 
       // Use centralized pagination response handler
-      const cards = handlePaginatedResponse(processedResults, page, 21);
+      const cards = handlePaginatedResponse(searchResults, page, 21);
       setResults(cards);
       
       setCurrentFilters({ set: setCode });
@@ -187,29 +154,7 @@ const Search = () => {
     navigate(`/card/${card.id}`);
   };
 
-  const formatPrice = (card) => {
-    const price = getLowestPrice(card);
-    if (!price || price === 0) {
-      return t('product.outOfStock');
-    }
-    return `€${price.toFixed(2)}`;
-  };
-
-  const getLowestPrice = (card) => {
-    if (card.price) return card.price;
-    if (card.from) return card.from;
-    if (card.prices && card.prices.length > 0) {
-      return Math.min(...card.prices.map(p => p.price));
-    }
-    return null;
-  };
-
-  const getAvailableCount = (card) => {
-    if (card.available) return card.available;
-    if (card.stock) return card.stock;
-    if (card.quantity) return card.quantity;
-    return 0;
-  };
+  const formatPrice = createFormatPrice(t);
 
   const filteredResults = rarityFilter === 'all' 
     ? results 
@@ -386,17 +331,20 @@ const Search = () => {
               </p>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 lg:gap-6">
-              {sortedResults.map((card) => (
-                <SearchGridCard
-                  key={card.id}
-                  card={card}
-                  onClick={() => handleCardClick(card)}
-                  formatPrice={formatPrice}
-                  getAvailableCount={getAvailableCount}
-                />
-              ))}
-            </div>
+            <SearchResultsGrid
+              cards={sortedResults}
+              onCardClick={handleCardClick}
+              loading={false}
+              error={null}
+              emptyMessage={results.length === 0 ? t('common.noResults') : `No cards found with ${rarityFilter} rarity`}
+              gridCols={{
+                default: 'grid-cols-1',
+                sm: 'sm:grid-cols-2',
+                lg: 'lg:grid-cols-2',
+                xl: 'xl:grid-cols-3',
+                '2xl': '2xl:grid-cols-3'
+              }}
+            />
           ) : (
             <div className="bg-white rounded-lg shadow overflow-hidden">
               {/* List Header - Hidden on very small screens */}
@@ -436,6 +384,9 @@ const Search = () => {
             totalPages={totalPages}
             onPageChange={handleLocalPageChange}
           />
+
+          {/* Recently Viewed Section */}
+          <RecentlyViewed />
         </div>
       </div>
     </div>

@@ -1,51 +1,37 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../components/AddToCartButton";
-import { getRarityTextColor } from "../utils/rarity";
+import { getRarityTextColor, getRaritySolidColor, getRarityIcon } from "../utils/rarity";
 import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
-import Pagination from "../components/Pagination";
+import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
+import { getSetIcon } from "../data/sets.js";
+import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
+import RecentlyViewed from "../components/RecentlyViewed.jsx";
+import OtherVersions from "../components/OtherVersions.jsx";
+import { getLanguageFlag } from "../utils/languageFlags.jsx";
 
 const CardInfoTab = ({ card }) => {
+  const navigate = useNavigate();
   const [cardsToSell, setCardsToSell] = useState([]);
+  const addRecentlyViewed = useRecentlyViewedStore(state => state.addRecentlyViewed);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
-  const [pagination, setPagination] = useState({
-    currentPage: 0,
-    totalPages: 0,
-    totalElements: 0,
-    size: 20
-  });
+  const [showZoomModal, setShowZoomModal] = useState(false);
 
-  const fetchCardsToSell = useCallback(async (cardName, cardId, page = 0) => {
+  const fetchCardsToSell = useCallback(async (cardName, cardId) => {
     if (!cardName) return;
-    
+
     setLoading(true);
     setError("");
-    
+
     try {
-      const data = await getCardsToSellById(cardId, page, 20);
-      
-      if (data.content) {
-        setCardsToSell(data.content);
-        setPagination({
-          currentPage: data.number,
-          totalPages: data.totalPages,
-          totalElements: data.totalElements,
-          size: data.size
-        });
-      } else {
-        setCardsToSell(data);
-        setPagination({
-          currentPage: 0,
-          totalPages: 1,
-          totalElements: data.length,
-          size: data.length
-        });
-      }
+      const data = await getCardsToSellById(cardId, 0, 100); // Get first 100 results
+      setCardsToSell(data.content || data);
     } catch (err) {
       setError(err.message);
-      setPagination({ currentPage: 0, totalPages: 0, totalElements: 0, size: 20 });
+      setCardsToSell([]);
     } finally {
       setLoading(false);
     }
@@ -57,120 +43,131 @@ const CardInfoTab = ({ card }) => {
     }
   }, [card?.name, card?.id, fetchCardsToSell]);
 
+  // Add card to recently viewed when component mounts
+  useEffect(() => {
+    if (card && card.id && card.name) {
+      addRecentlyViewed(card);
+    }
+  }, [card, addRecentlyViewed]);
+
+  const handleExpansionClick = (e) => {
+    e.preventDefault();
+    const setCode = card.set || card.setCode || card.set_code;
+    if (setCode) {
+      navigate(`/search?set=${encodeURIComponent(setCode)}`);
+    }
+  };
+
   if (!card) return null;
 
+
   return (
-    <>
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Image */}
-        <div className="flex-shrink-0 flex justify-center">
-          <img src={card.imageUrl ?? card.image ?? ""} alt={card.name ?? ""} className="w-64 h-auto rounded-lg shadow-lg border" />
+    <div className="max-w-6xl mx-auto p-4 space-y-8">
+      {/* Section 1: Card Image + Cards to Sell */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Card Image with Zoom */}
+        <div className="flex-shrink-0">
+          <div className="relative">
+            <img
+              src={card.imageUrl ?? card.image ?? ""}
+              alt={card.name ?? ""}
+              className="w-80 h-auto rounded-lg shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
+              onClick={() => setShowZoomModal(true)}
+            />
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+              🔍 Zoom In
+            </div>
+          </div>
         </div>
-        {/* Main info */}
+
+        {/* Cards to Sell Table */}
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-blue-900 mb-1">{card.name ?? "Unknown"}</h1>
-          <div className="text-lg text-gray-600 mb-2">{card.set_name ?? card.setName ?? card.set ?? "Unknown"} - Singles</div>
-          <div className="flex flex-wrap gap-4 mb-4">
-            <div><b>Rarity:</b> <span className={getRarityTextColor(card.rarity)}>{card.rarity ?? "Unknown"}</span></div>
-            <div><b>Number:</b> {card.number ?? "Unknown"}</div>
-            <div><b>Printed in:</b> <span className="text-blue-700 font-semibold">{card.printedIn ?? "Unknown"}</span></div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-            <div><b>Available items</b><br />{card.available ?? "Unknown"}</div>
-            <div><b>From</b><br />{card.from != null ? Number(card.from).toFixed(2) : "Unknown"} €</div>
-            <div><b>Price Trend</b><br />{card.priceTrend != null ? Number(card.priceTrend).toFixed(2) : "Unknown"} €</div>
-            <div><b>30-days avg</b><br />{card.avg30 != null ? Number(card.avg30).toFixed(2) : "Unknown"} €</div>
-            <div><b>7-days avg</b><br />{card.avg7 != null ? Number(card.avg7).toFixed(2) : "Unknown"} €</div>
-            <div><b>1-day avg</b><br />{card.avg1 != null ? Number(card.avg1).toFixed(2) : "Unknown"} €</div>
-          </div>
           <div className="mb-4">
-            <b>Rules Text</b>
-            <ul className="list-disc ml-6 text-gray-700">
-              {(card.rules && card.rules.length > 0)
-                ? card.rules.map((r, i) => <li key={i}>{r ?? "Unknown"}</li>)
-                : <li>Unknown</li>
-              }
-            </ul>
-          </div>
-        </div>
-        {/* Chart (placeholder) */}
-        <div className="hidden md:block w-72">
-          <div className="bg-gray-100 rounded-lg p-4 shadow flex flex-col items-center">
-            <span className="font-semibold mb-2">Avg. Sell Price</span>
-            <div className="w-full h-32 bg-white rounded border flex items-center justify-center text-gray-400">
-              [Graph Placeholder]
-            </div>
-            <div className="flex gap-2 mt-2">
-              <button className="bg-blue-700 text-white px-2 py-1 rounded">Facebook</button>
-              <button className="bg-black text-white px-2 py-1 rounded">X</button>
-              <button className="bg-green-600 text-white px-2 py-1 rounded">WhatsApp</button>
-              <button className="bg-orange-600 text-white px-2 py-1 rounded">Reddit</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Sellers table */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-2">
-          Sellers
-          {pagination.totalElements > 0 && (
-            <span className="text-sm font-normal text-gray-500 ml-2">
-              ({pagination.totalElements} total listings)
-            </span>
-          )}
-        </h2>
-        {loading ? (
-          <div className="text-center py-4">
-            <div className="text-gray-600">Loading sellers...</div>
-          </div>
-        ) : error ? (
-          <div className="text-center py-4">
-            <div className="text-red-600 mb-2">Error: {error}</div>
-            <button 
-              onClick={() => fetchCardsToSell(card.name, card.id, 0)} 
-              className="bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              Retry
-            </button>
-          </div>
-        ) : cardsToSell.length === 0 ? (
-          <div className="text-center py-4">
-            <div className="text-gray-600">No cards for sale for "{card?.name}"</div>
-            <div className="text-sm text-gray-500">Be the first to sell this card</div>
-            {pagination.totalElements > 0 && (
-              <div className="text-sm text-gray-500 mt-1">
-                {pagination.totalElements} total listings found
+            <div className="flex items-center gap-3 mb-2">
+              {/* Language Flag */}
+              <div className="transform scale-150">
+                {(() => {
+                  const language = (card.language || card.lang || 'en').toLowerCase();
+                  // Handle common variations
+                  const normalizedLanguage = language === 'jp' ? 'ja' : language;
+                  return getLanguageFlag(normalizedLanguage, 'normal');
+                })()}
               </div>
-            )}
+              <h1 className="text-2xl font-bold text-gray-700 mb-0">
+                {card.name ?? "Unknown"}
+              </h1>
+            </div>
+            <div className="text-sm text-gray-600 mb-4">
+              Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; Mythic Rare &amp; Rare
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border rounded-lg">
-              <thead>
-                <tr className="bg-blue-100 text-blue-900">
-                  <th className="px-3 py-2 text-left">Set</th>
-                  <th className="px-3 py-2 text-left">Price</th>
-                  <th className="px-3 py-2 text-left">Condition</th>
-                  <th className="px-3 py-2 text-left">Available</th>
-                  <th className="px-3 py-2 text-left">Seller ID</th>
-                  <th className="px-3 py-2 text-left">Quantity</th>
-                  <th className="px-3 py-2 text-right">Add to Cart</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cardsToSell.map((cardToSell, i) => {
-                  const listingId = cardToSell.id 
-                    ?? cardToSell.cardToSellId 
-                    ?? cardToSell.cardId 
-                    ?? cardToSell.listingId 
-                    ?? cardToSell._id 
-                    ?? `${cardToSell.userId ?? 'nouser'}-${cardToSell.setName ?? 'noset'}-${i}`;
-                  
-                  // Crear el objeto card aquí para que se recalcule cuando cambie selectedQuantities
+
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="text-gray-600">Loading cards for sale...</div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="text-red-600 mb-2">Error: {error}</div>
+              <button
+                onClick={() => fetchCardsToSell(card.name, card.id)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Retry
+              </button>
+            </div>
+          ) : cardsToSell.length === 0 ? (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="bg-blue-50 px-4 py-2 border-b">
+                <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
+                  <div>Condition</div>
+                  <div>Price</div>
+                  <div>Stock</div>
+                  <div>Qty</div>
+                </div>
+              </div>
+              <div className="divide-y">
+                {['NM', 'EX', 'GD', 'LP'].map((condition, index) => (
+                  <div key={condition} className={`px-4 py-2 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <div className="grid grid-cols-4 gap-4 items-center">
+                      <div className="flex items-center">
+                        <ConditionIcon condition={condition} />
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        -
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        0
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="px-3 py-1 bg-gray-300 text-gray-500 border border-gray-400 rounded text-sm cursor-not-allowed"
+                          disabled
+                          title="No stock available"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="bg-blue-50 px-4 py-2 border-b">
+                <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
+                  <div>Condition</div>
+                  <div>Price</div>
+                  <div>Stock</div>
+                  <div>Qty</div>
+                </div>
+              </div>
+              <div className="divide-y">
+                {cardsToSell.slice(0, 8).map((cardToSell, i) => {
+                  const listingId = cardToSell.id ?? `listing-${i}`;
                   const selectedQty = selectedQuantities[listingId] || 1;
-                  console.log(`🔄 Rendering card ${listingId} with quantity:`, selectedQty);
-                  
+
                   const cardForCart = {
                     id: listingId,
                     card_name: card.name,
@@ -183,72 +180,224 @@ const CardInfoTab = ({ card }) => {
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
                   };
-                  
-                  console.log(`🛍️ CardForCart object for ${listingId}:`, cardForCart);
-                  
+
                   return (
-                  <tr key={`${listingId}`} className="border-t hover:bg-gray-50">
-                    <td className="px-3 py-2">{cardToSell.setName ?? "Unknown"}</td>
-                    <td className="px-3 py-2 font-semibold text-green-600">
-                      €{cardToSell.cardPrice?.toFixed(2) ?? "Unknown"}
-                    </td>
-                    <td className="px-3 py-2">
-                      <ConditionIcon condition={cardToSell.condition} />
-                    </td>
-                    <td className="px-3 py-2 font-semibold text-blue-600">
-                      {cardToSell.quantity ?? "Unknown"}
-                    </td>
-                    <td className="px-3 py-2">{cardToSell.userId ?? "Unknown"}</td>
-                    <td className="px-3 py-2">
-                      {cardToSell.cardPrice ? (
-                        <select 
-                          className="border rounded px-2 py-1 text-sm"
-                          value={selectedQuantities[listingId] || 1}
-                          onChange={e => setSelectedQuantities(prev => ({
-                            ...prev,
-                            [listingId]: parseInt(e.target.value)
-                          }))}
-                        >
-                          {Array.from({length: Math.min(cardToSell.quantity || 1, 10)}, (_, i) => i + 1).map(num => (
-                            <option key={num} value={num}>{num}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-gray-500 text-sm">-</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {cardToSell.cardPrice ? (
-                        <AddToCartButton 
-                          card={cardForCart}
-                          className="px-3 py-1 text-sm"
-                          onAddToCart={() => {
-                            setSelectedQuantities(prev => ({
-                              ...prev,
-                              [listingId]: 1
-                            }));
-                          }}
+                    <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <div className="grid grid-cols-4 gap-4 items-center">
+                        <div className="flex items-center">
+                          <ConditionIcon condition={cardToSell.condition} />
+                        </div>
+                        <div className="font-semibold text-green-600 text-sm">
+                          ¥ {cardToSell.cardPrice?.toLocaleString() ?? "Unknown"}
+                        </div>
+                        <div className="font-semibold text-blue-600 text-sm">
+                          {cardToSell.quantity ?? 0}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {cardToSell.quantity > 0 ? (
+                            <>
+                              <select
+                                className="border rounded px-2 py-1 text-sm w-16"
+                                value={selectedQty}
+                                onChange={e => setSelectedQuantities(prev => ({
+                                  ...prev,
+                                  [listingId]: parseInt(e.target.value)
+                                }))}
+                              >
+                                {Array.from({length: Math.min(cardToSell.quantity || 1, 10)}, (_, i) => i + 1).map(num => (
+                                  <option key={num} value={num}>{num}</option>
+                                ))}
+                              </select>
+                              <AddToCartButton
+                                card={cardForCart}
+                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded"
+                              />
+                            </>
+                          ) : (
+                            <button className="bg-gray-300 text-gray-500 px-3 py-1 text-sm rounded cursor-not-allowed">
+                              Want Notice
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="mt-6 space-y-3">
+            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium">
+              📍 See other versions
+            </button>
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded font-medium">
+              ⓘ About Condition Info
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 2: Card Description */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-gray-600 text-white px-4 py-2">
+          <h2 className="font-semibold">■ Card Description</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <tbody className="divide-y divide-gray-200">
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100 w-32">Name</td>
+                <td className="px-4 py-3 bg-white">{card.name || "Unknown"}</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Color</td>
+                <td className="px-4 py-3 bg-gray-200">
+                  <div className="flex items-center gap-2">
+                    {card.cardColors && card.cardColors.length > 0 ? (
+                      getColorSymbols(card.cardColors).map((colorData, index) => (
+                        <div key={index} className="flex items-center gap-1">
+                          <img
+                            src={colorData.svg_uri}
+                            alt={colorData.name}
+                            className="w-4 h-4"
+                            title={colorData.name}
+                          />
+                          <span className="text-sm">{colorData.name}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <span>Colorless</span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Cost</td>
+                <td className="px-4 py-3 bg-white">
+                  <div className="flex items-center gap-1">
+                    {card.manaCost ? (
+                      parseManaCost(card.manaCost).map((manaSymbol, index) => (
+                        <img
+                          key={index}
+                          src={manaSymbol.svg_uri}
+                          alt={manaSymbol.symbol}
+                          className="w-5 h-5"
+                          title={`{${manaSymbol.symbol}}`}
                         />
-                      ) : (
-                        <span className="text-gray-500 text-sm">Sin precio</span>
-                      )}
-                    </td>
-                  </tr>
-                )})}
-              </tbody>
-            </table>
-            
-            {/* Pagination for sellers */}
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              onPageChange={(page) => fetchCardsToSell(card.name, card.id, page)}
-              className="mt-4"
+                      ))
+                    ) : (
+                      parseManaCost("{3}{W}").map((manaSymbol, index) => (
+                        <img
+                          key={index}
+                          src={manaSymbol.svg_uri}
+                          alt={manaSymbol.symbol}
+                          className="w-5 h-5"
+                          title={`{${manaSymbol.symbol}}`}
+                        />
+                      ))
+                    )}
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Cardtype</td>
+                <td className="px-4 py-3 bg-gray-200">{card.typeLine || "Sorcery"}</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Subtype</td>
+                <td className="px-4 py-3 bg-white">-</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Rarity</td>
+                <td className="px-4 py-3 bg-gray-200">
+                  <div className="flex items-center gap-2">
+                    <span className={`${(() => {
+                      const normalizedRarity = card.rarity?.toLowerCase();
+                      const mainRarities = ['common', 'uncommon', 'rare', 'mythic'];
+
+                      if (mainRarities.includes(normalizedRarity)) {
+                        return getRaritySolidColor(card.rarity);
+                      } else {
+                        return 'bg-blue-500';
+                      }
+                    })()} rounded-full w-4 h-4 ${card.rarity?.toLowerCase() === 'common' ? 'border border-black' : ''}`}></span>
+                    <span className="capitalize">
+                      {card.rarity || "Rare"}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Oracle</td>
+                <td className="px-4 py-3 bg-white">
+                  {card.oracleText ? (
+                    parseOracleText(card.oracleText)
+                  ) : (
+                    parseOracleText("Return all enchantment cards from your graveyard to the battlefield. (Auras with nothing to enchant remain in your graveyard.)")
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Flavor Text</td>
+                <td className="px-4 py-3 bg-gray-200 italic">{card.flavorText || "-"}</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Expansion</td>
+                <td className="px-4 py-3 bg-white">
+                  <div className="flex items-center gap-1">
+                    {(() => {
+                      const setCode = card.set || card.setCode || card.set_code;
+                      const setIconUrl = getSetIcon(setCode);
+                      return setIconUrl ? (
+                        <img
+                          src={setIconUrl}
+                          alt={`${card.set_name || card.setName || "Urza's Destiny"} icon`}
+                          className="w-4 h-4"
+                        />
+                      ) : null;
+                    })()}
+                    <button
+                      onClick={handleExpansionClick}
+                      className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
+                    >
+                      {card.set_name || card.setName || "Urza's Destiny"}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Illustrator</td>
+                <td className="px-4 py-3 bg-gray-200">
+                  {card.artistName || "Jim Nelson"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+      {/* Other Versions Section */}
+      <OtherVersions card={card} currentCardId={card?.id} />
+
+      {/* Recently Viewed Section */}
+      <RecentlyViewed />
+
+      {/* Zoom Modal */}
+      {showZoomModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setShowZoomModal(false)}>
+          <div className="max-w-2xl max-h-full p-4">
+            <img
+              src={card.imageUrl ?? card.image ?? ""}
+              alt={card.name ?? ""}
+              className="max-w-full max-h-full object-contain rounded-lg"
             />
           </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 };
 

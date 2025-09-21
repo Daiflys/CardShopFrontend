@@ -70,5 +70,22 @@
     "featuredProducts": "Productos Destacados",
     "trendingCards": "Cartas Tendencia",
     "browseCategories": "Explorar Categorías"
+  },
+  "banners": {
+    "aetherDrift": {
+      "title": "Aether Drift",
+      "subtitle": "Explora nuevos planos y descubre cartas poderosas",
+      "cta": "Explorar Set"
+    },
+    "finalFantasy": {
+      "title": "Final Fantasy",
+      "subtitle": "Batallas épicas te esperan con personajes legendarios",
+      "cta": "Descubrir Cartas"
+    },
+    "spiderman": {
+      "title": "Spider-Man",
+      "subtitle": "Acción con telarañas se encuentra con la emoción de cartas coleccionables",
+      "cta": "Explorar Cartas"
+    }
   }
 }

@@ -1,5 +1,6 @@
 // src/api/search.js
 import { createPaginationParams, createPaginationParamsRaw } from '../utils/pagination.js';
+import { formatPaginatedCardsResponse } from '../utils/cardFormatters.js';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || !import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
@@ -77,17 +78,17 @@ const mockSearchCards = async (name) => {
 const realSearchCards = async (name, filters = {}, page = 0, size = 21) => {
   // Build additional parameters for search
   const additionalParams = {};
-  
+
   console.log('Search filters received:', filters);
-  
+
   if (name && name.trim()) {
     additionalParams.name = name.trim();
   }
-  
+
   if (filters.collection && filters.collection !== 'All Collections') {
     additionalParams.set = filters.collection;
   }
-  
+
   // Handle language filters
   if (filters.languages && Object.keys(filters.languages).length > 0) {
     // Only include languages that are enabled (true)
@@ -95,14 +96,17 @@ const realSearchCards = async (name, filters = {}, page = 0, size = 21) => {
       .filter(([, isEnabled]) => isEnabled === true)
       .map(([lang]) => lang)
       .join(',');
-    
+
     console.log('Active languages:', activeLanguages);
-    
+
     if (activeLanguages) {
       additionalParams.languages = activeLanguages;
     }
   }
-  
+
+  // Add default sortBy parameter
+  additionalParams.sortBy = 'collector_number';
+
   // Create pagination parameters with additional search params (page is already 0-based)
   const params = createPaginationParamsRaw(page, size, additionalParams);
   
@@ -114,16 +118,8 @@ const realSearchCards = async (name, filters = {}, page = 0, size = 21) => {
   const data = await response.json();
   
   console.log('API response data:', data);
-  
-  if (data.content) {
-    return data;
-  } else {
-    return data.map(cardWithAvailability => ({
-      ...cardWithAvailability.card,
-      available: cardWithAvailability.available,
-      cardsToSell: cardWithAvailability.cardsToSell
-    }));
-  }
+
+  return formatPaginatedCardsResponse(data);
 };
 
 const mockSearchCardsWithFilters = async (name, filters = {}) => {
@@ -152,21 +148,13 @@ const mockSearchCardsWithFilters = async (name, filters = {}) => {
 
 // --- SEARCH BY SET ---
 const realSearchCardsBySet = async (setCode, page = 0, size = 21) => {
-  const params = createPaginationParamsRaw(page, size, { set: setCode });
-  
+  const params = createPaginationParamsRaw(page, size, { set: setCode, sortBy: 'collector_number' });
+
   const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
   if (!response.ok) throw new Error("Search by set error");
   const data = await response.json();
-  
-  if (data.content) {
-    return data;
-  } else {
-    return data.map(cardWithAvailability => ({
-      ...cardWithAvailability.card,
-      available: cardWithAvailability.available,
-      cardsToSell: cardWithAvailability.cardsToSell
-    }));
-  }
+
+  return formatPaginatedCardsResponse(data);
 };
 
 // --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
@@ -252,49 +240,7 @@ const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
     try {
       const data = await response.json();
       
-      // Handle paginated response
-      if (data.content) {
-        return {
-          content: data.content.map(card => ({
-            id: card.id,
-            oracle_id: card.oracleId,
-            set_name: card.setName,
-            set_code: card.set,
-            name: card.name,
-            printed_name: card.printedName,
-            rarity: card.rarity,
-            collector_number: card.collectorNumber,
-            number: card.collectorNumber, // alias for collector_number
-            image_url: card.imageUrl,
-            imageUrl: card.imageUrl, // keep both for compatibility
-            language: card.lang, // Include language from server
-            idAsUUID: card.idAsUUID
-          })),
-          totalPages: data.totalPages,
-          totalElements: data.totalElements,
-          currentPage: data.number,
-          size: data.size,
-          first: data.first,
-          last: data.last
-        };
-      } else {
-        // Fallback for non-paginated response
-        return data.map(card => ({
-          id: card.id,
-          oracle_id: card.oracleId,
-          set_name: card.setName,
-          set_code: card.set,
-          name: card.name,
-          printed_name: card.printedName,
-          rarity: card.rarity,
-          collector_number: card.collectorNumber,
-          number: card.collectorNumber, // alias for collector_number
-          image_url: card.imageUrl,
-          imageUrl: card.imageUrl, // keep both for compatibility
-          language: card.lang, // Include language from server
-          idAsUUID: card.idAsUUID
-        }));
-      }
+      return formatPaginatedCardsResponse(data);
     } catch (jsonError) {
       console.error('Failed to parse successful response as JSON:', jsonError);
       throw new Error('Server returned invalid JSON response. Please try again or contact support.');
@@ -310,6 +256,44 @@ const realSearchCardsBulk = async (filters = {}, page = 0, size = 50) => {
   }
 };
 
+// --- ADVANCED SEARCH ---
+const realAdvancedSearchCards = async (criteria = {}, page = 0, size = 20, sortBy = null, sortDirection = null) => {
+  const additionalParams = {};
+
+  // Add search criteria
+  Object.keys(criteria).forEach(key => {
+    const value = criteria[key];
+    if (value !== undefined && value !== null && value !== '') {
+      // Handle arrays (like languages, colors)
+      if (Array.isArray(value) && value.length > 0) {
+        additionalParams[key] = value.join(',');
+      } else if (!Array.isArray(value)) {
+        additionalParams[key] = value;
+      }
+    }
+  });
+
+  // Add sorting
+  if (sortBy) {
+    additionalParams.sortBy = sortBy;
+  }
+  if (sortDirection) {
+    additionalParams.sortDirection = sortDirection;
+  }
+
+  const params = createPaginationParamsRaw(page, size, additionalParams);
+
+  const finalUrl = `${API_BASE_URL}/cards/advanced-search?${params.toString()}`;
+  console.log('Advanced search URL:', finalUrl);
+
+  const response = await fetch(finalUrl);
+  if (!response.ok) throw new Error("Advanced search failed");
+  const data = await response.json();
+
+  return formatPaginatedCardsResponse(data);
+};
+
 export const searchCards = realSearchCards;
 export const searchCardsBySet = realSearchCardsBySet;
 export const searchCardsBulk = realSearchCardsBulk;
+export const advancedSearchCards = realAdvancedSearchCards;

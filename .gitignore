@@ -63,6 +63,7 @@ CLAUDE.md
 claude/*
 .claude
 claude
+.playwright*
 
 # Images folder for sharing screenshots
 images/

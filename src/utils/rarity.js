@@ -3,14 +3,14 @@ const VALID_RARITIES = ['common', 'uncommon', 'rare', 'mythic'];
 
 export const validateRarity = (rarity) => {
   if (!rarity) return null;
-  
+
   const normalizedRarity = rarity.toLowerCase().trim();
-  
+
   if (!VALID_RARITIES.includes(normalizedRarity)) {
-    console.error(`Invalid rarity detected: "${rarity}". Expected one of: ${VALID_RARITIES.join(', ')}`);
-    throw new Error(`Invalid rarity: ${rarity}. Please contact support if this persists.`);
+    console.warn(`Unknown rarity detected: "${rarity}". Using default fallback. Valid rarities: ${VALID_RARITIES.join(', ')}`);
+    return 'special'; // Return a special identifier for unknown rarities
   }
-  
+
   return normalizedRarity;
 };
 
@@ -28,8 +28,10 @@ export const getRarityColor = (rarity) => {
         return 'from-yellow-400 to-yellow-600';
       case 'mythic':
         return 'from-red-500 to-red-700';
+      case 'special':
+        return 'from-blue-500 to-blue-600'; // Blue color for unknown rarities
       default:
-        return 'from-gray-500 to-gray-600';
+        return 'from-blue-500 to-blue-600';
     }
   } catch (error) {
     console.error('Rarity validation error:', error);
@@ -51,8 +53,10 @@ export const getRarityTextColor = (rarity) => {
         return 'text-yellow-500';
       case 'mythic':
         return 'text-red-500';
+      case 'special':
+        return 'text-blue-500'; // Blue color for unknown rarities
       default:
-        return 'text-gray-500';
+        return 'text-blue-500';
     }
   } catch (error) {
     console.error('Rarity validation error:', error);
@@ -78,8 +82,10 @@ export const getRaritySolidColor = (rarity) => {
         return 'bg-yellow-400';
       case 'mythic':
         return 'bg-red-500';
+      case 'special':
+        return 'bg-blue-500'; // Blue color for unknown rarities
       default:
-        return 'bg-gray-500';
+        return 'bg-blue-500';
     }
   } catch (error) {
     console.error('Rarity validation error:', error);

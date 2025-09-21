@@ -14,8 +14,10 @@ const CartIcon = () => {
     <div className="relative">
       <button
         onClick={() => setShowCartPreview(!showCartPreview)}
-        className={`relative p-2 rounded-md transition-colors ${hasItems ? 'text-blue-700 bg-blue-50 hover:bg-blue-100' : 'text-gray-700 hover:text-blue-600'}`}
-        aria-label="Shopping cart"
+        className={`relative p-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 min-h-[44px] min-w-[44px] flex items-center justify-center ${hasItems ? 'text-blue-700 bg-blue-50 hover:bg-blue-100' : 'text-gray-700 hover:text-blue-600'}`}
+        aria-label={hasItems ? `Shopping cart with ${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : 'Shopping cart (empty)'}
+        aria-expanded={showCartPreview}
+        aria-haspopup="true"
         title={hasItems ? `Cart (${cartCount})` : 'Empty cart'}
       >
         <svg className="w-7 h-7" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -32,9 +34,14 @@ const CartIcon = () => {
 
       {/* Cart Preview */}
       {showCartPreview && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
+        <div
+          className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50"
+          role="dialog"
+          aria-labelledby="cart-preview-title"
+          aria-modal="false"
+        >
           <div className="p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Cart</h3>
+            <h3 id="cart-preview-title" className="text-lg font-semibold text-gray-900 mb-3">Cart</h3>
             {cartItems.length === 0 ? (
               <p className="text-gray-500 text-center py-4">Your cart is empty</p>
             ) : (
@@ -69,9 +76,10 @@ const CartIcon = () => {
             )}
             {cartItems.length > 0 && (
               <div className="mt-4 pt-3 border-t">
-                <button 
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                <button
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                   onClick={() => { setShowCartPreview(false); navigate('/checkout'); }}
+                  aria-label={`View cart with ${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`}
                 >
                   View cart
                 </button>
