@@ -111,7 +111,7 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
   const selectedSet = allSets.find(set => set.code === formData.setCode);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+    <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Advanced Search</h2>
         <p className="text-gray-600">Find exactly the cards you're looking for with detailed filters</p>

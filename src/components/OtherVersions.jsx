@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { getCardsByOracleId } from '../api/card';
-import SearchGridCard from './SearchGridCard';
+import SearchResultsGrid from './SearchResultsGrid';
 import usePaginationStore from '../store/paginationStore';
 import Card from '../models/Card';
-import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
 
 const OtherVersions = ({ card, currentCardId }) => {
   const { t } = useTranslation();
@@ -16,7 +15,6 @@ const OtherVersions = ({ card, currentCardId }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { handlePaginatedResponse } = usePaginationStore();
-  const formatPrice = createFormatPrice(t);
 
   useEffect(() => {
     if (!card?.oracleId && !card?.oracle_id) {
@@ -71,6 +69,49 @@ const OtherVersions = ({ card, currentCardId }) => {
     return null;
   }
 
+  const handleCardClick = (cardToNavigate) => {
+    navigate(`/card/${cardToNavigate.id}`);
+  };
+
+  const fetchOtherVersionsRetry = () => {
+    if (card?.oracleId || card?.oracle_id) {
+      const oracleId = card.oracleId || card.oracle_id;
+      const fetchOtherVersions = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+
+          console.log('Fetching other versions for oracle ID:', oracleId);
+          const response = await getCardsByOracleId(oracleId);
+
+          console.log('Raw Oracle ID response:', response);
+
+          // Use the same pattern as Search.jsx - handle paginated response
+          const cardsArray = handlePaginatedResponse(response, 0, 50);
+          console.log('Cards array after pagination handler:', cardsArray);
+
+          // Transform using Card model (handle nested structure)
+          const cards = Card.fromApiResponseArray(cardsArray);
+          console.log('Cards after Card model transformation:', cards);
+
+          // Filter out the current card from results
+          const filteredVersions = cards.filter(version => {
+            return version.id !== currentCardId && version.name && version.id;
+          });
+
+          console.log('Other versions found after filtering:', filteredVersions);
+          setOtherVersions(filteredVersions);
+        } catch (err) {
+          console.error('Error fetching other versions:', err);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchOtherVersions();
+    }
+  };
+
   return (
     <section className="py-8">
       <div className="flex items-center justify-between mb-6">
@@ -85,56 +126,25 @@ const OtherVersions = ({ card, currentCardId }) => {
             </span>
           )}
         </h2>
-
-        {otherVersions.length > 4 && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            {isExpanded ? t('common.showLess', 'Show Less') : t('common.showAll', 'Show All')}
-          </button>
-        )}
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-          <p className="text-red-600">{t('cardDetail.errorLoadingVersions', 'Error loading other versions')}: {error}</p>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      ) : otherVersions.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">{t('cardDetail.noOtherVersions', 'No other versions found')}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
-          {(isExpanded ? otherVersions : otherVersions.slice(0, 4)).map((card) => (
-            <SearchGridCard
-              key={card.id}
-              card={card}
-              onClick={() => navigate(`/card/${card.id}`)}
-              formatPrice={formatPrice}
-              getAvailableCount={getAvailableCount}
-            />
-          ))}
-        </div>
-      )}
-
-      {otherVersions.length > 4 && !isExpanded && (
-        <div className="text-center mt-6">
-          <button
-            onClick={() => setIsExpanded(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            {t('cardDetail.showMoreVersions', 'Show {{count}} More Versions', { count: otherVersions.length - 4 })}
-          </button>
-        </div>
-      )}
+      <SearchResultsGrid
+        cards={otherVersions}
+        onCardClick={handleCardClick}
+        loading={loading}
+        error={error}
+        emptyMessage={t('cardDetail.noOtherVersions', 'No other versions found')}
+        showExpand={true}
+        maxDisplayed={4}
+        expandText={t('common.showAll', 'Show All')}
+        collapseText={t('common.showLess', 'Show Less')}
+        onRetry={fetchOtherVersionsRetry}
+        columnsConfig={{
+          mobile: 2,
+          tablet: 2,
+          desktop: 3
+        }}
+      />
     </section>
   );
 };

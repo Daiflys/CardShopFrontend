@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { searchCards, searchCardsBySet } from '../api/search';
-import SearchGridCard from '../components/SearchGridCard';
+import SearchResultsGrid from '../components/SearchResultsGrid';
 import SearchListCard from '../components/SearchListCard';
 import SearchFilters from '../components/SearchFilters';
 import Pagination from '../components/Pagination';
@@ -331,17 +331,20 @@ const Search = () => {
               </p>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 lg:gap-6">
-              {sortedResults.map((card) => (
-                <SearchGridCard
-                  key={card.id}
-                  card={card}
-                  onClick={() => handleCardClick(card)}
-                  formatPrice={formatPrice}
-                  getAvailableCount={getAvailableCount}
-                />
-              ))}
-            </div>
+            <SearchResultsGrid
+              cards={sortedResults}
+              onCardClick={handleCardClick}
+              loading={false}
+              error={null}
+              emptyMessage={results.length === 0 ? t('common.noResults') : `No cards found with ${rarityFilter} rarity`}
+              gridCols={{
+                default: 'grid-cols-1',
+                sm: 'sm:grid-cols-2',
+                lg: 'lg:grid-cols-2',
+                xl: 'xl:grid-cols-3',
+                '2xl': '2xl:grid-cols-3'
+              }}
+            />
           ) : (
             <div className="bg-white rounded-lg shadow overflow-hidden">
               {/* List Header - Hidden on very small screens */}
