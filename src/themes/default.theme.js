@@ -92,6 +92,23 @@ export const defaultTheme = {
       logoContainer: "text-sky-300",
       socialLink: "text-slate-400 hover:text-sky-300 transition-colors",
       copyright: "text-sm text-slate-400"
+    },
+    productCard: {
+      container: "bg-white rounded-lg shadow p-3 flex flex-col items-center min-w-[140px] max-w-[160px] hover:shadow-lg transition-shadow cursor-pointer relative overflow-hidden",
+      imageContainer: "w-24 h-32 flex items-center justify-center mb-2",
+      contentContainer: "flex flex-col items-center",
+      title: "text-lg font-bold text-blue-800 mb-1",
+      meta: "text-xs text-gray-500 text-center mb-1",
+      price: "text-sm font-semibold text-green-600"
+    },
+    searchGridCard: {
+      container: "rounded-lg border border-gray-200 hover:border-blue-300 transition-all cursor-pointer group hover:shadow-md overflow-hidden relative w-full max-w-sm mx-auto",
+      available: "bg-white",
+      unavailable: "bg-gray-300",
+      imageContainer: "aspect-[3/4] bg-gray-50 rounded-t-lg p-2 sm:p-3",
+      contentContainer: "p-3 sm:p-4 relative min-h-[100px] sm:min-h-[120px] flex flex-col",
+      infoSection: "mb-2 sm:mb-3 flex-1",
+      bottomSection: "mt-auto mb-2 sm:mb-3"
     }
   }
 };

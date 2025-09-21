@@ -76,6 +76,23 @@ export const minimalTheme = {
       logoContainer: "text-gray-300",
       socialLink: "text-gray-400 hover:text-white transition-colors",
       copyright: "text-sm text-gray-400"
+    },
+    productCard: {
+      container: "bg-white rounded-md border border-gray-200 p-2 flex flex-col items-center min-w-[120px] max-w-[140px] hover:border-gray-400 transition-colors cursor-pointer relative overflow-hidden",
+      imageContainer: "w-20 h-28 flex items-center justify-center mb-2",
+      contentContainer: "flex flex-col items-center",
+      title: "text-base font-medium text-gray-900 mb-1 text-center",
+      meta: "text-xs text-gray-500 text-center mb-1",
+      price: "text-sm font-semibold text-gray-700"
+    },
+    searchGridCard: {
+      container: "rounded-md border border-gray-200 hover:border-gray-400 transition-all cursor-pointer hover:shadow-sm overflow-hidden relative w-full max-w-sm mx-auto",
+      available: "bg-white",
+      unavailable: "bg-gray-100",
+      imageContainer: "aspect-[3/4] bg-gray-50 rounded-t-md p-2",
+      contentContainer: "p-3 relative min-h-[80px] flex flex-col",
+      infoSection: "mb-2 flex-1",
+      bottomSection: "mt-auto mb-2"
     }
   }
 };

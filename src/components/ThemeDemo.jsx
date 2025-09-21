@@ -48,7 +48,7 @@ const ThemeDemo = ({ isOpen, onClose }) => {
           Current Skin: <span className="font-bold text-blue-600">{currentSkin}</span>
         </label>
         <div className="space-y-2">
-          {availableSkins.map(skinName => (
+          {availableSkins.filter(skinName => skinName !== 'line-limiter').map(skinName => (
             <button
               key={skinName}
               onClick={() => switchSkin(skinName)}
