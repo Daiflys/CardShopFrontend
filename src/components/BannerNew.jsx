@@ -26,7 +26,7 @@ const getBanners = (t) => [
     title: t('banners.spiderman.title', 'Spider-Man'),
     subtitle: t('banners.spiderman.subtitle', 'Web-slinging action meets trading card excitement'),
     cta: t('banners.spiderman.cta', 'Explore Cards'),
-    image: "/images/spiderman.png",
+    image: "/images/spiderman.jpg",
     bgColor: "from-red-400 via-red-500 to-red-600",
     setCode: "spm"
   }
