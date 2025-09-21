@@ -5,10 +5,13 @@ import { advancedSearchCards } from '../api/search';
 import SearchGridCard from '../components/SearchGridCard';
 import Pagination from '../components/Pagination';
 import { useTheme } from '../hooks/useTheme';
+import { useTranslation } from 'react-i18next';
+import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
 
 const AdvancedSearchPage = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const [searchResults, setSearchResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +21,9 @@ const AdvancedSearchPage = () => {
   const [currentCriteria, setCurrentCriteria] = useState({});
   const [sortBy, setSortBy] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
+
+  // Use centralized price formatting function
+  const formatPrice = createFormatPrice(t);
 
   const handleSearch = async (criteria, page = 0) => {
     setIsLoading(true);
@@ -152,18 +158,8 @@ const AdvancedSearchPage = () => {
                       key={card.id}
                       card={card}
                       onClick={() => handleCardClick(card.id)}
-                      formatPrice={(card) => {
-                        if (card.price !== undefined && card.price !== null) {
-                          return `€${parseFloat(card.price).toFixed(2)}`;
-                        }
-                        return 'Price N/A';
-                      }}
-                      getAvailableCount={(card) => {
-                        const cardsToSell = card.cardsToSell || [];
-                        return cardsToSell.reduce((total, cardToSell) =>
-                          total + (cardToSell.quantity || 0), 0
-                        );
-                      }}
+                      formatPrice={formatPrice}
+                      getAvailableCount={getAvailableCount}
                     />
                   ))}
                 </div>

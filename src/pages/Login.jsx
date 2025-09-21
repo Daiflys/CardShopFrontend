@@ -26,8 +26,6 @@ const Login = () => {
 
     if (!password.trim()) {
       errors.password = t('auth.errors.passwordRequired');
-    } else if (password.length < 6) {
-      errors.password = t('auth.errors.passwordTooShort');
     }
 
     return errors;
