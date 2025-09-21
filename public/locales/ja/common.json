@@ -70,5 +70,22 @@
     "featuredProducts": "おすすめ商品",
     "trendingCards": "人気カード",
     "browseCategories": "カテゴリを見る"
+  },
+  "banners": {
+    "aetherDrift": {
+      "title": "エーテル・ドリフト",
+      "subtitle": "新しい次元を探索し、強力なカードを発見しよう",
+      "cta": "セットを見る"
+    },
+    "finalFantasy": {
+      "title": "ファイナルファンタジー",
+      "subtitle": "伝説のキャラクターと壮大な戦いが待っている",
+      "cta": "カードを発見"
+    },
+    "spiderman": {
+      "title": "スパイダーマン",
+      "subtitle": "ウェブスリンギング・アクションとトレーディングカードの興奮が出会う",
+      "cta": "カードを探索"
+    }
   }
 }

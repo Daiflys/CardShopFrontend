@@ -37,20 +37,18 @@ function App() {
           />
           <Routes>
             <Route path="/" element={
-              <>
-                <BannerNew />
-                <main className="w-full">
-                  <PageLayout
-                    sidebar={<SetsSidebar />}
-                    sidebarTitle="Collections"
-                    showMobileSidebarButton={false}
-                    containerClassName="py-6 lg:py-8"
-                  >
-                    <Trends />
-                    <RecentlyViewed />
-                  </PageLayout>
-                </main>
-              </>
+              <main className="w-full">
+                <PageLayout
+                  sidebar={<SetsSidebar />}
+                  sidebarTitle="Collections"
+                  showMobileSidebarButton={false}
+                  containerClassName="py-6 lg:py-8"
+                >
+                  <BannerNew />
+                  <Trends />
+                  <RecentlyViewed />
+                </PageLayout>
+              </main>
             } />
             <Route path="/login" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Login /></main>} />
             <Route path="/register" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Register /></main>} />

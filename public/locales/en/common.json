@@ -70,5 +70,22 @@
     "featuredProducts": "Featured Products",
     "trendingCards": "Trending Cards",
     "browseCategories": "Browse Categories"
+  },
+  "banners": {
+    "aetherDrift": {
+      "title": "Aether Drift",
+      "subtitle": "Explore new planes and discover powerful cards",
+      "cta": "Explore Set"
+    },
+    "finalFantasy": {
+      "title": "Final Fantasy",
+      "subtitle": "Epic battles await with legendary characters",
+      "cta": "Discover Cards"
+    },
+    "spiderman": {
+      "title": "Spider-Man",
+      "subtitle": "Web-slinging action meets trading card excitement",
+      "cta": "Explore Cards"
+    }
   }
 }
