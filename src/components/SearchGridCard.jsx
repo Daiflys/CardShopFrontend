@@ -115,6 +115,12 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
     onClick(); // Navigate to card details
   };
 
+  // Function to truncate text if longer than 30 characters
+  const truncateText = (text, maxLength = 30) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
   const incrementQuantity = (e) => {
     e.stopPropagation();
     setQuantity(prev => Math.min(prev + 1, nmStock)); // Don't exceed available stock
@@ -159,7 +165,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
       {/* Card name with language flag */}
       <div className="flex items-start gap-1 sm:gap-2 mb-1 sm:mb-2 relative">
         <h3 className="text-xs sm:text-sm font-semibold text-black-900 flex-1 min-w-0 break-words leading-tight">
-          {card.printedName || card.name}
+          {truncateText(card.printedName || card.name)}
         </h3>
         <div className="flex-shrink-0 self-start">
           {getLanguageFlag(card.language || 'en', 'small')}

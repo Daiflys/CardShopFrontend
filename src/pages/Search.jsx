@@ -338,7 +338,7 @@ const Search = () => {
               error={null}
               emptyMessage={results.length === 0 ? t('common.noResults') : `No cards found with ${rarityFilter} rarity`}
               gridCols={{
-                default: 'grid-cols-1',
+                default: 'grid-cols-2',
                 sm: 'sm:grid-cols-2',
                 lg: 'lg:grid-cols-2',
                 xl: 'xl:grid-cols-3',
