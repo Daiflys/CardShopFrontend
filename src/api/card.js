@@ -104,7 +104,7 @@ const realGetAllCards = async (page = 1, size = 20) => {
 
 const realGetCardsByOracleId = async (oracleId, page = 1, size = 50) => {
   console.log("going to search for cards with oracle ID", oracleId);
-  const params = createPaginationParams(page, size);
+  const params = createPaginationParams(page, size, { sortBy: 'name' });
 
   const response = await fetch(`${API_BASE_URL}/cards/oracleId/${encodeURIComponent(oracleId)}?${params.toString()}`);
   if (!response.ok) throw new Error("Error fetching cards by oracle ID");

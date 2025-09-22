@@ -60,7 +60,7 @@ const SearchResultsGrid = ({
   } else {
     // Default configuration
     finalGridCols = {
-      default: 'grid-cols-1',
+      default: 'grid-cols-2',
       sm: 'sm:grid-cols-2',
       md: 'md:grid-cols-3',
       lg: 'lg:grid-cols-3',

@@ -32,7 +32,7 @@ const DefaultHeader = ({
         </div>
 
         {/* User Menu and Language */}
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-2 lg:gap-4 items-center shrink-0">
           {userMenu}
           {languageSwitcher}
         </div>
@@ -92,17 +92,6 @@ const DefaultHeader = ({
             <nav className={theme.components.header.mobileMenuNav}>
               {navigation && (
                 <div className="space-y-2 mb-4 pb-4 border-b border-sky-200">
-                  <a
-                    href="/search"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      window.location.href = '/search';
-                    }}
-                    className={theme.components.header.mobileMenuLink}
-                    role="menuitem"
-                  >
-                    Search
-                  </a>
                   <a
                     href="/advanced-search"
                     onClick={(e) => {
