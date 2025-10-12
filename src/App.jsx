@@ -16,6 +16,7 @@ import Transactions from "./pages/account/Transactions";
 import Settings from "./pages/account/Settings";
 import BulkSell from "./pages/BulkSell";
 import AdvancedSearch from "./pages/AdvancedSearch";
+import Admin from "./pages/Admin";
 import RequireAuth from "./pages/RequireAuth";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
@@ -57,6 +58,7 @@ function App() {
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Checkout /></main>} />
             <Route path="/bulk-sell" element={<RequireAuth><BulkSell /></RequireAuth>} />
+            <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
             <Route
               path="/account/*"
               element={
