@@ -131,8 +131,7 @@ class Card {
       image_url: this.imageUrl,
       price: cardData.price,
       condition: cardData.condition,
-      quantity: cardData.quantity,
-      comments: cardData.comments
+      quantity: cardData.quantity
     };
   }
 
