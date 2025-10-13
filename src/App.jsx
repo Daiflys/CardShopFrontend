@@ -16,8 +16,10 @@ import Transactions from "./pages/account/Transactions";
 import Settings from "./pages/account/Settings";
 import BulkSell from "./pages/BulkSell";
 import AdvancedSearch from "./pages/AdvancedSearch";
-import Admin from "./pages/Admin";
 import RequireAuth from "./pages/RequireAuth";
+import AdminLayout from "./admin/components/AdminLayout";
+import Dashboard from "./admin/scenes/dashboard";
+import BulkUpload from "./admin/scenes/bulkUpload";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
 import ThemeDemo from "./components/ThemeDemo";
@@ -58,7 +60,13 @@ function App() {
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Checkout /></main>} />
             <Route path="/bulk-sell" element={<RequireAuth><BulkSell /></RequireAuth>} />
-            <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
+
+            {/* Admin Routes */}
+            <Route path="/admin/*" element={<RequireAuth><AdminLayout /></RequireAuth>}>
+              <Route index element={<Dashboard />} />
+              <Route path="bulk-upload" element={<BulkUpload />} />
+            </Route>
+
             <Route
               path="/account/*"
               element={

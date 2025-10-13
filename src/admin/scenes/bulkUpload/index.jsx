@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import { csvCardSearch, bulkSellFromCSV } from '../api/admin';
-import { getRaritySolidColor } from '../utils/rarity';
-import { conditionOptions } from '../utils/cardConditions';
+import { csvCardSearch, bulkSellFromCSV } from '../../../api/admin';
+import { getRaritySolidColor } from '../../../utils/rarity';
+import { conditionOptions } from '../../../utils/cardConditions';
 
-const Admin = () => {
+const BulkUpload = () => {
   const [file, setFile] = useState(null);
   const [language, setLanguage] = useState('en');
   const [loading, setLoading] = useState(false);
@@ -594,4 +594,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default BulkUpload;
