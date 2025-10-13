@@ -4,6 +4,7 @@ import { searchCardsBulk } from '../api/search';
 import { bulkSellCards } from '../api/bulkSell';
 import { getRaritySolidColor } from '../utils/rarity';
 import { languageOptions as centralizedLanguageOptions } from '../utils/languageFlags.jsx';
+import { conditionOptions } from '../utils/cardConditions';
 import Pagination from '../components/Pagination';
 import usePaginationStore from '../store/paginationStore';
 
@@ -39,16 +40,6 @@ const BulkSell = () => {
   const rarities = ['All', 'Masterpiece', 'Mythic', 'Rare', 'Time Shifted', 'Uncommon', 'Common', 'Land', 'Special', 'Token', 'Code Card', 'Tip Card'];
 
   const sortingOptions = ['Collectors Number', 'English Name', 'Local Name', 'Rarity, Number'];
-
-  const conditionOptions = [
-    { code: "MT", name: "Mint", color: "bg-cyan-400" },
-    { code: "NM", name: "Near Mint", color: "bg-green-500" },
-    { code: "EX", name: "Excellent", color: "bg-yellow-600" },
-    { code: "GD", name: "Good", color: "bg-yellow-500" },
-    { code: "LP", name: "Light Played", color: "bg-orange-500" },
-    { code: "PL", name: "Played", color: "bg-red-400" },
-    { code: "PO", name: "Poor", color: "bg-red-600" }
-  ];
 
   // Use centralized language options
   const languageOptions = centralizedLanguageOptions;
@@ -89,8 +80,7 @@ const BulkSell = () => {
           language: 'en',
           condition: 'NM',
           quantity: 0,
-          price: 0,
-          comments: ''
+          price: 0
         };
       });
       setCardData(prev => page === 0 ? initialCardData : { ...prev, ...initialCardData });
@@ -135,8 +125,7 @@ const BulkSell = () => {
       language: 'en',
       condition: 'NM',
       quantity: 0,
-      price: 0.00,
-      comments: ''
+      price: 0.00
     };
     
     setCardData(prev => ({
@@ -174,8 +163,7 @@ const BulkSell = () => {
           ...cardData[cardId],
           selected: false,
           quantity: 0,
-          price: 0,
-          comments: ''
+          price: 0
         };
       });
       setCardData(clearedCardData);
@@ -344,7 +332,6 @@ const BulkSell = () => {
                     <th className="p-3 text-left">Language</th>
                     <th className="p-3 text-left">Condition</th>
                     <th className="p-3 text-left">★</th>
-                    <th className="p-3 text-left">Comments</th>
                     <th className="p-3 text-left">Amount</th>
                     <th className="p-3 text-left">Price</th>
                     <th className="p-3 text-left">Copy</th>
@@ -475,14 +462,6 @@ const BulkSell = () => {
                         </select>
                       </td>
                       <td className="p-3">★</td>
-                      <td className="p-3">
-                        <input
-                          type="text"
-                          className="border rounded px-2 py-1 w-24"
-                          value={cardData[cardKey]?.comments || ''}
-                          onChange={(e) => updateCardData(cardKey, 'comments', e.target.value)}
-                        />
-                      </td>
                       <td className="p-3">
                         <input
                           type="number"

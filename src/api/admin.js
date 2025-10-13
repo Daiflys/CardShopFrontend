@@ -69,3 +69,58 @@ export const csvCardSearch = async (cards, language = 'en') => {
     throw error;
   }
 };
+
+/**
+ * Bulk sell cards from CSV upload
+ * @param {Array} cards - Array of card objects formatted for bulk sell
+ * @param {string} language - Language code for the cards
+ * @returns {Promise} Response with success status and message
+ */
+export const bulkSellFromCSV = async (cards, language = 'en') => {
+  try {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      throw new Error('Authentication required. Please login.');
+    }
+
+    console.log('Bulk sell from CSV request:', { cards, language });
+
+    const response = await fetch(`${API_BASE_URL}/cardsToSell/auth/bulk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ cards })
+    });
+
+    if (!response.ok) {
+      let errorMessage = `Bulk sell failed with status ${response.status}`;
+
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (jsonError) {
+          console.warn('Could not parse error response as JSON:', jsonError);
+        }
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    console.log('Bulk sell from CSV response:', data);
+
+    return data;
+
+  } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
+    }
+
+    throw error;
+  }
+};

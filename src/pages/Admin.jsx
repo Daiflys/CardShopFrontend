@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import { csvCardSearch } from '../api/admin';
+import { csvCardSearch, bulkSellFromCSV } from '../api/admin';
+import { getRaritySolidColor } from '../utils/rarity';
+import { conditionOptions } from '../utils/cardConditions';
 
 const Admin = () => {
   const [file, setFile] = useState(null);
   const [language, setLanguage] = useState('en');
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+  const [parsedCSVData, setParsedCSVData] = useState([]);
+  const [cardData, setCardData] = useState({});
+  const [foundCards, setFoundCards] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [hoveredCard, setHoveredCard] = useState(null);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -26,21 +33,32 @@ const Admin = () => {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array' });
 
-          // Get the first sheet
           const sheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[sheetName];
-
-          // Convert to JSON
           const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-          // Extract card information
-          // Based on the Excel structure: Set Name, Product Name (cardName), Number (collectorNumber)
-          const cards = jsonData.map(row => ({
-            setName: row['Set Name'] || row['Set name'] || row['set name'],
-            cardName: row['Product Name'] || row['Product name'] || row['product name'],
-            collectorNumber: row['Number'] || row['number'],
-          })).filter(card => card.cardName && card.setName); // Filter out invalid rows
+          const cards = jsonData.map(row => {
+            // Try multiple variations for Add to Quantity
+            const addToQty = row['Add to Quantity'] ||
+                             row['Add to quantity'] ||
+                             row['add to quantity'] ||
+                             row['AddToQuantity'] ||
+                             row['addtoquantity'] ||
+                             row['Add To Quantity'] ||
+                             0;
 
+            const parsedCard = {
+              setName: row['Set Name'] || row['Set name'] || row['set name'],
+              cardName: row['Product Name'] || row['Product name'] || row['product name'],
+              collectorNumber: row['Number'] ? String(row['Number']) : (row['number'] ? String(row['number']) : undefined),
+              addToQuantity: parseInt(addToQty) || 0
+            };
+
+            console.log('Parsed CSV row:', parsedCard);
+            return parsedCard;
+          }).filter(card => card.cardName && card.setName);
+
+          console.log('Total cards parsed from CSV:', cards.length);
           resolve(cards);
         } catch (error) {
           reject(new Error('Failed to parse Excel file: ' + error.message));
@@ -63,10 +81,10 @@ const Admin = () => {
 
     setLoading(true);
     setError(null);
-    setResults(null);
+    setFoundCards([]);
+    setCardData({});
 
     try {
-      // Parse the Excel file
       const cards = await parseExcelFile(file);
 
       if (cards.length === 0) {
@@ -75,10 +93,115 @@ const Admin = () => {
         return;
       }
 
-      // Send to backend using the new CSV search endpoint
+      setParsedCSVData(cards);
       const response = await csvCardSearch(cards, language);
 
-      setResults(response);
+      if (response && response.results) {
+        const cardsToDisplay = [];
+        const initialCardData = {};
+
+        response.results.forEach((result, index) => {
+          if (result.found && result.matchedCards && result.matchedCards.length > 0) {
+            // Found cards
+            result.matchedCards.forEach((match, matchIndex) => {
+              const card = match.card || {};
+
+              console.log('=== Matching card ===');
+              console.log('Requested card from server:', result.requestedCard);
+              console.log('Looking in CSV for match...');
+
+              const csvCard = cards.find(c => {
+                const nameMatch = c.cardName === result.requestedCard.cardName;
+                const setMatch = c.setName === result.requestedCard.setName;
+                const numberMatch = !c.collectorNumber ||
+                                    String(c.collectorNumber) === String(result.requestedCard.collectorNumber);
+
+                console.log(`CSV card: ${c.cardName} | ${c.setName} | ${c.collectorNumber || 'no number'}`);
+                console.log(`Matches: name=${nameMatch}, set=${setMatch}, number=${numberMatch}`);
+
+                return nameMatch && setMatch && numberMatch;
+              });
+
+              const cardKey = `${card.id}_${index}_${matchIndex}`;
+              const csvAddToQuantity = csvCard?.addToQuantity || 0;
+
+              console.log('CSV card found:', csvCard);
+              console.log('CSV Add to Quantity:', csvAddToQuantity);
+              console.log('==================');
+
+              // Calculate total quantity from all cardsToSell entries
+              const currentQuantity = match.cardsToSell
+                ? match.cardsToSell.reduce((sum, cardToSell) => sum + (cardToSell.quantity || 0), 0)
+                : 0;
+
+              cardsToDisplay.push({
+                ...card,
+                reactKey: cardKey,
+                csvQuantity: csvAddToQuantity,
+                currentQuantity: currentQuantity,
+                requestedCard: result.requestedCard,
+                found: true,
+                language: language
+              });
+
+              initialCardData[cardKey] = {
+                selected: true, // Selected by default
+                condition: 'NM',
+                quantity: csvAddToQuantity, // Default to CSV "Add to Quantity"
+                price: 0,
+                csvData: csvCard,
+                cardId: card.id,
+                oracleId: card.oracleId || card.oracle_id
+              };
+            });
+          } else {
+            // Not found cards
+            console.log('=== Not found card ===');
+            console.log('Requested card from server:', result.requestedCard);
+
+            const csvCard = cards.find(c =>
+              c.cardName === result.requestedCard.cardName &&
+              c.setName === result.requestedCard.setName &&
+              (!c.collectorNumber || String(c.collectorNumber) === String(result.requestedCard.collectorNumber))
+            );
+
+            const cardKey = `notfound_${index}`;
+            const csvAddToQuantity = csvCard?.addToQuantity || 0;
+
+            console.log('CSV card found for not found:', csvCard);
+            console.log('CSV Add to Quantity:', csvAddToQuantity);
+            console.log('==================');
+
+            cardsToDisplay.push({
+              reactKey: cardKey,
+              name: result.requestedCard.cardName,
+              setName: result.requestedCard.setName,
+              set_name: result.requestedCard.setName,
+              collectorNumber: result.requestedCard.collectorNumber,
+              csvQuantity: csvAddToQuantity,
+              currentQuantity: 0,
+              requestedCard: result.requestedCard,
+              found: false,
+              errorMessage: result.errorMessage || 'Card not found',
+              language: language
+            });
+
+            initialCardData[cardKey] = {
+              selected: false, // Not found cards are not selected by default
+              condition: 'NM',
+              quantity: csvAddToQuantity,
+              price: 0,
+              csvData: csvCard,
+              cardId: null,
+              oracleId: null,
+              notFound: true
+            };
+          }
+        });
+
+        setFoundCards(cardsToDisplay);
+        setCardData(initialCardData);
+      }
     } catch (err) {
       setError(err.message || 'An error occurred while processing the file');
     } finally {
@@ -86,69 +209,96 @@ const Admin = () => {
     }
   };
 
-  const downloadResults = () => {
-    if (!results || !results.results) return;
-
-    // Create a new workbook
-    const wb = XLSX.utils.book_new();
-
-    // Process results into found and not found cards
-    const foundCards = [];
-    const notFoundCards = [];
-
-    results.results.forEach(result => {
-      if (result.found && result.matchedCards && result.matchedCards.length > 0) {
-        result.matchedCards.forEach(match => {
-          const card = match.card || {};
-          foundCards.push({
-            'Card Name': result.requestedCard.cardName,
-            'Set Name': result.requestedCard.setName,
-            'Collector Number': result.requestedCard.collectorNumber,
-            'Language': result.requestedCard.language,
-            'Available': match.available ? 'Yes' : 'No',
-            'Cards To Sell': match.cardsToSell ? match.cardsToSell.length : 0,
-            'Card ID': card.id || '',
-            'Scryfall ID': card.scryfallId || ''
-          });
-        });
-      } else {
-        notFoundCards.push({
-          'Card Name': result.requestedCard.cardName,
-          'Set Name': result.requestedCard.setName,
-          'Collector Number': result.requestedCard.collectorNumber,
-          'Language': result.requestedCard.language,
-          'Error': result.errorMessage || 'Not found'
-        });
+  const updateCardData = (cardKey, field, value) => {
+    setCardData(prev => ({
+      ...prev,
+      [cardKey]: {
+        ...prev[cardKey],
+        [field]: value,
+        selected: field === 'selected' ? value : true
       }
-    });
-
-    // Found cards sheet
-    if (foundCards.length > 0) {
-      const foundWs = XLSX.utils.json_to_sheet(foundCards);
-      XLSX.utils.book_append_sheet(wb, foundWs, 'Found Cards');
-    }
-
-    // Not found cards sheet
-    if (notFoundCards.length > 0) {
-      const notFoundWs = XLSX.utils.json_to_sheet(notFoundCards);
-      XLSX.utils.book_append_sheet(wb, notFoundWs, 'Not Found Cards');
-    }
-
-    // Download the file
-    XLSX.writeFile(wb, `card-search-results-${new Date().toISOString().split('T')[0]}.xlsx`);
+    }));
   };
+
+  const handleSubmit = async () => {
+    const selectedCardEntries = Object.entries(cardData);
+    const selectedCards = selectedCardEntries.filter(([cardKey, data]) =>
+      data.selected && data.quantity > 0 && !data.notFound
+    );
+
+    if (selectedCards.length === 0) {
+      setError('Please select at least one valid card with quantity > 0');
+      return;
+    }
+
+    setSubmitting(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const cardsToSubmit = selectedCards.map(([cardKey, data]) => {
+        const card = foundCards.find(c => c.reactKey === cardKey);
+        return {
+          card_id: data.cardId,
+          oracle_id: data.oracleId,
+          set_name: card.setName || card.set_name,
+          set_code: card.setCode || card.set_code || card.set,
+          card_name: card.name,
+          image_url: card.imageUrl || card.image_url,
+          price: parseFloat(data.price),
+          condition: data.condition,
+          quantity: parseInt(data.quantity),
+          language: language
+        };
+      });
+
+      const submitResult = await bulkSellFromCSV(cardsToSubmit, language);
+      setSuccessMessage(`Successfully listed ${selectedCards.length} cards for sale!`);
+
+      // Clear selection after successful submission
+      const clearedCardData = {};
+      Object.keys(cardData).forEach(cardKey => {
+        clearedCardData[cardKey] = {
+          ...cardData[cardKey],
+          selected: false,
+          quantity: 0,
+          price: 0
+        };
+      });
+      setCardData(clearedCardData);
+
+    } catch (err) {
+      setError('Error submitting cards: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const selectedCount = Object.values(cardData).filter(data => data.selected).length;
+
+  // Close language selector when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.card-hover')) {
+        setHoveredCard(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-6">Admin Panel</h1>
+          <h1 className="text-3xl font-bold text-slate-800 mb-6">Admin Panel - Bulk Card Upload</h1>
 
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-slate-700 mb-4">Bulk Card Search</h2>
+            <h2 className="text-xl font-semibold text-slate-700 mb-4">Upload CSV to Add Cards</h2>
             <p className="text-slate-600 mb-4">
-              Upload a CSV or Excel file containing card information to search for cards in the database.
-              The file should contain columns: Set Name, Product Name, and Number.
+              Upload a CSV or Excel file containing card information. The file should contain columns: Set Name, Product Name, Number, and Add to Quantity.
             </p>
           </div>
 
@@ -211,111 +361,230 @@ const Admin = () => {
               </div>
             )}
 
-            {/* Results Display */}
-            {results && results.results && (
-              <div className="space-y-4">
-                <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                  <h3 className="text-lg font-semibold text-green-800 mb-2">Results</h3>
-                  <div className="space-y-2 text-sm text-green-700">
-                    <p>Found: {results.results.filter(r => r.found).length} cards</p>
-                    <p>Not Found: {results.results.filter(r => !r.found).length} cards</p>
-                    <p>Total Processed: {results.results.length} cards</p>
+            {/* Success Message */}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                <p className="text-green-800 text-sm">{successMessage}</p>
+              </div>
+            )}
+
+            {/* Found Cards Table */}
+            {foundCards.filter(c => c.found).length > 0 && (
+              <div className="bg-white rounded-lg shadow mt-6">
+                <div className="flex justify-between items-center p-4 border-b bg-green-50">
+                  <div className="text-sm font-semibold text-green-800">
+                    ✓ Found Cards ({foundCards.filter(c => c.found).length})
                   </div>
                 </div>
 
-                {/* Download Button */}
-                <button
-                  onClick={downloadResults}
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
-                >
-                  Download Results
-                </button>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-blue-700 text-white">
+                      <tr>
+                        <th className="p-3 text-left">
+                          <input
+                            type="checkbox"
+                            onChange={(e) => {
+                              const newCardData = { ...cardData };
+                              foundCards.forEach(card => {
+                                const cardKey = card.reactKey;
+                                // Only select found cards
+                                if (card.found) {
+                                  newCardData[cardKey] = {
+                                    ...newCardData[cardKey],
+                                    selected: e.target.checked
+                                  };
+                                }
+                              });
+                              setCardData(newCardData);
+                            }}
+                          />
+                        </th>
+                        <th className="p-3 text-left">Name</th>
+                        <th className="p-3 text-left">Set</th>
+                        <th className="p-3 text-left">Language</th>
+                        <th className="p-3 text-left">Rarity</th>
+                        <th className="p-3 text-left">Condition</th>
+                        <th className="p-3 text-left">CSV Qty</th>
+                        <th className="p-3 text-left">Current Qty</th>
+                        <th className="p-3 text-left">Amount to Add</th>
+                        <th className="p-3 text-left">Total after Add</th>
+                        <th className="p-3 text-left">Price (€)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {foundCards.filter(c => c.found).map((card, index) => {
+                        const cardKey = card.reactKey;
+                        const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                        const currentQty = card.currentQuantity || 0;
+                        const amountToAdd = cardData[cardKey]?.quantity || 0;
+                        const totalAfterAdd = currentQty + amountToAdd;
 
-                {/* Found Cards Table */}
-                {(() => {
-                  const foundResults = results.results.filter(r => r.found && r.matchedCards && r.matchedCards.length > 0);
-                  return foundResults.length > 0 && (
-                    <div className="mt-6">
-                      <h3 className="text-lg font-semibold text-slate-700 mb-3">Found Cards</h3>
-                      <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                        <table className="min-w-full divide-y divide-slate-200">
-                          <thead className="bg-slate-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Card Name</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Set</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Number</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Language</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Available</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cards To Sell</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-slate-200">
-                            {foundResults.slice(0, 100).map((result, index) =>
-                              result.matchedCards.map((match, matchIndex) => (
-                                <tr key={`${index}-${matchIndex}`} className="hover:bg-slate-50">
-                                  <td className="px-4 py-3 text-sm text-slate-900">{result.requestedCard.cardName}</td>
-                                  <td className="px-4 py-3 text-sm text-slate-600">{result.requestedCard.setName}</td>
-                                  <td className="px-4 py-3 text-sm text-slate-600">{result.requestedCard.collectorNumber}</td>
-                                  <td className="px-4 py-3 text-sm text-slate-600">{result.requestedCard.language}</td>
-                                  <td className="px-4 py-3 text-sm text-slate-600">
-                                    <span className={`px-2 py-1 rounded-full text-xs ${match.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                      {match.available ? 'Yes' : 'No'}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 text-sm text-slate-600">{match.cardsToSell ? match.cardsToSell.length : 0}</td>
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
-                        {foundResults.length > 100 && (
-                          <div className="bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                            Showing 100 of {foundResults.length} cards. Download the file to see all results.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
+                        return (
+                          <tr key={cardKey} className={rowClass}>
+                            <td className="p-3">
+                              <input
+                                type="checkbox"
+                                checked={cardData[cardKey]?.selected || false}
+                                onChange={(e) => updateCardData(cardKey, 'selected', e.target.checked)}
+                              />
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center space-x-2">
+                                <div
+                                  className="relative card-hover"
+                                  onMouseEnter={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    setHoveredCard({ id: cardKey, rect, imageUrl: card.imageUrl || card.image_url });
+                                  }}
+                                  onMouseLeave={() => setHoveredCard(null)}
+                                >
+                                  <svg
+                                    className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-700"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                                    />
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                  </svg>
+                                </div>
 
-                {/* Not Found Cards Table */}
-                {(() => {
-                  const notFoundResults = results.results.filter(r => !r.found);
-                  return notFoundResults.length > 0 && (
-                    <div className="mt-6">
-                      <h3 className="text-lg font-semibold text-slate-700 mb-3">Not Found Cards</h3>
-                      <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                        <table className="min-w-full divide-y divide-slate-200">
-                          <thead className="bg-slate-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Card Name</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Set</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Number</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Language</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Error</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-slate-200">
-                            {notFoundResults.slice(0, 100).map((result, index) => (
-                              <tr key={index} className="hover:bg-slate-50">
-                                <td className="px-4 py-3 text-sm text-slate-900">{result.requestedCard.cardName}</td>
-                                <td className="px-4 py-3 text-sm text-slate-600">{result.requestedCard.setName}</td>
-                                <td className="px-4 py-3 text-sm text-slate-600">{result.requestedCard.collectorNumber}</td>
-                                <td className="px-4 py-3 text-sm text-slate-600">{result.requestedCard.language}</td>
-                                <td className="px-4 py-3 text-sm text-red-600">{result.errorMessage || 'Not found'}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        {notFoundResults.length > 100 && (
-                          <div className="bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                            Showing 100 of {notFoundResults.length} cards. Download the file to see all results.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
+                                {hoveredCard && hoveredCard.id === cardKey && hoveredCard.imageUrl && (
+                                  <div
+                                    className="fixed z-[9999] bg-white border rounded-lg shadow-2xl p-2 pointer-events-none"
+                                    style={{
+                                      left: hoveredCard.rect ? hoveredCard.rect.left - 320 - 8 : '100px',
+                                      top: hoveredCard.rect ? hoveredCard.rect.bottom - 400 : '100px',
+                                      width: '320px',
+                                      maxHeight: '90vh',
+                                      overflow: 'hidden'
+                                    }}
+                                  >
+                                    <img
+                                      src={hoveredCard.imageUrl}
+                                      alt={card.name}
+                                      className="w-full h-auto rounded max-h-full object-contain"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                                <span className="text-blue-600 hover:underline">
+                                  {card.name}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-3 text-sm">{card.setName || card.set_name}</td>
+                            <td className="p-3 text-sm text-center">{card.language?.toUpperCase() || 'EN'}</td>
+                            <td className="p-3 text-center">
+                              <span className={`inline-block w-3 h-3 rounded-full ${getRaritySolidColor(card.rarity)}`}></span>
+                            </td>
+                            <td className="p-3">
+                              <select
+                                className="border rounded px-2 py-1"
+                                value={cardData[cardKey]?.condition || 'NM'}
+                                onChange={(e) => updateCardData(cardKey, 'condition', e.target.value)}
+                              >
+                                {conditionOptions.map(option => (
+                                  <option key={option.code} value={option.code}>
+                                    {option.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="p-3 text-sm text-center">{card.csvQuantity}</td>
+                            <td className="p-3 text-sm text-center">{currentQty}</td>
+                            <td className="p-3">
+                              <input
+                                type="number"
+                                min="0"
+                                className="border rounded px-2 py-1 w-16"
+                                value={cardData[cardKey]?.quantity || 0}
+                                onChange={(e) => updateCardData(cardKey, 'quantity', parseInt(e.target.value) || 0)}
+                              />
+                            </td>
+                            <td className="p-3 text-sm text-center font-semibold">{totalAfterAdd}</td>
+                            <td className="p-3">
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                className="border rounded px-2 py-1 w-20"
+                                value={cardData[cardKey]?.price || ''}
+                                onChange={(e) => updateCardData(cardKey, 'price', e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Submit Button */}
+                <div className="p-4 border-t">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={submitting || selectedCount === 0}
+                    className="w-full bg-blue-700 text-white py-3 px-6 rounded font-semibold hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? 'SUBMITTING...' : `ADD CARD(S) TO INVENTORY (${selectedCount} selected)`}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Not Found Cards Table */}
+            {foundCards.filter(c => !c.found).length > 0 && (
+              <div className="bg-white rounded-lg shadow mt-6">
+                <div className="flex justify-between items-center p-4 border-b bg-red-50">
+                  <div className="text-sm font-semibold text-red-800">
+                    ✗ Not Found Cards ({foundCards.filter(c => !c.found).length})
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-red-700 text-white">
+                      <tr>
+                        <th className="p-3 text-left">Name</th>
+                        <th className="p-3 text-left">Set</th>
+                        <th className="p-3 text-left">Number</th>
+                        <th className="p-3 text-left">Language</th>
+                        <th className="p-3 text-left">CSV Qty</th>
+                        <th className="p-3 text-left">Error</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {foundCards.filter(c => !c.found).map((card, index) => {
+                        const rowClass = index % 2 === 0 ? 'bg-red-50' : 'bg-white';
+
+                        return (
+                          <tr key={card.reactKey} className={rowClass}>
+                            <td className="p-3 text-sm font-medium text-red-900">{card.name}</td>
+                            <td className="p-3 text-sm text-gray-700">{card.setName || card.set_name}</td>
+                            <td className="p-3 text-sm text-gray-700">{card.collectorNumber || '-'}</td>
+                            <td className="p-3 text-sm text-center">{card.language?.toUpperCase() || 'EN'}</td>
+                            <td className="p-3 text-sm text-center">{card.csvQuantity}</td>
+                            <td className="p-3 text-sm text-red-600">{card.errorMessage}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
