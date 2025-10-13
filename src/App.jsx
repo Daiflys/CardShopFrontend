@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
+import MainLayout from "./components/MainLayout";
 import BannerNew from "./components/BannerNew";
 import Trends from "./components/Trends";
 import SetsSidebar from "./components/SetsSidebar";
@@ -16,27 +16,29 @@ import Transactions from "./pages/account/Transactions";
 import Settings from "./pages/account/Settings";
 import BulkSell from "./pages/BulkSell";
 import AdvancedSearch from "./pages/AdvancedSearch";
-import Admin from "./pages/Admin";
 import RequireAuth from "./pages/RequireAuth";
+import AdminLayout from "./admin/components/AdminLayout";
+import Dashboard from "./admin/scenes/dashboard";
+import BulkUpload from "./admin/scenes/bulkUpload";
+import Users from "./admin/scenes/users";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
-import ThemeDemo from "./components/ThemeDemo";
-import Footer from "./components/Footer";
 import "./App.css";
 
 function App() {
-  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-
   return (
     <CartInitializer>
       <BrowserRouter>
-        <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f0f9ff)' }}>
-          <Header onThemeSettingsClick={() => setIsThemeModalOpen(true)} />
-          <ThemeDemo
-            isOpen={isThemeModalOpen}
-            onClose={() => setIsThemeModalOpen(false)}
-          />
-          <Routes>
+        <Routes>
+          {/* Admin Routes - No Header/Footer */}
+          <Route path="/admin/*" element={<RequireAuth><AdminLayout /></RequireAuth>}>
+            <Route index element={<Dashboard />} />
+            <Route path="bulk-upload" element={<BulkUpload />} />
+            <Route path="users" element={<Users />} />
+          </Route>
+
+          {/* Main Routes - With Header/Footer */}
+          <Route element={<MainLayout />}>
             <Route path="/" element={
               <main className="w-full">
                 <PageLayout
@@ -58,7 +60,7 @@ function App() {
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Checkout /></main>} />
             <Route path="/bulk-sell" element={<RequireAuth><BulkSell /></RequireAuth>} />
-            <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
+
             <Route
               path="/account/*"
               element={
@@ -74,9 +76,8 @@ function App() {
               <Route path="transactions" element={<Transactions />} />
               <Route path="settings" element={<Settings />} />
             </Route>
-          </Routes>
-          <Footer />
-        </div>
+          </Route>
+        </Routes>
       </BrowserRouter>
     </CartInitializer>
   );
