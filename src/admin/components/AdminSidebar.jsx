@@ -10,6 +10,7 @@ import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
+import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 
 const AdminSidebar = () => {
@@ -159,6 +160,23 @@ const AdminSidebar = () => {
               style={{ color: colors.grey[100] }}
             >
               Inventory
+            </MenuItem>
+
+            {/* Customization */}
+            <Typography
+              variant="h6"
+              color={colors.grey[300]}
+              sx={{ m: "15px 0 5px 20px" }}
+            >
+              {!isCollapsed && "Customization"}
+            </Typography>
+
+            <MenuItem
+              icon={<PaletteOutlinedIcon />}
+              component={<Link to="/admin/skin-editor" />}
+              style={{ color: colors.grey[100] }}
+            >
+              Skin Editor
             </MenuItem>
 
             {/* Back to Website */}
