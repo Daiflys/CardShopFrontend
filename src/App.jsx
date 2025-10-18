@@ -21,6 +21,7 @@ import AdminLayout from "./admin/components/AdminLayout";
 import Dashboard from "./admin/scenes/dashboard";
 import BulkUpload from "./admin/scenes/bulkUpload";
 import Users from "./admin/scenes/users";
+import SkinEditor from "./admin/scenes/skinEditor";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
 import "./App.css";
@@ -35,6 +36,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="bulk-upload" element={<BulkUpload />} />
             <Route path="users" element={<Users />} />
+            <Route path="skin-editor" element={<SkinEditor />} />
           </Route>
 
           {/* Main Routes - With Header/Footer */}

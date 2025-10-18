@@ -98,7 +98,7 @@ const CardInfoTab = ({ card }) => {
               </h1>
             </div>
             <div className="text-sm text-gray-600 mb-4">
-              Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; Mythic Rare &amp; Rare
+              Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; {card.rarity ?? "Unknown"}
             </div>
           </div>
 
@@ -287,17 +287,7 @@ const CardInfoTab = ({ card }) => {
                           title={`{${manaSymbol.symbol}}`}
                         />
                       ))
-                    ) : (
-                      parseManaCost("{3}{W}").map((manaSymbol, index) => (
-                        <img
-                          key={index}
-                          src={manaSymbol.svg_uri}
-                          alt={manaSymbol.symbol}
-                          className="w-5 h-5"
-                          title={`{${manaSymbol.symbol}}`}
-                        />
-                      ))
-                    )}
+                    ) : "-"}
                   </div>
                 </td>
               </tr>
