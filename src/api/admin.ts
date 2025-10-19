@@ -1,6 +1,7 @@
-// src/api/admin.js
+// src/api/admin.ts
+import { CSVCardInput, CSVSearchResponse, BulkSellCardData, BulkSellResponse } from './types.js';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 /**
  * CSV card search using the new /cards/csv-search endpoint
@@ -8,7 +9,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
  * @param {string} language - Language code for the cards
  * @returns {Promise} Response with results array containing matched cards
  */
-export const csvCardSearch = async (cards, language = 'en') => {
+export const csvCardSearch = async (cards: CSVCardInput[], language: string = 'en'): Promise<CSVSearchResponse> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -61,7 +62,7 @@ export const csvCardSearch = async (cards, language = 'en') => {
 
   } catch (error) {
     // Network or other fetch errors
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -76,7 +77,7 @@ export const csvCardSearch = async (cards, language = 'en') => {
  * @param {string} language - Language code for the cards
  * @returns {Promise} Response with success status and message
  */
-export const bulkSellFromCSV = async (cards, language = 'en') => {
+export const bulkSellFromCSV = async (cards: BulkSellCardData[], language: string = 'en'): Promise<BulkSellResponse> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -117,7 +118,7 @@ export const bulkSellFromCSV = async (cards, language = 'en') => {
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 

@@ -1,9 +1,11 @@
-// src/api/auth.js
+// src/api/auth.ts
+import type { LoginResponse, RegisterResponse, OAuthUserData } from './types';
+
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 // --- MOCKS ---
-const mockLogin = async (email, password) => {
+const mockLogin = async (email: string, password: string): Promise<LoginResponse> => {
   await new Promise(res => setTimeout(res, 1000));
   if (email === "test@test.com" && password === "1234") {
     return { success: true, token: "mock-token" };
@@ -12,7 +14,7 @@ const mockLogin = async (email, password) => {
   }
 };
 
-const mockRegister = async (username, email, password) => {
+const mockRegister = async (username: string, email: string, password: string): Promise<RegisterResponse> => {
   await new Promise(res => setTimeout(res, 1000));
   if (email === "test@test.com") {
     throw new Error("Email is already registered (mock)");
@@ -21,7 +23,7 @@ const mockRegister = async (username, email, password) => {
 };
 
 // --- REAL ---
-const realLogin = async (email, password) => {
+const realLogin = async (email: string, password: string): Promise<Response> => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -35,11 +37,11 @@ const realLogin = async (email, password) => {
   return response;
 };
 
-const realRegister = async (username, email, password) => {
+const realRegister = async (username: string, email: string, password: string): Promise<Response> => {
   const response = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email , password }),
+    body: JSON.stringify({ username, email, password }),
   });
   if (!response.ok) throw new Error(await response.text());
   const token = await response.text();
@@ -47,24 +49,24 @@ const realRegister = async (username, email, password) => {
   return response;
 };
 
-const validateToken = async () => {
+const validateToken = async (): Promise<boolean> => {
   const token = localStorage.getItem("authToken");
   if (!token) return false;
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/auth/validate`, {
       method: "GET",
-      headers: { 
+      headers: {
         "Authorization": `Bearer ${token}`
       },
     });
-    
+
     if (!response.ok) {
       localStorage.removeItem("authToken");
       localStorage.removeItem("userEmail");
       return false;
     }
-    
+
     return true;
   } catch (error) {
     localStorage.removeItem("authToken");
@@ -74,29 +76,29 @@ const validateToken = async () => {
 };
 
 // OAuth2 Login
-const oauthLogin = async (provider, token, userData) => {
+const oauthLogin = async (provider: string, token: string, userData?: OAuthUserData): Promise<Response> => {
   const response = await fetch(`${API_BASE_URL}/auth/${provider}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken: token }),
   });
-  
+
   if (!response.ok) {
     console.log("OAuth login response not ok, error: ", response);
     throw new Error("OAuth login failed");
   }
-  
+
   const authToken = await response.text();
   localStorage.setItem("authToken", authToken);
-  
+
   // Store user email for header fallback
   if (userData?.email) {
     localStorage.setItem("userEmail", userData.email);
   }
-  
+
   return response;
 };
 
 export const login = realLogin;
 export const register = realRegister;
-export { oauthLogin, validateToken }; 
+export { oauthLogin, validateToken };

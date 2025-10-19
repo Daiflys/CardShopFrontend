@@ -10,13 +10,13 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from 'react-router-dom';
 
-const AdminTopbar = () => {
+const AdminTopbar: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     localStorage.removeItem('authToken');
     navigate('/login');
   };

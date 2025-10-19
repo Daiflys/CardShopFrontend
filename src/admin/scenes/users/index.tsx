@@ -17,9 +17,10 @@ import {
   InputLabel,
   IconButton,
   Grid,
-  Paper
+  Paper,
+  SelectChangeEvent
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
@@ -42,28 +43,34 @@ import {
   getProviderLabel,
   getProviderColor
 } from "../../../utils/userRoles";
+import type { UserDTO, AdminStats } from "../../api/types";
 
-const Users = () => {
+interface UserRow extends UserDTO {
+  provider?: string;
+  result?: string;
+}
+
+const Users: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   // State
-  const [users, setUsers] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   // Role change modal
-  const [roleModalOpen, setRoleModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [newRole, setNewRole] = useState("");
-  const [roleChangeLoading, setRoleChangeLoading] = useState(false);
+  const [roleModalOpen, setRoleModalOpen] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
+  const [newRole, setNewRole] = useState<string>("");
+  const [roleChangeLoading, setRoleChangeLoading] = useState<boolean>(false);
 
   const roles = getAllRoles();
 
   // Load users and stats
-  const loadData = async () => {
+  const loadData = async (): Promise<void> => {
     setLoading(true);
     setError(null);
 
@@ -73,11 +80,11 @@ const Users = () => {
         getAdminStats()
       ]);
 
-      setUsers(usersData);
+      setUsers(usersData as UserRow[]);
       setStats(statsData);
     } catch (err) {
       console.error("Error loading users data:", err);
-      setError(err.message || "Failed to load users data");
+      setError((err as Error).message || "Failed to load users data");
       setUsers([]);
       setStats(null);
     } finally {
@@ -91,21 +98,21 @@ const Users = () => {
   }, []);
 
   // Handle opening role change modal
-  const handleOpenRoleModal = (user) => {
+  const handleOpenRoleModal = (user: UserRow): void => {
     setSelectedUser(user);
     setNewRole(user.role);
     setRoleModalOpen(true);
   };
 
   // Handle closing role change modal
-  const handleCloseRoleModal = () => {
+  const handleCloseRoleModal = (): void => {
     setRoleModalOpen(false);
     setSelectedUser(null);
     setNewRole("");
   };
 
   // Handle role change
-  const handleRoleChange = async () => {
+  const handleRoleChange = async (): Promise<void> => {
     if (!selectedUser || !newRole) return;
 
     setRoleChangeLoading(true);
@@ -113,12 +120,12 @@ const Users = () => {
     setSuccessMessage("");
 
     try {
-      const updatedUser = await updateUserRole(selectedUser.id, newRole);
+      const updatedUser = await updateUserRole(selectedUser.id, newRole as 'ROLE_USER' | 'ROLE_ADMIN');
 
       // Update users list with updated user
       setUsers(prevUsers =>
         prevUsers.map(user =>
-          user.id === updatedUser.id ? updatedUser : user
+          user.id === updatedUser.id ? { ...updatedUser as UserRow } : user
         )
       );
 
@@ -130,14 +137,14 @@ const Users = () => {
       handleCloseRoleModal();
     } catch (err) {
       console.error("Error updating user role:", err);
-      setError(err.message || "Failed to update user role");
+      setError((err as Error).message || "Failed to update user role");
     } finally {
       setRoleChangeLoading(false);
     }
   };
 
   // DataGrid columns
-  const columns = [
+  const columns: GridColDef[] = [
     {
       field: "id",
       headerName: "ID",
@@ -161,10 +168,10 @@ const Users = () => {
       minWidth: 200,
       align: "left",
       headerAlign: "left",
-      renderCell: ({ row }) => (
+      renderCell: (params: GridRenderCellParams) => (
         <Box display="flex" alignItems="center">
           <EmailOutlinedIcon sx={{ mr: 1, fontSize: "1.2rem", color: colors.grey[400] }} />
-          <Typography>{row.email}</Typography>
+          <Typography>{params.row.email}</Typography>
         </Box>
       ),
     },
@@ -174,17 +181,17 @@ const Users = () => {
       width: 140,
       align: "left",
       headerAlign: "left",
-      renderCell: ({ row }) => {
-        const roleColor = getRoleColor(row.role);
+      renderCell: (params: GridRenderCellParams) => {
+        const roleColor = getRoleColor(params.row.role);
         return (
           <Box display="flex" alignItems="center">
-            {row.role === USER_ROLES.ROLE_ADMIN.value ? (
+            {params.row.role === USER_ROLES.ROLE_ADMIN.value ? (
               <AdminPanelSettingsOutlinedIcon sx={{ color: roleColor, mr: 0.5 }} />
             ) : (
               <PersonOutlineOutlinedIcon sx={{ color: roleColor, mr: 0.5 }} />
             )}
             <Chip
-              label={getRoleLabel(row.role)}
+              label={getRoleLabel(params.row.role)}
               sx={{
                 backgroundColor: roleColor,
                 color: "#fff",
@@ -202,18 +209,18 @@ const Users = () => {
       width: 120,
       align: "center",
       headerAlign: "center",
-      renderCell: ({ row }) => {
-        const providerColor = getProviderColor(row.provider);
+      renderCell: (params: GridRenderCellParams) => {
+        const providerColor = getProviderColor(params.row.provider);
         return (
           <Box display="flex" alignItems="center" justifyContent="center">
-            {row.provider === 'GOOGLE' && (
+            {params.row.provider === 'GOOGLE' && (
               <GoogleIcon sx={{ color: providerColor, mr: 0.5, fontSize: "1.1rem" }} />
             )}
-            {row.provider === 'LOCAL' && (
+            {params.row.provider === 'LOCAL' && (
               <EmailOutlinedIcon sx={{ color: providerColor, mr: 0.5, fontSize: "1.1rem" }} />
             )}
             <Typography sx={{ color: providerColor, fontSize: "0.875rem" }}>
-              {getProviderLabel(row.provider)}
+              {getProviderLabel(params.row.provider)}
             </Typography>
           </Box>
         );
@@ -227,9 +234,9 @@ const Users = () => {
       headerAlign: "center",
       sortable: false,
       filterable: false,
-      renderCell: ({ row }) => (
+      renderCell: (params: GridRenderCellParams) => (
         <IconButton
-          onClick={() => handleOpenRoleModal(row)}
+          onClick={() => handleOpenRoleModal(params.row)}
           sx={{
             color: colors.blueAccent[500],
             "&:hover": {
@@ -307,7 +314,7 @@ const Users = () => {
                   Admin Users
                 </Typography>
                 <Typography variant="h3" fontWeight="bold" color={getRoleColor(USER_ROLES.ROLE_ADMIN.value)}>
-                  {stats.adminUsers}
+                  {stats.totalAdmins}
                 </Typography>
               </Box>
               <AdminPanelSettingsOutlinedIcon sx={{ fontSize: "3rem", color: getRoleColor(USER_ROLES.ROLE_ADMIN.value) }} />
@@ -330,7 +337,7 @@ const Users = () => {
                   Regular Users
                 </Typography>
                 <Typography variant="h3" fontWeight="bold" color={getRoleColor(USER_ROLES.ROLE_USER.value)}>
-                  {stats.regularUsers}
+                  {stats.totalUsers - stats.totalAdmins}
                 </Typography>
               </Box>
               <PersonOutlineOutlinedIcon sx={{ fontSize: "3rem", color: getRoleColor(USER_ROLES.ROLE_USER.value) }} />
@@ -442,7 +449,7 @@ const Users = () => {
                 <InputLabel sx={{ color: colors.grey[300] }}>Role</InputLabel>
                 <Select
                   value={newRole}
-                  onChange={(e) => setNewRole(e.target.value)}
+                  onChange={(e: SelectChangeEvent) => setNewRole(e.target.value)}
                   label="Role"
                   sx={{
                     color: colors.grey[100],

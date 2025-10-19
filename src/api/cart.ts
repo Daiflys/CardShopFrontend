@@ -1,53 +1,75 @@
-// src/api/cart.js
+// src/api/cart.ts
+import type { CartItem } from './types';
+
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
+interface CartResponse {
+  success: boolean;
+  message: string;
+}
+
+interface CheckoutItem {
+  card_to_sell_id: number;
+  quantity: number;
+}
+
+interface CheckoutRequest {
+  items: CheckoutItem[];
+}
+
+interface CheckoutResponse {
+  success: boolean;
+  transaction_id?: string;
+  purchases?: CartItem[];
+  message: string;
+}
 
 // --- MOCK DATA ---
-let mockCart = [];
+let mockCart: CartItem[] = [];
 
-const mockAddToCart = async (card) => {
+const mockAddToCart = async (card: CartItem): Promise<CartResponse> => {
   await new Promise(res => setTimeout(res, 200));
-  
+
   const quantityToAdd = card.quantity || 1;
-  const availableStock = card.availableStock || card.available || Infinity;
-  
+  const availableStock = card.available || Infinity;
+
   const existingItem = mockCart.find(item => item.id === card.id);
   const currentInCart = existingItem ? existingItem.quantity : 0;
-  
+
   // Check if we have enough stock
   if (currentInCart + quantityToAdd > availableStock) {
     const remaining = availableStock - currentInCart;
     throw new Error(`Only ${remaining} items available. You already have ${currentInCart} in cart.`);
   }
-  
+
   if (existingItem) {
     existingItem.quantity += quantityToAdd;
   } else {
     mockCart.push({
       ...card,
-      quantity: quantityToAdd,
-      addedAt: new Date().toISOString()
+      quantity: quantityToAdd
     });
   }
-  
+
   return { success: true, message: "Card added to cart" };
 };
 
-const mockRemoveFromCart = async (cardId) => {
+const mockRemoveFromCart = async (cardId: string | number): Promise<CartResponse> => {
   await new Promise(res => setTimeout(res, 200));
-  
+
   mockCart = mockCart.filter(item => item.id !== cardId);
   return { success: true, message: "Card removed from cart" };
 };
 
-const mockGetCart = async () => {
+const mockGetCart = async (): Promise<CartItem[]> => {
   await new Promise(res => setTimeout(res, 300));
   return mockCart;
 };
 
-const mockUpdateQuantity = async (cardId, quantity) => {
+const mockUpdateQuantity = async (cardId: string | number, quantity: number): Promise<CartResponse> => {
   await new Promise(res => setTimeout(res, 200));
-  
+
   const item = mockCart.find(item => item.id === cardId);
   if (item) {
     if (quantity <= 0) {
@@ -56,12 +78,12 @@ const mockUpdateQuantity = async (cardId, quantity) => {
       item.quantity = quantity;
     }
   }
-  
+
   return { success: true, message: "Cart updated" };
 };
 
 // --- REAL API ---
-const realAddToCart = async (card) => {
+const realAddToCart = async (card: CartItem): Promise<CartResponse> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
@@ -82,10 +104,10 @@ const realAddToCart = async (card) => {
     throw new Error("Error adding to cart");
   }
 
-  return response.json();
+  return response.json() as Promise<CartResponse>;
 };
 
-const realRemoveFromCart = async (cardId) => {
+const realRemoveFromCart = async (cardId: string | number): Promise<CartResponse> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
@@ -104,10 +126,10 @@ const realRemoveFromCart = async (cardId) => {
     throw new Error("Error removing from cart");
   }
 
-  return response.json();
+  return response.json() as Promise<CartResponse>;
 };
 
-const realGetCart = async () => {
+const realGetCart = async (): Promise<CartItem[]> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
@@ -123,10 +145,10 @@ const realGetCart = async () => {
     throw new Error("Error fetching cart");
   }
 
-  return response.json();
+  return response.json() as Promise<CartItem[]>;
 };
 
-const realUpdateQuantity = async (cardId, quantity) => {
+const realUpdateQuantity = async (cardId: string | number, quantity: number): Promise<CartResponse> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
@@ -145,21 +167,21 @@ const realUpdateQuantity = async (cardId, quantity) => {
     throw new Error("Error updating cart");
   }
 
-  return response.json();
+  return response.json() as Promise<CartResponse>;
 };
 
 // --- CHECKOUT ---
-const mockCheckout = async (items) => {
+const mockCheckout = async (items: CartItem[]): Promise<CheckoutResponse> => {
   await new Promise(res => setTimeout(res, 300));
-  return { 
-    success: true, 
+  return {
+    success: true,
     transaction_id: "mock-transaction-" + Date.now(),
     purchases: items,
     message: "All items purchased successfully"
   };
 };
 
-const realCheckout = async (items) => {
+const realCheckout = async (items: CartItem[]): Promise<CheckoutResponse> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
@@ -167,9 +189,9 @@ const realCheckout = async (items) => {
 
   console.log("📦 Cart Items received:", items);
 
-  const batchRequest = {
+  const batchRequest: CheckoutRequest = {
     items: items.map(item => ({
-      card_to_sell_id: typeof item.id === 'string' ? Number(item.id) : item.id,
+      card_to_sell_id: typeof item.id === 'string' ? Number(item.id) : item.id as number,
       quantity: item.quantity || 1
     }))
   };
@@ -194,7 +216,7 @@ const realCheckout = async (items) => {
     throw new Error(`Error performing checkout: ${response.status} - ${errorText}`);
   }
 
-  const result = await response.json();
+  const result = await response.json() as CheckoutResponse;
   console.log("✅ Checkout response:", result);
   return result;
 };

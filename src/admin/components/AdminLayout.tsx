@@ -5,7 +5,7 @@ import { ColorModeContext, useMode, tokens } from "../theme";
 import AdminSidebar from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
 
-const AdminLayout = () => {
+const AdminLayout: React.FC = () => {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
   const colors = tokens(theme.palette.mode);

@@ -1,12 +1,36 @@
-// src/api/card.js
+// src/api/card.ts
 import { createPaginationParams } from '../utils/pagination.js';
 import { formatCardDetailResponse } from '../utils/cardFormatters.js';
+import { Card, PageResponse } from './types.js';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 // --- MOCK ---
-const mockCard = {
+interface MockCard {
+  id: string;
+  name: string;
+  set: string;
+  rarity: string;
+  number: number;
+  printedIn: string;
+  available: number;
+  from: number;
+  priceTrend: number;
+  avg30: number;
+  avg7: number;
+  avg1: number;
+  image: string;
+  rules: string[];
+  sellers: Array<{
+    name: string;
+    country: string;
+    offer: number;
+    quantity: number;
+  }>;
+}
+
+const mockCard: MockCard = {
   id: "dragon-wings",
   name: "Dragon Wings",
   set: "Scourge",
@@ -33,7 +57,17 @@ const mockCard = {
   ],
 };
 
-const mockCardsToSell = [
+interface MockCardToSell {
+  id: string;
+  oracleId: string;
+  setName: string;
+  name: string;
+  imageUrl: string;
+  cardPrice: number;
+  userId: number;
+}
+
+const mockCardsToSell: MockCardToSell[] = [
   {
     id: "sell-1",
     oracleId: "12345",
@@ -54,18 +88,18 @@ const mockCardsToSell = [
   }
 ];
 
-const mockGetCardDetail = async (cardId) => {
+const mockGetCardDetail = async (cardId: string): Promise<MockCard> => {
   await new Promise(res => setTimeout(res, 500));
   return mockCard;
 };
 
-const mockGetCardsToSell = async (cardName) => {
+const mockGetCardsToSell = async (cardName: string): Promise<MockCardToSell[]> => {
   await new Promise(res => setTimeout(res, 300));
   return mockCardsToSell;
 };
 
 // --- REAL ---
-const realGetCardDetail = async (cardId) => {
+const realGetCardDetail = async (cardId: string): Promise<Card> => {
   console.log("going to search for cardId", cardId);
   const response = await fetch(`${API_BASE_URL}/cards/id/${cardId}`);
   if (!response.ok) throw new Error("Error fetching card details");
@@ -75,25 +109,25 @@ const realGetCardDetail = async (cardId) => {
   return formatCardDetailResponse(responseRead);
 };
 
-const realGetCardsToSell = async (cardName, page = 1, size = 20) => {
+const realGetCardsToSell = async (cardName: string, page: number = 1, size: number = 20): Promise<PageResponse<Card>> => {
   console.log("going to search for cards to sell with name", cardName);
   const params = createPaginationParams(page, size);
-  
+
   const response = await fetch(`${API_BASE_URL}/cardsToSell/${encodeURIComponent(cardName)}?${params.toString()}`);
   if (!response.ok) throw new Error("Error fetching cards to sell");
   return response.json();
 };
 
-const realGetCardsToSellById = async (cardId, page = 1, size = 20) => {
+const realGetCardsToSellById = async (cardId: string, page: number = 1, size: number = 20): Promise<PageResponse<Card>> => {
   console.log("going to search for cards to sell with id", cardId);
   const params = createPaginationParams(page, size);
-  
+
   const response = await fetch(`${API_BASE_URL}/cardsToSell/card/${encodeURIComponent(cardId)}?${params.toString()}`);
   if (!response.ok) throw new Error("Error fetching cards to sell");
   return response.json();
 };
 
-const realGetAllCards = async (page = 1, size = 20) => {
+const realGetAllCards = async (page: number = 1, size: number = 20): Promise<PageResponse<Card>> => {
   console.log("fetching all cards with pagination", { page, size });
   const params = createPaginationParams(page, size);
 
@@ -102,7 +136,7 @@ const realGetAllCards = async (page = 1, size = 20) => {
   return response.json();
 };
 
-const realGetCardsByOracleId = async (oracleId, page = 1, size = 50) => {
+const realGetCardsByOracleId = async (oracleId: string, page: number = 1, size: number = 50): Promise<PageResponse<Card>> => {
   console.log("going to search for cards with oracle ID", oracleId);
   const params = createPaginationParams(page, size, { sortBy: 'name' });
 
@@ -113,7 +147,7 @@ const realGetCardsByOracleId = async (oracleId, page = 1, size = 50) => {
   return data;
 };
 
-//export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail; 
+//export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail;
 export const getCardDetail = realGetCardDetail;
 export const getCardsToSell = realGetCardsToSell;
 export const getCardsToSellById = realGetCardsToSellById;

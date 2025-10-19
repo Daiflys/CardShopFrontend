@@ -1,18 +1,43 @@
+// src/api/bulkSell.ts
 import Card from '../models/Card.js';
+import { BulkSellResponse } from './types.js';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
-const mockBulkSell = async (selectedCardEntries, filteredCards) => {
+interface CardSelectionData {
+  selected: boolean;
+  quantity: number;
+  price: string | number;
+  condition: string;
+  comments?: string;
+  language: string;
+}
+
+type CardSelectionEntry = [string, CardSelectionData];
+
+interface CardWithReactKey {
+  id?: string;
+  reactKey?: string;
+  [key: string]: any;
+}
+
+const mockBulkSell = async (
+  selectedCardEntries: CardSelectionEntry[],
+  filteredCards: CardWithReactKey[]
+): Promise<BulkSellResponse> => {
   // Filter selected cards for mock response
   const selectedCards = selectedCardEntries.filter(([cardKey, data]) => data.selected && data.quantity > 0);
   await new Promise(res => setTimeout(res, 2000));
   return { success: true, message: `Successfully listed ${selectedCards.length} cards for sale` };
 };
 
-const realBulkSell = async (selectedCardEntries, filteredCards) => {
+const realBulkSell = async (
+  selectedCardEntries: CardSelectionEntry[],
+  filteredCards: CardWithReactKey[]
+): Promise<BulkSellResponse> => {
   const token = localStorage.getItem("authToken");
-  
+
   // Map the selected cards data using Card class
   const cardsData = selectedCardEntries
     .filter(([cardKey, data]) => data.selected && data.quantity > 0)
@@ -25,9 +50,9 @@ const realBulkSell = async (selectedCardEntries, filteredCards) => {
       // Use Card instance to format bulk sell data
       const cardInstance = card instanceof Card ? card : new Card(card);
       return cardInstance.toBulkSellFormat({
-        price: parseFloat(data.price),
+        price: parseFloat(String(data.price)),
         condition: data.condition,
-        quantity: parseInt(data.quantity),
+        quantity: parseInt(String(data.quantity)),
         comments: data.comments,
         language: data.language
       });
@@ -35,18 +60,18 @@ const realBulkSell = async (selectedCardEntries, filteredCards) => {
 
   const response = await fetch(`${API_BASE_URL}/cardsToSell/auth/bulk`, {
     method: "POST",
-    headers: { 
+    headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`, 
+      "Authorization": `Bearer ${token}`,
     },
     body: JSON.stringify({ cards: cardsData }),
   });
-  
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Error posting cards to sell");
   }
-  
+
   return response.json();
 };
 

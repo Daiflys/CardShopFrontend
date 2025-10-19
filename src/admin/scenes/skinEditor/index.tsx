@@ -14,7 +14,7 @@ import {
   Tab,
   Switch,
   FormControlLabel,
-  Slider,
+  SelectChangeEvent,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import AdminHeader from "../../components/Header";
@@ -22,7 +22,38 @@ import MainHeader from "../../../components/Header";
 import { useSkin } from "../../../hooks/useComponent";
 import { useTheme as useAppTheme } from "../../../hooks/useTheme";
 
-const SkinEditor = () => {
+interface HeaderElementConfig {
+  visible: boolean;
+  width?: string;
+  fontSize?: string;
+}
+
+interface HeaderElements {
+  logo: HeaderElementConfig;
+  search: HeaderElementConfig;
+  navigation: HeaderElementConfig;
+  cart: HeaderElementConfig;
+  userMenu: HeaderElementConfig;
+  languageSwitcher: HeaderElementConfig;
+}
+
+interface HeaderStyles {
+  backgroundColor: string;
+  textColor: string;
+  borderColor: string;
+  buttonBgColor: string;
+  buttonTextColor: string;
+  height: string;
+  padding: string;
+}
+
+interface TabPanelProps {
+  children: React.ReactNode;
+  value: number;
+  index: number;
+}
+
+const SkinEditor: React.FC = () => {
   const theme = useMuiTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -31,13 +62,13 @@ const SkinEditor = () => {
   const { theme: appTheme, updateTheme } = useAppTheme();
 
   // Tab state
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState<number>(0);
 
   // Preview mode state
-  const [previewMode, setPreviewMode] = useState("desktop");
+  const [previewMode, setPreviewMode] = useState<string>("desktop");
 
   // Header element configurations
-  const [headerElements, setHeaderElements] = useState({
+  const [headerElements, setHeaderElements] = useState<HeaderElements>({
     logo: { visible: true, width: '120px', fontSize: '24px' },
     search: { visible: true, width: '400px' },
     navigation: { visible: true },
@@ -47,7 +78,7 @@ const SkinEditor = () => {
   });
 
   // Header style editor state
-  const [headerStyles, setHeaderStyles] = useState({
+  const [headerStyles, setHeaderStyles] = useState<HeaderStyles>({
     backgroundColor: '#f0f9ff',
     textColor: '#0284c7',
     borderColor: '#e0f2fe',
@@ -58,7 +89,7 @@ const SkinEditor = () => {
   });
 
   // Tab panel component
-  const TabPanel = ({ children, value, index }) => {
+  const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
     return (
       <div role="tabpanel" hidden={value !== index}>
         {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
@@ -74,7 +105,7 @@ const SkinEditor = () => {
       <Box backgroundColor={colors.primary[400]} borderRadius="8px" mb={3}>
         <Tabs
           value={currentTab}
-          onChange={(e, newValue) => setCurrentTab(newValue)}
+          onChange={(e, newValue: number) => setCurrentTab(newValue)}
           sx={{
             "& .MuiTab-root": {
               color: colors.grey[100],
@@ -106,7 +137,7 @@ const SkinEditor = () => {
           <InputLabel>Select Skin</InputLabel>
           <Select
             value={currentSkin}
-            onChange={(e) => switchSkin(e.target.value)}
+            onChange={(e: SelectChangeEvent) => switchSkin(e.target.value)}
             label="Select Skin"
           >
             {availableSkins.map((skin) => (
@@ -170,8 +201,8 @@ const SkinEditor = () => {
                   maxWidth: '100%',
                   margin: previewMode === "mobile" ? '0 auto' : '0',
                   transition: 'width 0.3s ease',
-                  pointerEvents: 'none', // Disable all interactions in preview
-                  userSelect: 'none', // Disable text selection
+                  pointerEvents: 'none',
+                  userSelect: 'none',
                   '& header': {
                     background: `${headerStyles.backgroundColor} !important`,
                     borderColor: `${headerStyles.borderColor} !important`,
@@ -184,30 +215,24 @@ const SkinEditor = () => {
                     background: `${headerStyles.buttonBgColor} !important`,
                     color: `${headerStyles.buttonTextColor} !important`,
                   },
-                  // Logo controls
                   '& header button[class*="logo"], & header a[class*="logo"]': {
                     display: headerElements.logo.visible ? 'flex' : 'none !important',
                     width: headerElements.logo.width,
                     fontSize: headerElements.logo.fontSize,
                   },
-                  // Search controls
                   '& header input[type="search"], & header [class*="search"], & header form': {
                     display: headerElements.search.visible ? 'flex' : 'none !important',
                     width: headerElements.search.width,
                   },
-                  // Navigation controls
                   '& header nav': {
                     display: headerElements.navigation.visible ? 'flex' : 'none !important',
                   },
-                  // Cart controls
                   '& header [class*="cart"], & header button[aria-label*="cart"]': {
                     display: headerElements.cart.visible ? 'flex' : 'none !important',
                   },
-                  // User menu controls
                   '& header [class*="user"], & header button[aria-label*="user"]': {
                     display: headerElements.userMenu.visible ? 'flex' : 'none !important',
                   },
-                  // Language switcher controls
                   '& header [class*="language"], & header select[class*="lang"]': {
                     display: headerElements.languageSwitcher.visible ? 'flex' : 'none !important',
                   },

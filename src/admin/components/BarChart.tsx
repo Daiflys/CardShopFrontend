@@ -1,9 +1,13 @@
 import { useTheme } from "@mui/material";
-import { ResponsiveBar } from "@nivo/bar";
+import { ResponsiveBar, BarDatum } from "@nivo/bar";
 import { tokens } from "../theme";
 import { mockBarData as data } from "../data/mockData";
 
-const BarChart = ({ isDashboard = false }) => {
+interface BarChartProps {
+  isDashboard?: boolean;
+}
+
+const BarChart: React.FC<BarChartProps> = ({ isDashboard = false }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -119,7 +123,8 @@ const BarChart = ({ isDashboard = false }) => {
         },
       ]}
       role="application"
-      barAriaLabel={function (e) {
+      ariaLabel="Bar chart showing food data by country"
+      barAriaLabel={(e: BarDatum) => {
         return e.id + ": " + e.formattedValue + " in country: " + e.indexValue;
       }}
     />

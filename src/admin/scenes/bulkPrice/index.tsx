@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import {
   Box,
   Typography,
@@ -13,9 +13,10 @@ import {
   CircularProgress,
   Alert,
   Paper,
-  Grid
+  Grid,
+  SelectChangeEvent
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -24,31 +25,32 @@ import { setPriceBulk, incrementPriceBulk, adjustPricePercentageBulk } from "../
 import { languageOptions } from "../../../utils/languageFlags";
 import { conditionOptions, getConditionColor as getTailwindConditionColor } from "../../../utils/cardConditions";
 import { rarityOptions, getRarityColorHex, getRaritySymbol } from "../../../utils/rarityOptions";
+import type { CardToSellDTO } from "../../api/types";
 
-const BulkPriceChange = () => {
+const BulkPriceChange: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   // Form state
-  const [mode, setMode] = useState("set"); // "set", "increment", "percentage"
-  const [language, setLanguage] = useState("en");
-  const [set, setSet] = useState("");
-  const [price, setPrice] = useState("");
-  const [increment, setIncrement] = useState("");
-  const [percentage, setPercentage] = useState("");
-  const [quantityLessThan, setQuantityLessThan] = useState("");
-  const [rarity, setRarity] = useState("");
-  const [condition, setCondition] = useState("");
+  const [mode, setMode] = useState<string>("set");
+  const [language, setLanguage] = useState<string>("en");
+  const [set, setSet] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
+  const [increment, setIncrement] = useState<string>("");
+  const [percentage, setPercentage] = useState<string>("");
+  const [quantityLessThan, setQuantityLessThan] = useState<string>("");
+  const [rarity, setRarity] = useState<string>("");
+  const [condition, setCondition] = useState<string>("");
 
   // Result state
-  const [updatedCards, setUpdatedCards] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [updatedCards, setUpdatedCards] = useState<CardToSellDTO[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   // Convert Tailwind color class to hex for MUI
-  const tailwindToHex = (tailwindClass) => {
-    const colorMap = {
+  const tailwindToHex = (tailwindClass: string): string => {
+    const colorMap: Record<string, string> = {
       'bg-cyan-400': '#22d3ee',
       'bg-green-500': '#22c55e',
       'bg-yellow-600': '#ca8a04',
@@ -61,13 +63,13 @@ const BulkPriceChange = () => {
   };
 
   // Get condition color in hex
-  const getConditionColorHex = (conditionCode) => {
+  const getConditionColorHex = (conditionCode: string): string => {
     const tailwindColor = getTailwindConditionColor(conditionCode);
     return tailwindToHex(tailwindColor);
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -75,7 +77,7 @@ const BulkPriceChange = () => {
     setUpdatedCards([]);
 
     try {
-      let result;
+      let result: any;
       const baseParams = {
         language,
         set,
@@ -112,7 +114,7 @@ const BulkPriceChange = () => {
       }
 
       // Handle paginated response and map to include id
-      const cards = (result.content || result).map(card => ({
+      const cards: CardToSellDTO[] = (result.content || result).map((card: CardToSellDTO) => ({
         ...card,
         id: card.cardToSellId || card.id
       }));
@@ -125,7 +127,7 @@ const BulkPriceChange = () => {
       }
     } catch (err) {
       console.error("Error changing prices:", err);
-      setError(err.message || "Failed to change prices");
+      setError((err as Error).message || "Failed to change prices");
       setUpdatedCards([]);
     } finally {
       setLoading(false);
@@ -133,7 +135,7 @@ const BulkPriceChange = () => {
   };
 
   // Handle form reset
-  const handleReset = () => {
+  const handleReset = (): void => {
     setMode("set");
     setLanguage("en");
     setSet("");
@@ -149,20 +151,20 @@ const BulkPriceChange = () => {
   };
 
   // Get condition name from code
-  const getConditionName = (code) => {
+  const getConditionName = (code: string): string => {
     const condition = conditionOptions.find(opt => opt.code === code);
     return condition ? condition.name : code;
   };
 
   // Check if form is valid
-  const isFormValid = () => {
+  const isFormValid = (): boolean => {
     const baseValid = language && set && rarity && condition;
 
     if (!baseValid) return false;
 
     switch (mode) {
       case "set":
-        return price && parseFloat(price) > 0;
+        return !!price && parseFloat(price) > 0;
       case "increment":
         return increment !== "";
       case "percentage":
@@ -173,7 +175,7 @@ const BulkPriceChange = () => {
   };
 
   // DataGrid columns
-  const columns = [
+  const columns: GridColDef[] = [
     {
       field: "id",
       headerName: "ID",
@@ -203,9 +205,9 @@ const BulkPriceChange = () => {
       width: 150,
       align: "left",
       headerAlign: "left",
-      renderCell: ({ row }) => {
-        const conditionColor = getConditionColorHex(row.condition);
-        const conditionName = getConditionName(row.condition);
+      renderCell: (params: GridRenderCellParams) => {
+        const conditionColor = getConditionColorHex(params.row.condition);
+        const conditionName = getConditionName(params.row.condition);
         return (
           <Chip
             label={conditionName}
@@ -225,11 +227,11 @@ const BulkPriceChange = () => {
       width: 120,
       align: "right",
       headerAlign: "right",
-      renderCell: ({ row }) => (
+      renderCell: (params: GridRenderCellParams) => (
         <Box display="flex" alignItems="center" justifyContent="flex-end">
           <AttachMoneyIcon sx={{ fontSize: "1rem", color: colors.greenAccent[500], mr: 0.5 }} />
           <Typography fontWeight="bold" color={colors.greenAccent[500]}>
-            {row.cardPrice?.toFixed(2) || "0.00"}
+            {params.row.cardPrice?.toFixed(2) || "0.00"}
           </Typography>
         </Box>
       ),
@@ -265,7 +267,7 @@ const BulkPriceChange = () => {
                 <InputLabel sx={{ color: colors.grey[300] }}>Mode</InputLabel>
                 <Select
                   value={mode}
-                  onChange={(e) => setMode(e.target.value)}
+                  onChange={(e: SelectChangeEvent) => setMode(e.target.value)}
                   label="Mode"
                   sx={{
                     color: colors.grey[100],
@@ -305,7 +307,7 @@ const BulkPriceChange = () => {
                 <InputLabel sx={{ color: colors.grey[300] }}>Language</InputLabel>
                 <Select
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  onChange={(e: SelectChangeEvent) => setLanguage(e.target.value)}
                   label="Language"
                   sx={{
                     color: colors.grey[100],
@@ -330,7 +332,7 @@ const BulkPriceChange = () => {
                 size="small"
                 label="Set Code"
                 value={set}
-                onChange={(e) => setSet(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setSet(e.target.value)}
                 placeholder="e.g., MOM, BRO, ONE"
                 helperText="3-letter set code (case insensitive)"
                 sx={{
@@ -356,7 +358,7 @@ const BulkPriceChange = () => {
                   type="number"
                   label="Price"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPrice(e.target.value)}
                   inputProps={{ min: 0.01, step: 0.01 }}
                   helperText="Fixed price to set (must be > 0)"
                   sx={{
@@ -383,7 +385,7 @@ const BulkPriceChange = () => {
                     type="number"
                     label="Increment"
                     value={increment}
-                    onChange={(e) => setIncrement(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setIncrement(e.target.value)}
                     inputProps={{ step: 0.01 }}
                     helperText="Amount to add (negative to subtract)"
                     sx={{
@@ -406,7 +408,7 @@ const BulkPriceChange = () => {
                     type="number"
                     label="Quantity Less Than (Optional)"
                     value={quantityLessThan}
-                    onChange={(e) => setQuantityLessThan(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setQuantityLessThan(e.target.value)}
                     inputProps={{ min: 1, step: 1 }}
                     helperText="Only update cards with stock below this value"
                     sx={{
@@ -433,7 +435,7 @@ const BulkPriceChange = () => {
                   type="number"
                   label="Percentage"
                   value={percentage}
-                  onChange={(e) => setPercentage(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPercentage(e.target.value)}
                   inputProps={{ step: 0.1 }}
                   helperText="Percentage to adjust (e.g., 10 for +10%, -5 for -5%)"
                   sx={{
@@ -457,7 +459,7 @@ const BulkPriceChange = () => {
                 <InputLabel sx={{ color: colors.grey[300] }}>Rarity</InputLabel>
                 <Select
                   value={rarity}
-                  onChange={(e) => setRarity(e.target.value)}
+                  onChange={(e: SelectChangeEvent) => setRarity(e.target.value)}
                   label="Rarity"
                   sx={{
                     color: colors.grey[100],
@@ -494,7 +496,7 @@ const BulkPriceChange = () => {
                 <InputLabel sx={{ color: colors.grey[300] }}>Condition</InputLabel>
                 <Select
                   value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
+                  onChange={(e: SelectChangeEvent) => setCondition(e.target.value)}
                   label="Condition"
                   sx={{
                     color: colors.grey[100],
