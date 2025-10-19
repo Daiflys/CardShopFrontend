@@ -33,7 +33,7 @@ import {
   getAllUsers,
   updateUserRole,
   getAdminStats
-} from "../../../api/adminUsers";
+} from "../../api/adminUsers";
 import {
   USER_ROLES,
   getAllRoles,

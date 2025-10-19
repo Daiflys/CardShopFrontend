@@ -131,7 +131,9 @@ class Card {
       image_url: this.imageUrl,
       price: cardData.price,
       condition: cardData.condition,
-      quantity: cardData.quantity
+      quantity: cardData.quantity,
+      language: cardData.language || 'en',
+      comments: cardData.comments || ''
     };
   }
 

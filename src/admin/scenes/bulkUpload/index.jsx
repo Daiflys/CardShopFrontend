@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { csvCardSearch, bulkSellFromCSV } from '../../../api/admin';
-import { getRaritySolidColor } from '../../../utils/rarity';
 import { conditionOptions } from '../../../utils/cardConditions';
+import RarityCircle from '../../../components/RarityCircle';
 
 const BulkUpload = () => {
   const [file, setFile] = useState(null);
@@ -489,7 +489,7 @@ const BulkUpload = () => {
                             <td className="p-3 text-sm">{card.setName || card.set_name}</td>
                             <td className="p-3 text-sm text-center">{card.language?.toUpperCase() || 'EN'}</td>
                             <td className="p-3 text-center">
-                              <span className={`inline-block w-3 h-3 rounded-full ${getRaritySolidColor(card.rarity)}`}></span>
+                              <RarityCircle rarity={card.rarity} size="medium" />
                             </td>
                             <td className="p-3">
                               <select

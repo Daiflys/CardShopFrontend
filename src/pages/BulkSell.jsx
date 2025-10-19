@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { MTG_SETS } from '../data/sets';
 import { searchCardsBulk } from '../api/search';
 import { bulkSellCards } from '../api/bulkSell';
-import { getRaritySolidColor } from '../utils/rarity';
 import { languageOptions as centralizedLanguageOptions } from '../utils/languageFlags.jsx';
 import { conditionOptions } from '../utils/cardConditions';
+import { rarityOptions } from '../utils/rarityOptions';
+import RarityCircle from '../components/RarityCircle';
 import Pagination from '../components/Pagination';
 import usePaginationStore from '../store/paginationStore';
 
@@ -37,12 +38,11 @@ const BulkSell = () => {
     name: set.name
   })).sort((a, b) => a.name.localeCompare(b.name));
 
-  const rarities = ['All', 'Masterpiece', 'Mythic', 'Rare', 'Time Shifted', 'Uncommon', 'Common', 'Land', 'Special', 'Token', 'Code Card', 'Tip Card'];
-
   const sortingOptions = ['Collectors Number', 'English Name', 'Local Name', 'Rarity, Number'];
 
-  // Use centralized language options
+  // Use centralized options
   const languageOptions = centralizedLanguageOptions;
+  const rarities = rarityOptions;
 
   const handleFilter = async (page = 0) => {
     if (!selectedExpansion) {
@@ -407,7 +407,7 @@ const BulkSell = () => {
                         </div>
                       </td>
                       <td className="p-3 text-center">
-                        <span className={`inline-block w-3 h-3 rounded-full ${getRaritySolidColor(card.rarity)}`}></span>
+                        <RarityCircle rarity={card.rarity} size="medium" />
                       </td>
                       <td className="p-3">
                         <div className="relative language-selector">
