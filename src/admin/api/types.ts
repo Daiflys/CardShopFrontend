@@ -65,12 +65,29 @@ export interface PageResponse<T> {
 }
 
 // Bulk Price Change types
-export interface BulkPriceChangeParams {
+export interface SetPriceBulkParams {
   language: string;
   set: string;
-  newPrice: number;
   rarity: string;
   condition: string;
+  price: number;
+}
+
+export interface IncrementPriceBulkParams {
+  language: string;
+  set: string;
+  rarity: string;
+  condition: string;
+  increment: number;
+  quantityLessThan?: number;
+}
+
+export interface AdjustPricePercentageBulkParams {
+  language: string;
+  set: string;
+  rarity: string;
+  condition: string;
+  percentage: number;
 }
 
 export interface CardToSellDTO {

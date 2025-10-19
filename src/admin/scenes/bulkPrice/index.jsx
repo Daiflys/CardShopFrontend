@@ -20,7 +20,7 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import UpdateIcon from "@mui/icons-material/Update";
-import { changePriceBulk } from "../../api/bulkPrice";
+import { setPriceBulk, incrementPriceBulk, adjustPricePercentageBulk } from "../../api/bulkPrice";
 import { languageOptions } from "../../../utils/languageFlags";
 import { conditionOptions, getConditionColor as getTailwindConditionColor } from "../../../utils/cardConditions";
 import { rarityOptions, getRarityColorHex, getRaritySymbol } from "../../../utils/rarityOptions";
@@ -30,9 +30,13 @@ const BulkPriceChange = () => {
   const colors = tokens(theme.palette.mode);
 
   // Form state
+  const [mode, setMode] = useState("set"); // "set", "increment", "percentage"
   const [language, setLanguage] = useState("en");
   const [set, setSet] = useState("");
-  const [newPrice, setNewPrice] = useState("");
+  const [price, setPrice] = useState("");
+  const [increment, setIncrement] = useState("");
+  const [percentage, setPercentage] = useState("");
+  const [quantityLessThan, setQuantityLessThan] = useState("");
   const [rarity, setRarity] = useState("");
   const [condition, setCondition] = useState("");
 
@@ -71,18 +75,46 @@ const BulkPriceChange = () => {
     setUpdatedCards([]);
 
     try {
-      const result = await changePriceBulk({
+      let result;
+      const baseParams = {
         language,
         set,
-        newPrice: parseFloat(newPrice),
-        rarity: rarity.toLowerCase(), // Ensure lowercase for rarity
+        rarity: rarity.toLowerCase(),
         condition
-      });
+      };
+
+      // Call appropriate endpoint based on mode
+      switch (mode) {
+        case "set":
+          result = await setPriceBulk({
+            ...baseParams,
+            price: parseFloat(price)
+          });
+          break;
+
+        case "increment":
+          result = await incrementPriceBulk({
+            ...baseParams,
+            increment: parseFloat(increment),
+            ...(quantityLessThan && { quantityLessThan: parseInt(quantityLessThan) })
+          });
+          break;
+
+        case "percentage":
+          result = await adjustPricePercentageBulk({
+            ...baseParams,
+            percentage: parseFloat(percentage)
+          });
+          break;
+
+        default:
+          throw new Error("Invalid mode selected");
+      }
 
       // Handle paginated response and map to include id
       const cards = (result.content || result).map(card => ({
         ...card,
-        id: card.cardToSellId || card.id // Use cardToSellId as id for DataGrid
+        id: card.cardToSellId || card.id
       }));
       setUpdatedCards(cards);
 
@@ -102,9 +134,13 @@ const BulkPriceChange = () => {
 
   // Handle form reset
   const handleReset = () => {
+    setMode("set");
     setLanguage("en");
     setSet("");
-    setNewPrice("");
+    setPrice("");
+    setIncrement("");
+    setPercentage("");
+    setQuantityLessThan("");
     setRarity("");
     setCondition("");
     setUpdatedCards([]);
@@ -119,7 +155,22 @@ const BulkPriceChange = () => {
   };
 
   // Check if form is valid
-  const isFormValid = language && set && newPrice && rarity && condition && parseFloat(newPrice) > 0;
+  const isFormValid = () => {
+    const baseValid = language && set && rarity && condition;
+
+    if (!baseValid) return false;
+
+    switch (mode) {
+      case "set":
+        return price && parseFloat(price) > 0;
+      case "increment":
+        return increment !== "";
+      case "percentage":
+        return percentage !== "";
+      default:
+        return false;
+    }
+  };
 
   // DataGrid columns
   const columns = [
@@ -208,6 +259,46 @@ const BulkPriceChange = () => {
       >
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
+            {/* Mode Selector */}
+            <Grid item xs={12}>
+              <FormControl fullWidth size="small">
+                <InputLabel sx={{ color: colors.grey[300] }}>Mode</InputLabel>
+                <Select
+                  value={mode}
+                  onChange={(e) => setMode(e.target.value)}
+                  label="Mode"
+                  sx={{
+                    color: colors.grey[100],
+                  }}
+                >
+                  <MenuItem value="set">
+                    <Box>
+                      <Typography fontWeight="bold">Set Fixed Price</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Assign a fixed price to all matching cards
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem value="increment">
+                    <Box>
+                      <Typography fontWeight="bold">Increment Price</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Add or subtract a fixed amount (with optional stock filter)
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem value="percentage">
+                    <Box>
+                      <Typography fontWeight="bold">Adjust by Percentage</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Increase or decrease price by percentage
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
             {/* Language */}
             <Grid item xs={12} sm={6} md={4}>
               <FormControl fullWidth size="small">
@@ -256,30 +347,109 @@ const BulkPriceChange = () => {
               />
             </Grid>
 
-            {/* New Price */}
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField
-                fullWidth
-                size="small"
-                type="number"
-                label="New Price"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                inputProps={{ min: 0.01, step: 0.01 }}
-                helperText="Must be greater than 0"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    color: colors.grey[100],
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: colors.grey[300],
-                  },
-                  "& .MuiFormHelperText-root": {
-                    color: colors.grey[400],
-                  },
-                }}
-              />
-            </Grid>
+            {/* Conditional Fields Based on Mode */}
+            {mode === "set" && (
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="number"
+                  label="Price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  inputProps={{ min: 0.01, step: 0.01 }}
+                  helperText="Fixed price to set (must be > 0)"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: colors.grey[100],
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: colors.grey[300],
+                    },
+                    "& .MuiFormHelperText-root": {
+                      color: colors.grey[400],
+                    },
+                  }}
+                />
+              </Grid>
+            )}
+
+            {mode === "increment" && (
+              <>
+                <Grid item xs={12} sm={6} md={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    label="Increment"
+                    value={increment}
+                    onChange={(e) => setIncrement(e.target.value)}
+                    inputProps={{ step: 0.01 }}
+                    helperText="Amount to add (negative to subtract)"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        color: colors.grey[100],
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: colors.grey[300],
+                      },
+                      "& .MuiFormHelperText-root": {
+                        color: colors.grey[400],
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    label="Quantity Less Than (Optional)"
+                    value={quantityLessThan}
+                    onChange={(e) => setQuantityLessThan(e.target.value)}
+                    inputProps={{ min: 1, step: 1 }}
+                    helperText="Only update cards with stock below this value"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        color: colors.grey[100],
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: colors.grey[300],
+                      },
+                      "& .MuiFormHelperText-root": {
+                        color: colors.grey[400],
+                      },
+                    }}
+                  />
+                </Grid>
+              </>
+            )}
+
+            {mode === "percentage" && (
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="number"
+                  label="Percentage"
+                  value={percentage}
+                  onChange={(e) => setPercentage(e.target.value)}
+                  inputProps={{ step: 0.1 }}
+                  helperText="Percentage to adjust (e.g., 10 for +10%, -5 for -5%)"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: colors.grey[100],
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: colors.grey[300],
+                    },
+                    "& .MuiFormHelperText-root": {
+                      color: colors.grey[400],
+                    },
+                  }}
+                />
+              </Grid>
+            )}
 
             {/* Rarity */}
             <Grid item xs={12} sm={6} md={4}>
@@ -362,7 +532,7 @@ const BulkPriceChange = () => {
                   type="submit"
                   variant="contained"
                   startIcon={loading ? <CircularProgress size={20} /> : <UpdateIcon />}
-                  disabled={!isFormValid || loading}
+                  disabled={!isFormValid() || loading}
                   sx={{
                     backgroundColor: colors.greenAccent[700],
                     color: colors.grey[100],
