@@ -35,7 +35,7 @@ import {
   getAuditLogsByAction,
   getAuditLogsByRange,
   getAuditLogsByUserAndRange
-} from "../../../api/auditLogs";
+} from "../../api/auditLogs";
 import {
   getAllAuditActions,
   getAuditActionLabel,

@@ -1,14 +1,16 @@
-// src/api/auditLogs.js
+// src/admin/api/auditLogs.ts
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import type { AuditLogDTO, PageResponse, ErrorResponse } from './types';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 /**
  * Get recent audit logs with pagination
- * @param {number} page - Page number (default 0)
- * @param {number} size - Page size (default 50)
- * @returns {Promise} Response with audit logs array
+ * @param page - Page number (default 0)
+ * @param size - Page size (default 50)
+ * @returns Response with audit logs array
  */
-export const getRecentAuditLogs = async (page = 0, size = 50) => {
+export const getRecentAuditLogs = async (page: number = 0, size: number = 50): Promise<PageResponse<AuditLogDTO>> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -30,7 +32,7 @@ export const getRecentAuditLogs = async (page = 0, size = 50) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -40,11 +42,11 @@ export const getRecentAuditLogs = async (page = 0, size = 50) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as PageResponse<AuditLogDTO>;
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -54,12 +56,12 @@ export const getRecentAuditLogs = async (page = 0, size = 50) => {
 
 /**
  * Get audit logs by username
- * @param {string} username - Username to filter by
- * @param {number} page - Page number (default 0)
- * @param {number} size - Page size (default 20)
- * @returns {Promise} Response with audit logs array
+ * @param username - Username to filter by
+ * @param page - Page number (default 0)
+ * @param size - Page size (default 20)
+ * @returns Response with audit logs array
  */
-export const getAuditLogsByUser = async (username, page = 0, size = 20) => {
+export const getAuditLogsByUser = async (username: string, page: number = 0, size: number = 20): Promise<PageResponse<AuditLogDTO>> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -81,7 +83,7 @@ export const getAuditLogsByUser = async (username, page = 0, size = 20) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -91,11 +93,11 @@ export const getAuditLogsByUser = async (username, page = 0, size = 20) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as PageResponse<AuditLogDTO>;
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -105,12 +107,12 @@ export const getAuditLogsByUser = async (username, page = 0, size = 20) => {
 
 /**
  * Get audit logs by action type
- * @param {string} action - Action type to filter by
- * @param {number} page - Page number (default 0)
- * @param {number} size - Page size (default 20)
- * @returns {Promise} Response with audit logs array
+ * @param action - Action type to filter by
+ * @param page - Page number (default 0)
+ * @param size - Page size (default 20)
+ * @returns Response with audit logs array
  */
-export const getAuditLogsByAction = async (action, page = 0, size = 20) => {
+export const getAuditLogsByAction = async (action: string, page: number = 0, size: number = 20): Promise<PageResponse<AuditLogDTO>> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -132,7 +134,7 @@ export const getAuditLogsByAction = async (action, page = 0, size = 20) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -142,11 +144,11 @@ export const getAuditLogsByAction = async (action, page = 0, size = 20) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as PageResponse<AuditLogDTO>;
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -156,11 +158,11 @@ export const getAuditLogsByAction = async (action, page = 0, size = 20) => {
 
 /**
  * Get audit logs by entity
- * @param {string} entityType - Entity type (e.g., "User", "CardToSell", "Purchase")
- * @param {number} entityId - Entity ID
- * @returns {Promise} Response with audit logs array
+ * @param entityType - Entity type (e.g., "User", "CardToSell", "Purchase")
+ * @param entityId - Entity ID
+ * @returns Response with audit logs array
  */
-export const getAuditLogsByEntity = async (entityType, entityId) => {
+export const getAuditLogsByEntity = async (entityType: string, entityId: number): Promise<AuditLogDTO[]> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -182,7 +184,7 @@ export const getAuditLogsByEntity = async (entityType, entityId) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -192,11 +194,11 @@ export const getAuditLogsByEntity = async (entityType, entityId) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as AuditLogDTO[];
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -206,11 +208,11 @@ export const getAuditLogsByEntity = async (entityType, entityId) => {
 
 /**
  * Get audit logs by date range
- * @param {string} start - Start datetime (ISO format)
- * @param {string} end - End datetime (ISO format)
- * @returns {Promise} Response with audit logs array
+ * @param start - Start datetime (ISO format)
+ * @param end - End datetime (ISO format)
+ * @returns Response with audit logs array
  */
-export const getAuditLogsByRange = async (start, end) => {
+export const getAuditLogsByRange = async (start: string, end: string): Promise<AuditLogDTO[]> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -232,7 +234,7 @@ export const getAuditLogsByRange = async (start, end) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -242,11 +244,11 @@ export const getAuditLogsByRange = async (start, end) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as AuditLogDTO[];
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -256,12 +258,12 @@ export const getAuditLogsByRange = async (start, end) => {
 
 /**
  * Get audit logs by user and date range
- * @param {string} username - Username to filter by
- * @param {string} start - Start datetime (ISO format)
- * @param {string} end - End datetime (ISO format)
- * @returns {Promise} Response with audit logs array
+ * @param username - Username to filter by
+ * @param start - Start datetime (ISO format)
+ * @param end - End datetime (ISO format)
+ * @returns Response with audit logs array
  */
-export const getAuditLogsByUserAndRange = async (username, start, end) => {
+export const getAuditLogsByUserAndRange = async (username: string, start: string, end: string): Promise<AuditLogDTO[]> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -283,7 +285,7 @@ export const getAuditLogsByUserAndRange = async (username, start, end) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -293,11 +295,11 @@ export const getAuditLogsByUserAndRange = async (username, start, end) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as AuditLogDTO[];
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 

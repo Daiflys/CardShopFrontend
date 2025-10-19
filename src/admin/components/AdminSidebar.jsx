@@ -13,6 +13,7 @@ import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
+import PriceChangeOutlinedIcon from "@mui/icons-material/PriceChangeOutlined";
 
 const AdminSidebar = () => {
   const theme = useTheme();
@@ -121,6 +122,14 @@ const AdminSidebar = () => {
               style={{ color: colors.grey[100] }}
             >
               Bulk Upload
+            </MenuItem>
+
+            <MenuItem
+              icon={<PriceChangeOutlinedIcon />}
+              component={<Link to="/admin/bulk-price" />}
+              style={{ color: colors.grey[100] }}
+            >
+              Bulk Price Change
             </MenuItem>
 
             <MenuItem

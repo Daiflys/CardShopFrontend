@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { setCardToSell } from "../api/postCardToSell";
 import { conditionOptions } from "../utils/cardConditions";
 
@@ -13,6 +13,25 @@ const CardSellTab = ({ card }) => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // Map language names to codes
+  const languageNameToCode = {
+    "English": "en",
+    "Spanish": "es",
+    "German": "de",
+    "French": "fr"
+  };
+
+  // Get language code from card or state
+  const getLanguageCode = () => {
+    // Try to get from card first
+    const cardLang = card.language || card.lang;
+    if (cardLang) {
+      return cardLang.toLowerCase();
+    }
+    // Otherwise map from state
+    return languageNameToCode[language] || "en";
+  };
+
   const handleSubmit = async (e) => {
     console.log("handleSubmit called");
     e.preventDefault();
@@ -20,18 +39,19 @@ const CardSellTab = ({ card }) => {
     setError("");
     setSuccessMessage("");
     try {
-      // Use snake_case properties from Card model
+      const languageCode = getLanguageCode();
       const result = await setCardToSell(
-        card.oracle_id,      // Fixed: was card.oracleId
+        card.oracle_id,
         card.id,
-        card.setName,        // Already correct (Card model has setName)
-        card.set_code,       // Already correct (Card model has set_code alias)
+        card.setName,
+        card.set_code,
         card.name,
-        card.imageUrl,       // Already correct (Card model has imageUrl)
+        card.imageUrl,
         price,
         condition,
         quantity,
-        comments
+        comments,
+        languageCode
       );
       console.log("result is: " + result + " result success is: " + result.success);
       setSuccessMessage("Card successfully put up for sale!");

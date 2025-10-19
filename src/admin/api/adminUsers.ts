@@ -1,12 +1,14 @@
-// src/api/adminUsers.js
+// src/admin/api/adminUsers.ts
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import type { UserDTO, AdminStats, ErrorResponse } from './types';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 /**
  * Get all users (admin only)
- * @returns {Promise<Array>} Array of UserDTO objects
+ * @returns Array of UserDTO objects
  */
-export const getAllUsers = async () => {
+export const getAllUsers = async (): Promise<UserDTO[]> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -28,7 +30,7 @@ export const getAllUsers = async () => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -38,11 +40,11 @@ export const getAllUsers = async () => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as UserDTO[];
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -52,10 +54,10 @@ export const getAllUsers = async () => {
 
 /**
  * Get a specific user by ID (admin only)
- * @param {number} userId - User ID
- * @returns {Promise<Object>} UserDTO object
+ * @param userId - User ID
+ * @returns UserDTO object
  */
-export const getUserById = async (userId) => {
+export const getUserById = async (userId: number): Promise<UserDTO> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -77,7 +79,7 @@ export const getUserById = async (userId) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -87,11 +89,11 @@ export const getUserById = async (userId) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as UserDTO;
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -101,11 +103,11 @@ export const getUserById = async (userId) => {
 
 /**
  * Update user role (admin only)
- * @param {number} userId - User ID
- * @param {string} role - New role ("ROLE_USER" or "ROLE_ADMIN")
- * @returns {Promise<Object>} Updated UserDTO object
+ * @param userId - User ID
+ * @param role - New role ("ROLE_USER" or "ROLE_ADMIN")
+ * @returns Updated UserDTO object
  */
-export const updateUserRole = async (userId, role) => {
+export const updateUserRole = async (userId: number, role: 'ROLE_USER' | 'ROLE_ADMIN'): Promise<UserDTO> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -133,7 +135,7 @@ export const updateUserRole = async (userId, role) => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -143,11 +145,11 @@ export const updateUserRole = async (userId, role) => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as UserDTO;
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
@@ -157,9 +159,9 @@ export const updateUserRole = async (userId, role) => {
 
 /**
  * Get admin statistics (admin only)
- * @returns {Promise<Object>} AdminStats object
+ * @returns AdminStats object
  */
-export const getAdminStats = async () => {
+export const getAdminStats = async (): Promise<AdminStats> => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -181,7 +183,7 @@ export const getAdminStats = async () => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          const errorData = await response.json() as ErrorResponse;
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (jsonError) {
           console.warn('Could not parse error response as JSON:', jsonError);
@@ -191,11 +193,11 @@ export const getAdminStats = async () => {
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = await response.json() as AdminStats;
     return data;
 
   } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
     }
 
