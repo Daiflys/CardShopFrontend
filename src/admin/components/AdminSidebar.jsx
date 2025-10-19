@@ -12,6 +12,7 @@ import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
+import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 
 const AdminSidebar = () => {
   const theme = useTheme();
@@ -160,6 +161,14 @@ const AdminSidebar = () => {
               style={{ color: colors.grey[100] }}
             >
               Inventory
+            </MenuItem>
+
+            <MenuItem
+              icon={<AssessmentOutlinedIcon />}
+              component={<Link to="/admin/audit-logs" />}
+              style={{ color: colors.grey[100] }}
+            >
+              Audit Logs
             </MenuItem>
 
             {/* Customization */}

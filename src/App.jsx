@@ -22,6 +22,7 @@ import Dashboard from "./admin/scenes/dashboard";
 import BulkUpload from "./admin/scenes/bulkUpload";
 import Users from "./admin/scenes/users";
 import SkinEditor from "./admin/scenes/skinEditor";
+import AuditLogs from "./admin/scenes/auditLogs";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
 import "./App.css";
@@ -37,6 +38,7 @@ function App() {
             <Route path="bulk-upload" element={<BulkUpload />} />
             <Route path="users" element={<Users />} />
             <Route path="skin-editor" element={<SkinEditor />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
           </Route>
 
           {/* Main Routes - With Header/Footer */}

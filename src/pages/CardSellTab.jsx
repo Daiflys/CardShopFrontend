@@ -20,11 +20,23 @@ const CardSellTab = ({ card }) => {
     setError("");
     setSuccessMessage("");
     try {
-      const result = await setCardToSell(card.oracleId, card.id, card.setName, card.set_code, card.name, card.imageUrl, price, condition, quantity, comments);
+      // Use snake_case properties from Card model
+      const result = await setCardToSell(
+        card.oracle_id,      // Fixed: was card.oracleId
+        card.id,
+        card.setName,        // Already correct (Card model has setName)
+        card.set_code,       // Already correct (Card model has set_code alias)
+        card.name,
+        card.imageUrl,       // Already correct (Card model has imageUrl)
+        price,
+        condition,
+        quantity,
+        comments
+      );
       console.log("result is: " + result + " result success is: " + result.success);
       setSuccessMessage("Card successfully put up for sale!");
     } catch (err) {
-      //console.error("Error posting card to sell: ", err);
+      console.error("Error posting card to sell: ", err);
       setError(err.message);
     } finally {
       setLoading(false);
