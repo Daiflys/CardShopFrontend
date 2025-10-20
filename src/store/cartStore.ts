@@ -1,7 +1,38 @@
 import { create } from 'zustand';
-import { addToCart, removeFromCart, getCart, updateQuantity } from '../api/cart';
+import { addToCart, removeFromCart, getCart, updateQuantity } from '../api/cart.ts';
 
-const useCartStore = create((set, get) => ({
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  imageUrl?: string;
+  set?: string;
+  condition?: string;
+  sellerId?: string;
+  available?: number;
+}
+
+export interface CartStore {
+  // State
+  cartItems: CartItem[];
+  loading: boolean;
+  error: string;
+
+  // Actions
+  loadCart: () => Promise<void>;
+  addItemToCart: (card: any) => Promise<{ success: boolean; error?: string }>;
+  removeItemFromCart: (cardId: string) => Promise<{ success: boolean; error?: string }>;
+  updateItemQuantity: (cardId: string, quantity: number) => Promise<{ success: boolean; error?: string }>;
+  clearCart: () => void;
+
+  // Computed values (getters)
+  getCartTotal: () => number;
+  getCartCount: () => number;
+  isInCart: (cardId: string) => boolean;
+}
+
+const useCartStore = create<CartStore>((set, get) => ({
   // State
   cartItems: [],
   loading: false,
@@ -17,7 +48,7 @@ const useCartStore = create((set, get) => ({
       // Only show error if user is authenticated
       const token = localStorage.getItem("authToken");
       if (token) {
-        set({ error: err.message });
+        set({ error: (err as Error).message });
       }
       // If not authenticated, just set empty cart (this is normal)
       set({ cartItems: [] });
@@ -26,7 +57,7 @@ const useCartStore = create((set, get) => ({
     }
   },
 
-  addItemToCart: async (card) => {
+  addItemToCart: async (card: any) => {
     try {
       set({ loading: true });
       await addToCart(card);
@@ -35,12 +66,12 @@ const useCartStore = create((set, get) => ({
       set({ loading: false });
       return { success: true };
     } catch (err) {
-      set({ error: err.message, loading: false });
-      return { success: false, error: err.message };
+      set({ error: (err as Error).message, loading: false });
+      return { success: false, error: (err as Error).message };
     }
   },
 
-  removeItemFromCart: async (cardId) => {
+  removeItemFromCart: async (cardId: string) => {
     try {
       set({ loading: true });
       await removeFromCart(cardId);
@@ -48,12 +79,12 @@ const useCartStore = create((set, get) => ({
       set({ loading: false });
       return { success: true };
     } catch (err) {
-      set({ error: err.message, loading: false });
-      return { success: false, error: err.message };
+      set({ error: (err as Error).message, loading: false });
+      return { success: false, error: (err as Error).message };
     }
   },
 
-  updateItemQuantity: async (cardId, quantity) => {
+  updateItemQuantity: async (cardId: string, quantity: number) => {
     try {
       set({ loading: true });
       await updateQuantity(cardId, quantity);
@@ -61,8 +92,8 @@ const useCartStore = create((set, get) => ({
       set({ loading: false });
       return { success: true };
     } catch (err) {
-      set({ error: err.message, loading: false });
-      return { success: false, error: err.message };
+      set({ error: (err as Error).message, loading: false });
+      return { success: false, error: (err as Error).message };
     }
   },
 
@@ -84,7 +115,7 @@ const useCartStore = create((set, get) => ({
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   },
 
-  isInCart: (cardId) => {
+  isInCart: (cardId: string) => {
     const { cartItems } = get();
     return cartItems.some(item => item.id === cardId);
   }

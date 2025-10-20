@@ -1,4 +1,19 @@
-export const COLOR_SYMBOLS = {
+import React from 'react';
+
+export interface ColorSymbol {
+  name: string;
+  fullName: string;
+  symbol: string;
+  svg_uri: string;
+}
+
+export interface ManaSymbol {
+  symbol: string;
+  svg_uri: string;
+  type: 'generic' | 'variable' | 'color' | 'colorless' | 'hybrid' | 'phyrexian' | 'hybrid-phyrexian' | 'special';
+}
+
+export const COLOR_SYMBOLS: Record<string, ColorSymbol> = {
   "W": {
     "name": "White",
     "fullName": "Plains",
@@ -32,7 +47,7 @@ export const COLOR_SYMBOLS = {
 };
 
 // Comprehensive mana symbols from Scryfall API
-export const MANA_SYMBOLS = {
+export const MANA_SYMBOLS: Record<string, ManaSymbol> = {
   // Generic mana (numbers)
   "0": { "symbol": "0", "svg_uri": "/assets/mana-symbols/0.svg", "type": "generic" },
   "1": { "symbol": "1", "svg_uri": "/assets/mana-symbols/1.svg", "type": "generic" },
@@ -117,23 +132,25 @@ export const MANA_SYMBOLS = {
 };
 
 // Helper function to get color symbol by letter
-export const getColorSymbol = (colorLetter) => {
-  return COLOR_SYMBOLS[colorLetter?.toUpperCase()] || null;
+export const getColorSymbol = (colorLetter?: string | null): ColorSymbol | null => {
+  if (!colorLetter) return null;
+  return COLOR_SYMBOLS[colorLetter.toUpperCase()] || null;
 };
 
 // Helper function to get multiple color symbols
-export const getColorSymbols = (colorArray) => {
+export const getColorSymbols = (colorArray?: string[] | null): ColorSymbol[] => {
   if (!Array.isArray(colorArray)) return [];
-  return colorArray.map(color => getColorSymbol(color)).filter(Boolean);
+  return colorArray.map(color => getColorSymbol(color)).filter((symbol): symbol is ColorSymbol => symbol !== null);
 };
 
 // Helper function to get mana symbol by symbol
-export const getManaSymbol = (symbol) => {
-  return MANA_SYMBOLS[symbol?.toUpperCase()] || null;
+export const getManaSymbol = (symbol?: string | null): ManaSymbol | null => {
+  if (!symbol) return null;
+  return MANA_SYMBOLS[symbol.toUpperCase()] || null;
 };
 
 // Function to parse mana cost string and return array of symbol objects
-export const parseManaCost = (manaCostString) => {
+export const parseManaCost = (manaCostString?: string | null): ManaSymbol[] => {
   if (!manaCostString) return [];
 
   // Match patterns like {3}, {W}, {U}, {X}, etc.
@@ -145,11 +162,11 @@ export const parseManaCost = (manaCostString) => {
     // Remove the braces to get the symbol content
     const symbol = match.slice(1, -1);
     return getManaSymbol(symbol);
-  }).filter(Boolean);
+  }).filter((symbol): symbol is ManaSymbol => symbol !== null);
 };
 
 // Function to parse Oracle text and return React elements with symbols
-export const parseOracleText = (oracleText) => {
+export const parseOracleText = (oracleText?: string | null): (JSX.Element | null)[] | null => {
   if (!oracleText) return null;
 
   // Split text by symbol patterns while keeping the symbols

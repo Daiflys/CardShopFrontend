@@ -1,9 +1,21 @@
 import React from 'react';
-import { conditionOptions } from '../utils/cardConditions';
+import { conditionOptions } from '../utils/cardConditions.ts';
 
-const ConditionIcon = ({ condition, showName = false, size = "sm" }) => {
+export type ConditionIconSize = 'xs' | 'sm' | 'md';
+
+export interface ConditionIconProps {
+  condition: string;
+  showName?: boolean;
+  size?: ConditionIconSize;
+}
+
+const ConditionIcon: React.FC<ConditionIconProps> = ({
+  condition,
+  showName = false,
+  size = "sm"
+}) => {
   const conditionData = conditionOptions.find(opt => opt.code === condition);
-  
+
   if (!conditionData) {
     return showName ? (
       <span className="text-gray-500 text-xs">Unknown</span>
@@ -14,9 +26,9 @@ const ConditionIcon = ({ condition, showName = false, size = "sm" }) => {
     );
   }
 
-  const sizeClasses = {
+  const sizeClasses: Record<ConditionIconSize, string> = {
     xs: "px-2 py-1 text-xs w-9 text-center",
-    sm: "px-2 py-1 text-xs w-10 text-center", 
+    sm: "px-2 py-1 text-xs w-10 text-center",
     md: "px-3 py-1 text-sm w-12 text-center"
   };
 

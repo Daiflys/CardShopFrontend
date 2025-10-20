@@ -1,39 +1,55 @@
 // OAuth2 Utility Functions
-import { OAUTH_CONFIG, OAUTH_PROVIDERS } from '../config/oauth.js';
+import { OAUTH_CONFIG, OAUTH_PROVIDERS } from '../config/oauth.ts';
 
-export const initializeGoogleOAuth = () => {
+// Extend window interface for Google OAuth
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        id: {
+          initialize: (config: any) => void;
+          prompt: (callback?: (notification: any) => void) => void;
+          renderButton: (element: HTMLElement, config: any) => void;
+          disableAutoSelect: () => void;
+        };
+      };
+    };
+  }
+}
+
+export const initializeGoogleOAuth = (): Promise<void> => {
   return new Promise((resolve) => {
     if (window.google?.accounts?.id) {
       resolve();
       return;
     }
 
-    const checkGoogleLoaded = () => {
+    const checkGoogleLoaded = (): void => {
       if (window.google?.accounts?.id) {
         resolve();
       } else {
         setTimeout(checkGoogleLoaded, 100);
       }
     };
-    
+
     checkGoogleLoaded();
   });
 };
 
-export const signInWithGoogle = () => {
+export const signInWithGoogle = (): Promise<any> => {
   return new Promise((resolve, reject) => {
     initializeGoogleOAuth().then(() => {
-      window.google.accounts.id.initialize({
+      window.google!.accounts!.id.initialize({
         client_id: OAUTH_CONFIG.google.clientId,
-        callback: (response) => {
+        callback: (response: any) => {
           resolve(response);
         },
-        error_callback: (error) => {
+        error_callback: (error: any) => {
           reject(error);
         }
       });
 
-      window.google.accounts.id.prompt((notification) => {
+      window.google!.accounts!.id.prompt((notification: any) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
           // Fallback to popup if One Tap is not available
           renderGoogleSignInButton();
@@ -43,7 +59,7 @@ export const signInWithGoogle = () => {
   });
 };
 
-export const renderGoogleSignInButton = (elementId = 'google-signin-button') => {
+export const renderGoogleSignInButton = (elementId: string = 'google-signin-button'): Promise<any> => {
   return new Promise((resolve, reject) => {
     initializeGoogleOAuth().then(() => {
       const element = document.getElementById(elementId);
@@ -52,14 +68,14 @@ export const renderGoogleSignInButton = (elementId = 'google-signin-button') => 
         return;
       }
 
-      window.google.accounts.id.initialize({
+      window.google!.accounts!.id.initialize({
         client_id: OAUTH_CONFIG.google.clientId,
-        callback: (response) => {
+        callback: (response: any) => {
           resolve(response);
         }
       });
 
-      window.google.accounts.id.renderButton(element, {
+      window.google!.accounts!.id.renderButton(element, {
         theme: 'outline',
         size: 'large',
         width: element.offsetWidth
@@ -68,7 +84,7 @@ export const renderGoogleSignInButton = (elementId = 'google-signin-button') => 
   });
 };
 
-export const decodeJWTToken = (token) => {
+export const decodeJWTToken = (token: string): any | null => {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -85,7 +101,7 @@ export const decodeJWTToken = (token) => {
   }
 };
 
-export const signOutFromGoogle = () => {
+export const signOutFromGoogle = (): Promise<void> => {
   return new Promise((resolve) => {
     if (window.google?.accounts?.id) {
       window.google.accounts.id.disableAutoSelect();

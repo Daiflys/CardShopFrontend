@@ -1,31 +1,77 @@
 import { create } from 'zustand';
 
-const usePaginationStore = create((set, get) => ({
+export interface PaginationData {
+  currentPage?: number;
+  totalPages?: number;
+  totalElements?: number;
+  size?: number;
+}
+
+export interface PaginationState {
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  size: number;
+}
+
+export interface PaginationRange {
+  start: number;
+  end: number;
+  total: number;
+}
+
+export interface PaginatedApiResponse<T> {
+  content?: T[];
+  totalPages?: number;
+  totalElements?: number;
+  size?: number;
+}
+
+export interface PaginationStore {
+  // Pagination state
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  size: number;
+
+  // Actions
+  setCurrentPage: (page: number) => void;
+  setPaginationData: (data: PaginationData) => void;
+  resetPagination: () => void;
+
+  // Helpers
+  getPaginationState: () => PaginationState;
+  getPaginationRange: () => PaginationRange;
+  handlePaginatedResponse: <T>(result: PaginatedApiResponse<T> | T[], requestedPage: number, pageElements?: number) => T[];
+  handlePageChange: (newPage: number, searchFunction?: (page: number) => void) => number;
+}
+
+const usePaginationStore = create<PaginationStore>((set, get) => ({
   // Pagination state
   currentPage: 0,
   totalPages: 0,
   totalElements: 0,
   size: 21,
-  
+
   // Actions
-  setCurrentPage: (page) => set({ currentPage: Math.max(0, page) }),
-  
-  setPaginationData: ({ currentPage, totalPages, totalElements, size }) => set({
+  setCurrentPage: (page: number) => set({ currentPage: Math.max(0, page) }),
+
+  setPaginationData: ({ currentPage, totalPages, totalElements, size }: PaginationData) => set({
     currentPage: Math.max(0, currentPage || 0),
     totalPages: Math.max(0, totalPages || 0),
     totalElements: Math.max(0, totalElements || 0),
     size: size || 21
   }),
-  
+
   resetPagination: () => set({
     currentPage: 0,
     totalPages: 0,
     totalElements: 0,
     size: 21
   }),
-  
+
   // Helper to get current pagination state
-  getPaginationState: () => {
+  getPaginationState: (): PaginationState => {
     const state = get();
     return {
       currentPage: state.currentPage,
@@ -36,7 +82,7 @@ const usePaginationStore = create((set, get) => ({
   },
 
   // Helper to get pagination range display
-  getPaginationRange: () => {
+  getPaginationRange: (): PaginationRange => {
     const state = get();
     if (state.totalElements === 0) return { start: 0, end: 0, total: 0 };
 
@@ -51,10 +97,10 @@ const usePaginationStore = create((set, get) => ({
   },
 
   // Helper to handle paginated API response
-  handlePaginatedResponse: (result, requestedPage, pageElements = 21) => {
+  handlePaginatedResponse: <T>(result: PaginatedApiResponse<T> | T[], requestedPage: number, pageElements: number = 21): T[] => {
     const { setPaginationData } = get();
 
-    if (result.content) {
+    if (result && typeof result === 'object' && 'content' in result && result.content) {
       // Server response with pagination metadata
       setPaginationData({
         currentPage: requestedPage, // Use requested page for consistency
@@ -65,18 +111,19 @@ const usePaginationStore = create((set, get) => ({
       return result.content;
     } else {
       // Non-paginated response (array)
+      const arrayResult = result as T[];
       setPaginationData({
         currentPage: 0,
-        totalPages: Math.ceil(result.length / pageElements),
-        totalElements: result.length,
+        totalPages: Math.ceil(arrayResult.length / pageElements),
+        totalElements: arrayResult.length,
         size: pageElements
       });
-      return result;
+      return arrayResult;
     }
   },
 
   // Helper to handle page changes with search/filter logic
-  handlePageChange: (newPage, searchFunction) => {
+  handlePageChange: (newPage: number, searchFunction?: (page: number) => void): number => {
     const { setCurrentPage } = get();
 
     // Ensure newPage is a valid number, default to 0 if invalid

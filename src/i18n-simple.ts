@@ -2,7 +2,100 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-const resources = {
+interface BannerTranslations {
+  title: string;
+  subtitle: string;
+  cta: string;
+}
+
+interface Translations {
+  navigation: {
+    home: string;
+    products: string;
+    account: string;
+    cart: string;
+    login: string;
+    register: string;
+    logout: string;
+  };
+  auth: {
+    loginTitle: string;
+    registerTitle: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    loginButton: string;
+    registerButton: string;
+    forgotPassword: string;
+    dontHaveAccount: string;
+    alreadyHaveAccount: string;
+    signUp: string;
+    signIn: string;
+  };
+  cart: {
+    title: string;
+    addToCart: string;
+    removeFromCart: string;
+    quantity: string;
+    total: string;
+    checkout: string;
+    empty: string;
+    continueShopping: string;
+  };
+  product: {
+    price: string;
+    condition: string;
+    seller: string;
+    addToCart: string;
+    outOfStock: string;
+    inStock: string;
+    description: string;
+    details: string;
+  };
+  account: {
+    profile: string;
+    transactions: string;
+    settings: string;
+    personalInfo: string;
+    orderHistory: string;
+    preferences: string;
+  };
+  common: {
+    loading: string;
+    error: string;
+    success: string;
+    cancel: string;
+    save: string;
+    edit: string;
+    delete: string;
+    search: string;
+    filter: string;
+    sort: string;
+    language: string;
+    noResults: string;
+    results: string;
+  };
+  homepage: {
+    welcome: string;
+    subtitle: string;
+    featuredProducts: string;
+    trendingCards: string;
+    browseCategories: string;
+  };
+  trends: {
+    title: string;
+    bestSellers: string;
+    bestBargains: string;
+    loadingTrends: string;
+  };
+  banners: {
+    aetherDrift: BannerTranslations;
+    finalFantasy: BannerTranslations;
+    modernHorizons: BannerTranslations;
+  };
+}
+
+const resources: Record<string, { common: Translations }> = {
   en: {
     common: {
       navigation: {
@@ -312,7 +405,7 @@ i18n
     fallbackLng: 'en',
     supportedLngs: ['en', 'es', 'ja'],
     debug: false,
-    
+
     interpolation: {
       escapeValue: false,
     },

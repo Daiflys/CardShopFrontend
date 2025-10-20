@@ -1,19 +1,40 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const useRecentlyViewedStore = create(
+export interface RecentlyViewedCard {
+  cardId: string;
+  image: string;
+  name: string;
+}
+
+export interface CardInput {
+  id?: string;
+  cardId?: string;
+  imageUrl?: string;
+  image?: string;
+  name: string;
+}
+
+export interface RecentlyViewedStore {
+  recentlyViewed: RecentlyViewedCard[];
+  addRecentlyViewed: (card: CardInput) => void;
+  getRecentlyViewed: () => RecentlyViewedCard[];
+  clearRecentlyViewed: () => void;
+}
+
+const useRecentlyViewedStore = create<RecentlyViewedStore>()(
   persist(
     (set, get) => ({
       recentlyViewed: [],
 
       // Add a card to recently viewed list
-      addRecentlyViewed: (card) => {
+      addRecentlyViewed: (card: CardInput) => {
         const { recentlyViewed } = get();
 
         // Create card object with required fields
-        const cardToAdd = {
-          cardId: card.id || card.cardId,
-          image: card.imageUrl || card.image,
+        const cardToAdd: RecentlyViewedCard = {
+          cardId: card.id || card.cardId || '',
+          image: card.imageUrl || card.image || '',
           name: card.name
         };
 
@@ -27,7 +48,7 @@ const useRecentlyViewedStore = create(
       },
 
       // Get all recently viewed cards
-      getRecentlyViewed: () => {
+      getRecentlyViewed: (): RecentlyViewedCard[] => {
         return get().recentlyViewed;
       },
 

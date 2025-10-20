@@ -1,15 +1,23 @@
 import React from 'react';
-import { getRarityColor, validateRarity } from '../utils/rarity';
+import { getRarityColor, validateRarity } from '../utils/rarity.ts';
 
-const RarityIndicator = ({ rarity, className = "" }) => {
+export interface RarityIndicatorProps {
+  rarity?: string | null;
+  className?: string;
+}
+
+const RarityIndicator: React.FC<RarityIndicatorProps> = ({
+  rarity,
+  className = ""
+}) => {
   if (!rarity) return null;
-  
+
   try {
     const validRarity = validateRarity(rarity);
     if (!validRarity) return null;
-    
+
     const gradientColors = getRarityColor(rarity);
-    
+
     return (
       <div className={`absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-r ${gradientColors} ${className}`}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -18,7 +26,7 @@ const RarityIndicator = ({ rarity, className = "" }) => {
     );
   } catch (error) {
     return (
-      <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-r from-red-500 to-red-700 animate-pulse" title={error.message}>
+      <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-r from-red-500 to-red-700 animate-pulse" title={(error as Error).message}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
       </div>
     );

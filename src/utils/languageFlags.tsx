@@ -1,5 +1,20 @@
 // Language flags utility - using local SVG assets
-export const getLanguageFlag = (languageCode, size = 'normal') => {
+
+export type LanguageSize = 'normal' | 'small';
+
+export interface LanguageOption {
+  key: string;
+  name: string;
+  flag: JSX.Element;
+}
+
+export interface HeaderLanguageOption {
+  code: string;
+  name: string;
+  flag: JSX.Element;
+}
+
+export const getLanguageFlag = (languageCode: string, size: LanguageSize = 'normal'): JSX.Element => {
   // Size variants: normal (20x15 for header), small (24x18 for search grid - 50% larger)
   const [width, height] = size === 'normal' ? [20, 15] : [24, 18];
 
@@ -18,8 +33,8 @@ export const getLanguageFlag = (languageCode, size = 'normal') => {
   );
 };
 
-export const getLanguageName = (languageCode) => {
-  const names = {
+export const getLanguageName = (languageCode: string): string => {
+  const names: Record<string, string> = {
     en: 'English',
     es: 'Español',
     fr: 'Français',
@@ -31,79 +46,79 @@ export const getLanguageName = (languageCode) => {
     zh: '中文',
     ko: '한국어'
   };
-  
+
   return names[languageCode] || 'English';
 };
 
 // Complete language options for card language filters (all languages)
-export const languageOptions = [
-  { 
-    key: 'en', 
-    name: 'English', 
+export const languageOptions: LanguageOption[] = [
+  {
+    key: 'en',
+    name: 'English',
     flag: getLanguageFlag('en', 'normal')
   },
-  { 
-    key: 'es', 
-    name: 'Español', 
+  {
+    key: 'es',
+    name: 'Español',
     flag: getLanguageFlag('es', 'normal')
   },
-  { 
-    key: 'fr', 
-    name: 'Français', 
+  {
+    key: 'fr',
+    name: 'Français',
     flag: getLanguageFlag('fr', 'normal')
   },
-  { 
-    key: 'de', 
-    name: 'Deutsch', 
+  {
+    key: 'de',
+    name: 'Deutsch',
     flag: getLanguageFlag('de', 'normal')
   },
-  { 
-    key: 'it', 
-    name: 'Italiano', 
+  {
+    key: 'it',
+    name: 'Italiano',
     flag: getLanguageFlag('it', 'normal')
   },
-  { 
-    key: 'ja', 
-    name: '日本語', 
+  {
+    key: 'ja',
+    name: '日本語',
     flag: getLanguageFlag('ja', 'normal')
   },
-  { 
-    key: 'pt', 
-    name: 'Português', 
+  {
+    key: 'pt',
+    name: 'Português',
     flag: getLanguageFlag('pt', 'normal')
   },
-  { 
-    key: 'ru', 
-    name: 'Русский', 
+  {
+    key: 'ru',
+    name: 'Русский',
     flag: getLanguageFlag('ru', 'normal')
   },
-  { 
-    key: 'zh', 
-    name: '中文', 
+  {
+    key: 'zh',
+    name: '中文',
     flag: getLanguageFlag('zh', 'normal')
   },
-  { 
-    key: 'ko', 
-    name: '한국어', 
+  {
+    key: 'ko',
+    name: '한국어',
     flag: getLanguageFlag('ko', 'normal')
   }
 ];
 
 // Language options for header (normal size)
-export const headerLanguageOptions = [
-  { 
-    code: 'en', 
-    name: 'English', 
+export const headerLanguageOptions: HeaderLanguageOption[] = [
+  {
+    code: 'en',
+    name: 'English',
     flag: getLanguageFlag('en', 'normal')
   },
-  { 
-    code: 'es', 
-    name: 'Español', 
+  {
+    code: 'es',
+    name: 'Español',
     flag: getLanguageFlag('es', 'normal')
   },
-  { 
-    code: 'ja', 
-    name: '日本語', 
+  {
+    code: 'ja',
+    name: '日本語',
     flag: getLanguageFlag('ja', 'normal')
   }
 ];

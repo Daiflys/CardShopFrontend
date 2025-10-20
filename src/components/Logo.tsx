@@ -1,6 +1,10 @@
 import React from 'react';
 
-const Logo = ({ className = "w-8 h-8" }) => {
+export interface LogoProps {
+  className?: string;
+}
+
+const Logo: React.FC<LogoProps> = ({ className = "w-8 h-8" }) => {
   return (
     <div className="flex items-center gap-2">
       {/* Logo SVG - 3 cards stacked */}

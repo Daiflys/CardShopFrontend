@@ -1,6 +1,12 @@
 // Card condition options utility - centralized definition
 
-export const conditionOptions = [
+export interface ConditionOption {
+  code: string;
+  name: string;
+  color: string;
+}
+
+export const conditionOptions: ConditionOption[] = [
   { code: "MT", name: "Mint", color: "bg-cyan-400" },
   { code: "NM", name: "Near Mint", color: "bg-green-500" },
   { code: "EX", name: "Excellent", color: "bg-yellow-600" },
@@ -10,12 +16,12 @@ export const conditionOptions = [
   { code: "PO", name: "Poor", color: "bg-red-600" }
 ];
 
-export const getConditionName = (conditionCode) => {
+export const getConditionName = (conditionCode: string): string => {
   const condition = conditionOptions.find(opt => opt.code === conditionCode);
   return condition ? condition.name : 'Unknown';
 };
 
-export const getConditionColor = (conditionCode) => {
+export const getConditionColor = (conditionCode: string): string => {
   const condition = conditionOptions.find(opt => opt.code === conditionCode);
   return condition ? condition.color : 'bg-gray-400';
 };
