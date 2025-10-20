@@ -1,12 +1,15 @@
 // Rarity utility functions
-const VALID_RARITIES = ['common', 'uncommon', 'rare', 'mythic'];
 
-export const validateRarity = (rarity) => {
+const VALID_RARITIES = ['common', 'uncommon', 'rare', 'mythic'] as const;
+
+type ValidRarity = typeof VALID_RARITIES[number];
+
+export const validateRarity = (rarity?: string | null): string | null => {
   if (!rarity) return null;
 
   const normalizedRarity = rarity.toLowerCase().trim();
 
-  if (!VALID_RARITIES.includes(normalizedRarity)) {
+  if (!VALID_RARITIES.includes(normalizedRarity as ValidRarity)) {
     console.warn(`Unknown rarity detected: "${rarity}". Using default fallback. Valid rarities: ${VALID_RARITIES.join(', ')}`);
     return 'special'; // Return a special identifier for unknown rarities
   }
@@ -14,11 +17,11 @@ export const validateRarity = (rarity) => {
   return normalizedRarity;
 };
 
-export const getRarityColor = (rarity) => {
+export const getRarityColor = (rarity?: string | null): string => {
   try {
     const validRarity = validateRarity(rarity);
     if (!validRarity) return 'from-gray-500 to-gray-600';
-    
+
     switch (validRarity) {
       case 'common':
         return 'from-white to-gray-100';
@@ -39,11 +42,11 @@ export const getRarityColor = (rarity) => {
   }
 };
 
-export const getRarityTextColor = (rarity) => {
+export const getRarityTextColor = (rarity?: string | null): string => {
   try {
     const validRarity = validateRarity(rarity);
     if (!validRarity) return 'text-gray-500';
-    
+
     switch (validRarity) {
       case 'common':
         return 'text-gray-100';
@@ -64,15 +67,15 @@ export const getRarityTextColor = (rarity) => {
   }
 };
 
-export const getRarityIcon = () => {
+export const getRarityIcon = (): string => {
   return '●';
 };
 
-export const getRaritySolidColor = (rarity) => {
+export const getRaritySolidColor = (rarity?: string | null): string => {
   try {
     const validRarity = validateRarity(rarity);
     if (!validRarity) return 'bg-gray-500';
-    
+
     switch (validRarity) {
       case 'common':
         return 'bg-white';

@@ -1,9 +1,20 @@
-// src/utils/auditActions.js
+// src/utils/auditActions.ts
+
+/**
+ * Audit action information structure
+ */
+export interface AuditActionInfo {
+  value: string;
+  label: string;
+  description: string;
+  color: string;
+  category: string;
+}
 
 /**
  * Audit action types and their display information
  */
-export const AUDIT_ACTIONS = {
+export const AUDIT_ACTIONS: Record<string, AuditActionInfo> = {
   USER_LOGIN: {
     value: 'USER_LOGIN',
     label: 'User Login',
@@ -86,45 +97,45 @@ export const AUDIT_ACTIONS = {
 /**
  * Get all audit action types as array
  */
-export const getAllAuditActions = () => {
+export const getAllAuditActions = (): AuditActionInfo[] => {
   return Object.values(AUDIT_ACTIONS);
 };
 
 /**
  * Get audit action info by value
- * @param {string} actionValue - The action value (e.g., "USER_LOGIN")
- * @returns {Object|null} Action info object or null if not found
+ * @param actionValue - The action value (e.g., "USER_LOGIN")
+ * @returns Action info object or null if not found
  */
-export const getAuditActionInfo = (actionValue) => {
+export const getAuditActionInfo = (actionValue: string): AuditActionInfo | null => {
   return AUDIT_ACTIONS[actionValue] || null;
 };
 
 /**
  * Get audit action label by value
- * @param {string} actionValue - The action value
- * @returns {string} Action label or the original value if not found
+ * @param actionValue - The action value
+ * @returns Action label or the original value if not found
  */
-export const getAuditActionLabel = (actionValue) => {
+export const getAuditActionLabel = (actionValue: string): string => {
   const action = AUDIT_ACTIONS[actionValue];
   return action ? action.label : actionValue;
 };
 
 /**
  * Get audit action color by value
- * @param {string} actionValue - The action value
- * @returns {string} Action color or default gray
+ * @param actionValue - The action value
+ * @returns Action color or default gray
  */
-export const getAuditActionColor = (actionValue) => {
+export const getAuditActionColor = (actionValue: string): string => {
   const action = AUDIT_ACTIONS[actionValue];
   return action ? action.color : '#757575'; // gray
 };
 
 /**
  * Get unique categories from audit actions
- * @returns {Array} Array of unique categories
+ * @returns Array of unique categories
  */
-export const getAuditCategories = () => {
-  const categories = new Set();
+export const getAuditCategories = (): string[] => {
+  const categories = new Set<string>();
   Object.values(AUDIT_ACTIONS).forEach(action => {
     categories.add(action.category);
   });
@@ -133,10 +144,10 @@ export const getAuditCategories = () => {
 
 /**
  * Get audit actions by category
- * @param {string} category - The category to filter by
- * @returns {Array} Array of actions in the category
+ * @param category - The category to filter by
+ * @returns Array of actions in the category
  */
-export const getAuditActionsByCategory = (category) => {
+export const getAuditActionsByCategory = (category: string): AuditActionInfo[] => {
   return Object.values(AUDIT_ACTIONS).filter(action => action.category === category);
 };
 
@@ -147,7 +158,9 @@ export const ENTITY_TYPES = {
   USER: 'User',
   CARD_TO_SELL: 'CardToSell',
   PURCHASE: 'Purchase'
-};
+} as const;
+
+export type EntityType = typeof ENTITY_TYPES[keyof typeof ENTITY_TYPES];
 
 /**
  * Result types for audit logs
@@ -155,14 +168,16 @@ export const ENTITY_TYPES = {
 export const RESULT_TYPES = {
   SUCCESS: 'SUCCESS',
   FAILED: 'FAILED'
-};
+} as const;
+
+export type ResultType = typeof RESULT_TYPES[keyof typeof RESULT_TYPES];
 
 /**
  * Get result color
- * @param {string} result - Result value
- * @returns {string} Color for the result
+ * @param result - Result value
+ * @returns Color for the result
  */
-export const getResultColor = (result) => {
+export const getResultColor = (result: string): string => {
   switch (result) {
     case RESULT_TYPES.SUCCESS:
       return '#4caf50'; // green

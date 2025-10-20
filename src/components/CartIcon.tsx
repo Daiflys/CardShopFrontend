@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import useCartStore from "../store/cartStore";
+import useCartStore from "../store/cartStore.ts";
 import { useNavigate } from "react-router-dom";
-import ConditionIcon from "./ConditionIcon";
+import ConditionIcon from "./ConditionIcon.tsx";
 
-const CartIcon = () => {
+const CartIcon: React.FC = () => {
   const { getCartCount, cartItems } = useCartStore();
-  const [showCartPreview, setShowCartPreview] = useState(false);
+  const [showCartPreview, setShowCartPreview] = useState<boolean>(false);
   const cartCount = getCartCount();
   const hasItems = cartCount > 0;
   const navigate = useNavigate();
@@ -49,10 +49,10 @@ const CartIcon = () => {
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
                     <div className="w-12 h-16 bg-gray-200 rounded flex items-center justify-center">
-                      {item.image_url ? (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.card_name || item.name} 
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
                           className="w-full h-full object-contain"
                         />
                       ) : (
@@ -61,7 +61,7 @@ const CartIcon = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {item.card_name || item.name}
+                        {item.name}
                       </p>
                       <div className="flex items-center justify-between">
                         <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
@@ -91,7 +91,7 @@ const CartIcon = () => {
 
       {/* Backdrop to close cart preview */}
       {showCartPreview && (
-        <div 
+        <div
           className="fixed inset-0 z-40"
           onClick={() => setShowCartPreview(false)}
         />

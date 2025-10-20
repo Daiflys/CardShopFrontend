@@ -1,6 +1,20 @@
 // Rarity options utility - centralized definition
 
-export const rarityOptions = [
+export type RarityType =
+  | 'All'
+  | 'Masterpiece'
+  | 'Mythic'
+  | 'Rare'
+  | 'Time Shifted'
+  | 'Uncommon'
+  | 'Common'
+  | 'Land'
+  | 'Special'
+  | 'Token'
+  | 'Code Card'
+  | 'Tip Card';
+
+export const rarityOptions: RarityType[] = [
   'All',
   'Masterpiece',
   'Mythic',
@@ -16,7 +30,7 @@ export const rarityOptions = [
 ];
 
 // Get rarity color for MUI components (hex colors)
-export const getRarityColorHex = (rarity) => {
+export const getRarityColorHex = (rarity?: string): string => {
   const rarityLower = rarity?.toLowerCase();
 
   switch (rarityLower) {
@@ -38,7 +52,7 @@ export const getRarityColorHex = (rarity) => {
 };
 
 // Get symbol for rarity
-export const getRaritySymbol = (rarity) => {
+export const getRaritySymbol = (rarity?: string): string => {
   const rarityLower = rarity?.toLowerCase();
 
   switch (rarityLower) {

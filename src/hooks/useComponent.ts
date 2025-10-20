@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { componentRegistry } from '../registry/ComponentRegistry.js';
 
-export const useComponent = (componentName) => {
-  const [component, setComponent] = useState(null);
-  const [currentSkin, setCurrentSkin] = useState(componentRegistry.getCurrentSkin());
+export const useComponent = <T = any>(componentName: string): T | null => {
+  const [component, setComponent] = useState<T | null>(null);
+  const [currentSkin, setCurrentSkin] = useState<string>(componentRegistry.getCurrentSkin());
 
   useEffect(() => {
     // Get the component for the current skin
@@ -11,7 +11,7 @@ export const useComponent = (componentName) => {
     setComponent(() => comp);
 
     // Listen for skin changes
-    const unsubscribe = componentRegistry.addListener((newSkin) => {
+    const unsubscribe = componentRegistry.addListener((newSkin: string) => {
       setCurrentSkin(newSkin);
       const newComp = componentRegistry.getComponent(componentName);
       setComponent(() => newComp);
@@ -23,12 +23,18 @@ export const useComponent = (componentName) => {
   return component;
 };
 
-export const useSkin = () => {
-  const [currentSkin, setCurrentSkin] = useState(componentRegistry.getCurrentSkin());
-  const [availableSkins, setAvailableSkins] = useState(componentRegistry.getAvailableSkins());
+export interface UseSkinReturn {
+  currentSkin: string;
+  availableSkins: string[];
+  switchSkin: (skinName: string) => void;
+}
+
+export const useSkin = (): UseSkinReturn => {
+  const [currentSkin, setCurrentSkin] = useState<string>(componentRegistry.getCurrentSkin());
+  const [availableSkins, setAvailableSkins] = useState<string[]>(componentRegistry.getAvailableSkins());
 
   useEffect(() => {
-    const unsubscribe = componentRegistry.addListener((newSkin) => {
+    const unsubscribe = componentRegistry.addListener((newSkin: string) => {
       setCurrentSkin(newSkin);
       setAvailableSkins(componentRegistry.getAvailableSkins());
     });
@@ -36,7 +42,7 @@ export const useSkin = () => {
     return unsubscribe;
   }, []);
 
-  const switchSkin = (skinName) => {
+  const switchSkin = (skinName: string): void => {
     componentRegistry.switchSkin(skinName);
     componentRegistry.saveSkinToStorage();
   };

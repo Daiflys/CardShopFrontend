@@ -1,4 +1,11 @@
-export const MTG_SETS = {
+export interface MTGSet {
+  name: string;
+  code: string;
+  icon_svg_uri: string;
+  release_date: string;
+}
+
+export const MTG_SETS: Record<string, MTGSet> = {
   "ECL": {
     "name": "Lorwyn Eclipsed",
     "code": "ecl",
