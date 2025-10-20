@@ -1,6 +1,79 @@
 import { tokens } from "../theme";
 
-export const mockDataTeam = [
+// Type definitions for mock data
+export interface TeamMember {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+  phone: string;
+  access: string;
+}
+
+export interface Contact {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+  phone: string;
+  address: string;
+  city: string;
+  zipCode: string;
+  registrarId: number;
+}
+
+export interface Invoice {
+  id: number;
+  name: string;
+  email: string;
+  cost: string;
+  phone: string;
+  date: string;
+}
+
+export interface Transaction {
+  txId: string;
+  user: string;
+  date: string;
+  cost: string;
+}
+
+export interface BarDataItem {
+  country: string;
+  "hot dog": number;
+  "hot dogColor": string;
+  burger: number;
+  burgerColor: string;
+  kebab: number;
+  kebabColor: string;
+  donut: number;
+  donutColor: string;
+}
+
+export interface PieDataItem {
+  id: string;
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface LineDataPoint {
+  x: string;
+  y: number;
+}
+
+export interface LineDataSeries {
+  id: string;
+  color: string;
+  data: LineDataPoint[];
+}
+
+export interface GeographyDataItem {
+  id: string;
+  value: number;
+}
+
+export const mockDataTeam: TeamMember[] = [
   {
     id: 1,
     name: "Jon Snow",
@@ -75,7 +148,7 @@ export const mockDataTeam = [
   },
 ];
 
-export const mockDataContacts = [
+export const mockDataContacts: Contact[] = [
   {
     id: 1,
     name: "Jon Snow",
@@ -199,7 +272,7 @@ export const mockDataContacts = [
   },
 ];
 
-export const mockDataInvoices = [
+export const mockDataInvoices: Invoice[] = [
   {
     id: 1,
     name: "Jon Snow",
@@ -266,7 +339,7 @@ export const mockDataInvoices = [
   },
 ];
 
-export const mockTransactions = [
+export const mockTransactions: Transaction[] = [
   {
     txId: "01e4dsa",
     user: "johndoe",
@@ -317,7 +390,7 @@ export const mockTransactions = [
   },
 ];
 
-export const mockBarData = [
+export const mockBarData: BarDataItem[] = [
   {
     country: "AD",
     "hot dog": 137,
@@ -397,7 +470,7 @@ export const mockBarData = [
   },
 ];
 
-export const mockPieData = [
+export const mockPieData: PieDataItem[] = [
   {
     id: "hack",
     label: "hack",
@@ -430,7 +503,7 @@ export const mockPieData = [
   },
 ];
 
-export const mockLineData = [
+export const mockLineData: LineDataSeries[] = [
   {
     id: "japan",
     color: tokens("dark").greenAccent[500],
@@ -595,7 +668,7 @@ export const mockLineData = [
   },
 ];
 
-export const mockGeographyData = [
+export const mockGeographyData: GeographyDataItem[] = [
   {
     id: "AFG",
     value: 520600,

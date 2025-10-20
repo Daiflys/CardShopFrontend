@@ -1,9 +1,11 @@
-// src/api/banner.js
+// src/api/banner.ts
+import { Banner } from './types.js';
+
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || !import.meta.env.VITE_API_BASE_URL;
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 // --- MOCK ---
-const banners = [
+const banners: Banner[] = [
   {
     title: "AETHERDRIFT",
     subtitle: "Ramp & Furious",
@@ -30,16 +32,16 @@ const banners = [
   },
 ];
 
-const mockGetBanners = async () => {
+const mockGetBanners = async (): Promise<Banner[]> => {
   await new Promise(res => setTimeout(res, 200));
   return banners;
 };
 
 // --- REAL ---
-const realGetBanners = async () => {
+const realGetBanners = async (): Promise<Banner[]> => {
   const response = await fetch(`${API_BASE_URL}/banners`);
   if (!response.ok) throw new Error("Error fetching banners");
   return response.json();
 };
 
-export const getBanners = USE_MOCK ? mockGetBanners : realGetBanners; 
+export const getBanners = USE_MOCK ? mockGetBanners : realGetBanners;

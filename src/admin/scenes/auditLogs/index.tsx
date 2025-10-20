@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent, SyntheticEvent } from "react";
 import {
   Box,
   Typography,
@@ -18,9 +18,10 @@ import {
   DialogActions,
   IconButton,
   Divider,
-  Paper
+  Paper,
+  SelectChangeEvent
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -43,58 +44,54 @@ import {
   getResultColor,
   RESULT_TYPES
 } from "../../../utils/auditActions";
+import type { AuditLogDTO } from "../../api/types";
 
-const AuditLogs = () => {
+const AuditLogs: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   // State
-  const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(50);
-  const [totalRows, setTotalRows] = useState(0);
+  const [logs, setLogs] = useState<AuditLogDTO[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(50);
+  const [totalRows, setTotalRows] = useState<number>(0);
 
   // Filters
-  const [filterUsername, setFilterUsername] = useState("");
-  const [filterAction, setFilterAction] = useState("");
-  const [filterStartDate, setFilterStartDate] = useState("");
-  const [filterEndDate, setFilterEndDate] = useState("");
+  const [filterUsername, setFilterUsername] = useState<string>("");
+  const [filterAction, setFilterAction] = useState<string>("");
+  const [filterStartDate, setFilterStartDate] = useState<string>("");
+  const [filterEndDate, setFilterEndDate] = useState<string>("");
 
   // Details Modal
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [selectedLog, setSelectedLog] = useState(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState<boolean>(false);
+  const [selectedLog, setSelectedLog] = useState<AuditLogDTO | null>(null);
 
   const auditActions = getAllAuditActions();
 
   // Load audit logs
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = async (): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      let data;
+      let data: any;
 
       // Determine which API to call based on filters
       if (filterUsername && (filterStartDate || filterEndDate)) {
-        // User + date range
         const start = filterStartDate || new Date(0).toISOString();
         const end = filterEndDate || new Date().toISOString();
         data = await getAuditLogsByUserAndRange(filterUsername, start, end);
       } else if (filterStartDate || filterEndDate) {
-        // Date range only
         const start = filterStartDate || new Date(0).toISOString();
         const end = filterEndDate || new Date().toISOString();
         data = await getAuditLogsByRange(start, end);
       } else if (filterUsername) {
-        // User only
         data = await getAuditLogsByUser(filterUsername, page, pageSize);
       } else if (filterAction) {
-        // Action only
         data = await getAuditLogsByAction(filterAction, page, pageSize);
       } else {
-        // Recent logs (default)
         data = await getRecentAuditLogs(page, pageSize);
       }
 
@@ -111,7 +108,7 @@ const AuditLogs = () => {
       }
     } catch (err) {
       console.error("Error loading audit logs:", err);
-      setError(err.message || "Failed to load audit logs");
+      setError((err as Error).message || "Failed to load audit logs");
       setLogs([]);
     } finally {
       setLoading(false);
@@ -124,24 +121,23 @@ const AuditLogs = () => {
   }, [page, pageSize]);
 
   // Handle filter application
-  const handleApplyFilters = () => {
-    setPage(0); // Reset to first page
+  const handleApplyFilters = (): void => {
+    setPage(0);
     loadAuditLogs();
   };
 
   // Handle filter reset
-  const handleResetFilters = () => {
+  const handleResetFilters = (): void => {
     setFilterUsername("");
     setFilterAction("");
     setFilterStartDate("");
     setFilterEndDate("");
     setPage(0);
-    // Trigger reload after state updates
     setTimeout(() => loadAuditLogs(), 100);
   };
 
   // Format timestamp for display
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (timestamp: string | null): string => {
     if (!timestamp) return "N/A";
     try {
       const date = new Date(timestamp);
@@ -152,7 +148,7 @@ const AuditLogs = () => {
   };
 
   // Parse details JSON
-  const parseDetails = (details) => {
+  const parseDetails = (details: string | null): string => {
     if (!details) return "N/A";
     try {
       const parsed = JSON.parse(details);
@@ -163,19 +159,19 @@ const AuditLogs = () => {
   };
 
   // Handle opening details modal
-  const handleViewDetails = (log) => {
+  const handleViewDetails = (log: AuditLogDTO): void => {
     setSelectedLog(log);
     setDetailsModalOpen(true);
   };
 
   // Handle closing details modal
-  const handleCloseDetails = () => {
+  const handleCloseDetails = (): void => {
     setDetailsModalOpen(false);
     setSelectedLog(null);
   };
 
   // DataGrid columns
-  const columns = [
+  const columns: GridColDef[] = [
     {
       field: "id",
       headerName: "ID",
@@ -190,7 +186,7 @@ const AuditLogs = () => {
       minWidth: 180,
       align: "left",
       headerAlign: "left",
-      renderCell: ({ row }) => formatTimestamp(row.timestamp),
+      renderCell: (params: GridRenderCellParams) => formatTimestamp(params.row.timestamp),
     },
     {
       field: "username",
@@ -208,11 +204,11 @@ const AuditLogs = () => {
       minWidth: 150,
       align: "left",
       headerAlign: "left",
-      renderCell: ({ row }) => {
-        const actionColor = getAuditActionColor(row.action);
+      renderCell: (params: GridRenderCellParams) => {
+        const actionColor = getAuditActionColor(params.row.action);
         return (
           <Chip
-            label={getAuditActionLabel(row.action)}
+            label={getAuditActionLabel(params.row.action)}
             sx={{
               backgroundColor: actionColor,
               color: "#fff",
@@ -229,9 +225,9 @@ const AuditLogs = () => {
       width: 140,
       align: "left",
       headerAlign: "left",
-      renderCell: ({ row }) => {
-        const resultColor = getResultColor(row.result);
-        const isSuccess = row.result === RESULT_TYPES.SUCCESS;
+      renderCell: (params: GridRenderCellParams) => {
+        const resultColor = getResultColor(params.row.result);
+        const isSuccess = params.row.result === RESULT_TYPES.SUCCESS;
         return (
           <Box display="flex" alignItems="center">
             {isSuccess ? (
@@ -240,7 +236,7 @@ const AuditLogs = () => {
               <ErrorOutlineIcon sx={{ color: resultColor, mr: 0.5, fontSize: "1.2rem" }} />
             )}
             <Typography sx={{ color: resultColor, fontSize: "0.875rem" }}>
-              {row.result}
+              {params.row.result}
             </Typography>
           </Box>
         );
@@ -252,7 +248,7 @@ const AuditLogs = () => {
       width: 120,
       align: "center",
       headerAlign: "center",
-      renderCell: ({ row }) => row.entityType || "N/A",
+      renderCell: (params: GridRenderCellParams) => params.row.entityType || "N/A",
     },
     {
       field: "entityId",
@@ -260,7 +256,7 @@ const AuditLogs = () => {
       width: 100,
       align: "center",
       headerAlign: "center",
-      renderCell: ({ row }) => row.entityId || "N/A",
+      renderCell: (params: GridRenderCellParams) => params.row.entityId || "N/A",
     },
     {
       field: "ipAddress",
@@ -268,7 +264,7 @@ const AuditLogs = () => {
       width: 140,
       align: "center",
       headerAlign: "center",
-      renderCell: ({ row }) => row.ipAddress || "N/A",
+      renderCell: (params: GridRenderCellParams) => params.row.ipAddress || "N/A",
     },
     {
       field: "actions",
@@ -278,9 +274,9 @@ const AuditLogs = () => {
       headerAlign: "center",
       sortable: false,
       filterable: false,
-      renderCell: ({ row }) => (
+      renderCell: (params: GridRenderCellParams) => (
         <IconButton
-          onClick={() => handleViewDetails(row)}
+          onClick={() => handleViewDetails(params.row)}
           sx={{
             color: colors.blueAccent[500],
             "&:hover": {
@@ -322,7 +318,7 @@ const AuditLogs = () => {
             label="Username"
             variant="outlined"
             value={filterUsername}
-            onChange={(e) => setFilterUsername(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFilterUsername(e.target.value)}
             size="small"
             sx={{
               "& .MuiOutlinedInput-root": {
@@ -338,7 +334,7 @@ const AuditLogs = () => {
             <InputLabel sx={{ color: colors.grey[300] }}>Action Type</InputLabel>
             <Select
               value={filterAction}
-              onChange={(e) => setFilterAction(e.target.value)}
+              onChange={(e: SelectChangeEvent) => setFilterAction(e.target.value)}
               label="Action Type"
               sx={{
                 color: colors.grey[100],
@@ -360,7 +356,7 @@ const AuditLogs = () => {
             type="datetime-local"
             variant="outlined"
             value={filterStartDate}
-            onChange={(e) => setFilterStartDate(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFilterStartDate(e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
             sx={{
@@ -378,7 +374,7 @@ const AuditLogs = () => {
             type="datetime-local"
             variant="outlined"
             value={filterEndDate}
-            onChange={(e) => setFilterEndDate(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFilterEndDate(e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
             sx={{
@@ -480,7 +476,7 @@ const AuditLogs = () => {
           rows={logs}
           columns={columns}
           pageSize={pageSize}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+          onPageSizeChange={(newPageSize: number) => setPageSize(newPageSize)}
           rowsPerPageOptions={[10, 20, 50, 100]}
           pagination
           paginationMode="client"
@@ -584,35 +580,6 @@ const AuditLogs = () => {
                       }}
                       size="small"
                     />
-                  </Box>
-
-                  <Typography fontWeight="bold" color={colors.grey[300]}>
-                    Result:
-                  </Typography>
-                  <Box display="flex" alignItems="center">
-                    {selectedLog.result === RESULT_TYPES.SUCCESS ? (
-                      <CheckCircleOutlineIcon
-                        sx={{
-                          color: getResultColor(selectedLog.result),
-                          mr: 1,
-                        }}
-                      />
-                    ) : (
-                      <ErrorOutlineIcon
-                        sx={{
-                          color: getResultColor(selectedLog.result),
-                          mr: 1,
-                        }}
-                      />
-                    )}
-                    <Typography
-                      sx={{
-                        color: getResultColor(selectedLog.result),
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {selectedLog.result}
-                    </Typography>
                   </Box>
 
                   <Typography fontWeight="bold" color={colors.grey[300]}>

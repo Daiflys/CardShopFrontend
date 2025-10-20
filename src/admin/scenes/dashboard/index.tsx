@@ -13,7 +13,7 @@ import PieChart from "../../components/PieChart";
 import StatBox from "../../components/StatBox";
 import ProgressCircle from "../../components/ProgressCircle";
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 

@@ -1,44 +1,116 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import * as XLSX from 'xlsx';
 import { csvCardSearch, bulkSellFromCSV } from '../../../api/admin';
 import { conditionOptions } from '../../../utils/cardConditions';
 import RarityCircle from '../../../components/RarityCircle';
 
-const BulkUpload = () => {
-  const [file, setFile] = useState(null);
-  const [language, setLanguage] = useState('en');
-  const [loading, setLoading] = useState(false);
-  const [parsedCSVData, setParsedCSVData] = useState([]);
-  const [cardData, setCardData] = useState({});
-  const [foundCards, setFoundCards] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [hoveredCard, setHoveredCard] = useState(null);
+interface CSVCard {
+  setName: string;
+  cardName: string;
+  collectorNumber?: string;
+  addToQuantity: number;
+}
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+interface CardData {
+  selected: boolean;
+  condition: string;
+  quantity: number;
+  price: number;
+  csvData: CSVCard | null;
+  cardId: string | null;
+  oracleId: string | null;
+  notFound?: boolean;
+}
+
+interface CardToSell {
+  quantity?: number;
+}
+
+interface MatchedCard {
+  card: Card;
+  cardsToSell?: CardToSell[];
+}
+
+interface RequestedCard {
+  cardName: string;
+  setName: string;
+  collectorNumber?: string;
+}
+
+interface SearchResult {
+  found: boolean;
+  requestedCard: RequestedCard;
+  matchedCards?: MatchedCard[];
+  errorMessage?: string;
+}
+
+interface SearchResponse {
+  results: SearchResult[];
+}
+
+interface Card {
+  id: string;
+  oracleId?: string;
+  oracle_id?: string;
+  name: string;
+  setName?: string;
+  set_name?: string;
+  setCode?: string;
+  set_code?: string;
+  set?: string;
+  imageUrl?: string;
+  image_url?: string;
+  collectorNumber?: string;
+  rarity?: string;
+  reactKey?: string;
+  csvQuantity?: number;
+  currentQuantity?: number;
+  requestedCard?: RequestedCard;
+  found?: boolean;
+  errorMessage?: string;
+  language?: string;
+}
+
+interface HoveredCard {
+  id: string;
+  rect: DOMRect | null;
+  imageUrl: string;
+}
+
+const BulkUpload: React.FC = () => {
+  const [file, setFile] = useState<File | null>(null);
+  const [language, setLanguage] = useState<string>('en');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [parsedCSVData, setParsedCSVData] = useState<CSVCard[]>([]);
+  const [cardData, setCardData] = useState<Record<string, CardData>>({});
+  const [foundCards, setFoundCards] = useState<Card[]>([]);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [hoveredCard, setHoveredCard] = useState<HoveredCard | null>(null);
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       setError(null);
     }
   };
 
-  const parseExcelFile = (file) => {
+  const parseExcelFile = (file: File): Promise<CSVCard[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
-      reader.onload = (e) => {
+      reader.onload = (e: ProgressEvent<FileReader>) => {
         try {
-          const data = new Uint8Array(e.target.result);
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: 'array' });
 
           const sheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-          const cards = jsonData.map(row => {
-            // Try multiple variations for Add to Quantity
+          const cards = jsonData.map((row: any) => {
             const addToQty = row['Add to Quantity'] ||
                              row['Add to quantity'] ||
                              row['add to quantity'] ||
@@ -47,7 +119,7 @@ const BulkUpload = () => {
                              row['Add To Quantity'] ||
                              0;
 
-            const parsedCard = {
+            const parsedCard: CSVCard = {
               setName: row['Set Name'] || row['Set name'] || row['set name'],
               cardName: row['Product Name'] || row['Product name'] || row['product name'],
               collectorNumber: row['Number'] ? String(row['Number']) : (row['number'] ? String(row['number']) : undefined),
@@ -61,7 +133,7 @@ const BulkUpload = () => {
           console.log('Total cards parsed from CSV:', cards.length);
           resolve(cards);
         } catch (error) {
-          reject(new Error('Failed to parse Excel file: ' + error.message));
+          reject(new Error('Failed to parse Excel file: ' + (error as Error).message));
         }
       };
 
@@ -73,7 +145,7 @@ const BulkUpload = () => {
     });
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (): Promise<void> => {
     if (!file) {
       setError('Please select a file');
       return;
@@ -94,17 +166,16 @@ const BulkUpload = () => {
       }
 
       setParsedCSVData(cards);
-      const response = await csvCardSearch(cards, language);
+      const response: SearchResponse = await csvCardSearch(cards, language);
 
       if (response && response.results) {
-        const cardsToDisplay = [];
-        const initialCardData = {};
+        const cardsToDisplay: Card[] = [];
+        const initialCardData: Record<string, CardData> = {};
 
         response.results.forEach((result, index) => {
           if (result.found && result.matchedCards && result.matchedCards.length > 0) {
-            // Found cards
             result.matchedCards.forEach((match, matchIndex) => {
-              const card = match.card || {};
+              const card = match.card || {} as Card;
 
               console.log('=== Matching card ===');
               console.log('Requested card from server:', result.requestedCard);
@@ -129,7 +200,6 @@ const BulkUpload = () => {
               console.log('CSV Add to Quantity:', csvAddToQuantity);
               console.log('==================');
 
-              // Calculate total quantity from all cardsToSell entries
               const currentQuantity = match.cardsToSell
                 ? match.cardsToSell.reduce((sum, cardToSell) => sum + (cardToSell.quantity || 0), 0)
                 : 0;
@@ -145,17 +215,16 @@ const BulkUpload = () => {
               });
 
               initialCardData[cardKey] = {
-                selected: true, // Selected by default
+                selected: true,
                 condition: 'NM',
-                quantity: csvAddToQuantity, // Default to CSV "Add to Quantity"
+                quantity: csvAddToQuantity,
                 price: 0,
-                csvData: csvCard,
+                csvData: csvCard || null,
                 cardId: card.id,
-                oracleId: card.oracleId || card.oracle_id
+                oracleId: card.oracleId || card.oracle_id || null
               };
             });
           } else {
-            // Not found cards
             console.log('=== Not found card ===');
             console.log('Requested card from server:', result.requestedCard);
 
@@ -173,6 +242,7 @@ const BulkUpload = () => {
             console.log('==================');
 
             cardsToDisplay.push({
+              id: cardKey,
               reactKey: cardKey,
               name: result.requestedCard.cardName,
               setName: result.requestedCard.setName,
@@ -187,11 +257,11 @@ const BulkUpload = () => {
             });
 
             initialCardData[cardKey] = {
-              selected: false, // Not found cards are not selected by default
+              selected: false,
               condition: 'NM',
               quantity: csvAddToQuantity,
               price: 0,
-              csvData: csvCard,
+              csvData: csvCard || null,
               cardId: null,
               oracleId: null,
               notFound: true
@@ -203,13 +273,13 @@ const BulkUpload = () => {
         setCardData(initialCardData);
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while processing the file');
+      setError((err as Error).message || 'An error occurred while processing the file');
     } finally {
       setLoading(false);
     }
   };
 
-  const updateCardData = (cardKey, field, value) => {
+  const updateCardData = (cardKey: string, field: keyof CardData, value: any): void => {
     setCardData(prev => ({
       ...prev,
       [cardKey]: {
@@ -220,7 +290,7 @@ const BulkUpload = () => {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     const selectedCardEntries = Object.entries(cardData);
     const selectedCards = selectedCardEntries.filter(([cardKey, data]) =>
       data.selected && data.quantity > 0 && !data.notFound
@@ -241,13 +311,13 @@ const BulkUpload = () => {
         return {
           card_id: data.cardId,
           oracle_id: data.oracleId,
-          set_name: card.setName || card.set_name,
-          set_code: card.setCode || card.set_code || card.set,
-          card_name: card.name,
-          image_url: card.imageUrl || card.image_url,
-          price: parseFloat(data.price),
+          set_name: card?.setName || card?.set_name || '',
+          set_code: card?.setCode || card?.set_code || card?.set || '',
+          card_name: card?.name || '',
+          image_url: card?.imageUrl || card?.image_url || '',
+          price: parseFloat(String(data.price)),
           condition: data.condition,
-          quantity: parseInt(data.quantity),
+          quantity: parseInt(String(data.quantity)),
           language: language
         };
       });
@@ -255,8 +325,7 @@ const BulkUpload = () => {
       const submitResult = await bulkSellFromCSV(cardsToSubmit, language);
       setSuccessMessage(`Successfully listed ${selectedCards.length} cards for sale!`);
 
-      // Clear selection after successful submission
-      const clearedCardData = {};
+      const clearedCardData: Record<string, CardData> = {};
       Object.keys(cardData).forEach(cardKey => {
         clearedCardData[cardKey] = {
           ...cardData[cardKey],
@@ -268,7 +337,7 @@ const BulkUpload = () => {
       setCardData(clearedCardData);
 
     } catch (err) {
-      setError('Error submitting cards: ' + err.message);
+      setError('Error submitting cards: ' + (err as Error).message);
     } finally {
       setSubmitting(false);
     }
@@ -276,10 +345,9 @@ const BulkUpload = () => {
 
   const selectedCount = Object.values(cardData).filter(data => data.selected).length;
 
-  // Close language selector when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('.card-hover')) {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (!(event.target as HTMLElement).closest('.card-hover')) {
         setHoveredCard(null);
       }
     };
@@ -303,7 +371,6 @@ const BulkUpload = () => {
           </div>
 
           <div className="space-y-6">
-            {/* File Upload */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Spreadsheet File (CSV or Excel)
@@ -321,7 +388,6 @@ const BulkUpload = () => {
               )}
             </div>
 
-            {/* Language Selection */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Card Language
@@ -345,7 +411,6 @@ const BulkUpload = () => {
               </select>
             </div>
 
-            {/* Upload Button */}
             <button
               onClick={handleUpload}
               disabled={!file || loading}
@@ -354,26 +419,23 @@ const BulkUpload = () => {
               {loading ? 'Processing...' : 'Upload and Search'}
             </button>
 
-            {/* Error Display */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-md p-4">
                 <p className="text-red-800 text-sm">{error}</p>
               </div>
             )}
 
-            {/* Success Message */}
             {successMessage && (
               <div className="bg-green-50 border border-green-200 rounded-md p-4">
                 <p className="text-green-800 text-sm">{successMessage}</p>
               </div>
             )}
 
-            {/* Found Cards Table */}
             {foundCards.filter(c => c.found).length > 0 && (
               <div className="bg-white rounded-lg shadow mt-6">
                 <div className="flex justify-between items-center p-4 border-b bg-green-50">
                   <div className="text-sm font-semibold text-green-800">
-                    ✓ Found Cards ({foundCards.filter(c => c.found).length})
+                    Found Cards ({foundCards.filter(c => c.found).length})
                   </div>
                 </div>
 
@@ -387,8 +449,7 @@ const BulkUpload = () => {
                             onChange={(e) => {
                               const newCardData = { ...cardData };
                               foundCards.forEach(card => {
-                                const cardKey = card.reactKey;
-                                // Only select found cards
+                                const cardKey = card.reactKey!;
                                 if (card.found) {
                                   newCardData[cardKey] = {
                                     ...newCardData[cardKey],
@@ -414,7 +475,7 @@ const BulkUpload = () => {
                     </thead>
                     <tbody>
                       {foundCards.filter(c => c.found).map((card, index) => {
-                        const cardKey = card.reactKey;
+                        const cardKey = card.reactKey!;
                         const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                         const currentQty = card.currentQuantity || 0;
                         const amountToAdd = cardData[cardKey]?.quantity || 0;
@@ -435,7 +496,7 @@ const BulkUpload = () => {
                                   className="relative card-hover"
                                   onMouseEnter={(e) => {
                                     const rect = e.currentTarget.getBoundingClientRect();
-                                    setHoveredCard({ id: cardKey, rect, imageUrl: card.imageUrl || card.image_url });
+                                    setHoveredCard({ id: cardKey, rect, imageUrl: card.imageUrl || card.image_url || '' });
                                   }}
                                   onMouseLeave={() => setHoveredCard(null)}
                                 >
@@ -476,7 +537,7 @@ const BulkUpload = () => {
                                       alt={card.name}
                                       className="w-full h-auto rounded max-h-full object-contain"
                                       onError={(e) => {
-                                        e.target.style.display = 'none';
+                                        (e.target as HTMLImageElement).style.display = 'none';
                                       }}
                                     />
                                   </div>
@@ -533,7 +594,6 @@ const BulkUpload = () => {
                   </table>
                 </div>
 
-                {/* Submit Button */}
                 <div className="p-4 border-t">
                   <button
                     onClick={handleSubmit}
@@ -546,12 +606,11 @@ const BulkUpload = () => {
               </div>
             )}
 
-            {/* Not Found Cards Table */}
             {foundCards.filter(c => !c.found).length > 0 && (
               <div className="bg-white rounded-lg shadow mt-6">
                 <div className="flex justify-between items-center p-4 border-b bg-red-50">
                   <div className="text-sm font-semibold text-red-800">
-                    ✗ Not Found Cards ({foundCards.filter(c => !c.found).length})
+                    Not Found Cards ({foundCards.filter(c => !c.found).length})
                   </div>
                 </div>
 
