@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../components/AddToCartButton";
-import { getRarityTextColor, getRaritySolidColor, getRarityIcon } from "../utils/rarity";
+import { getRarityTextColor, getRarityIcon } from "../utils/rarity";
+import RarityCircle from "../components/RarityCircle";
 import ConditionIcon from "../components/ConditionIcon";
 import { getCardsToSellById } from "../api/card";
 import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
@@ -98,7 +99,7 @@ const CardInfoTab = ({ card }) => {
               </h1>
             </div>
             <div className="text-sm text-gray-600 mb-4">
-              Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; Mythic Rare &amp; Rare
+              Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; {card.rarity ?? "Unknown"}
             </div>
           </div>
 
@@ -287,17 +288,7 @@ const CardInfoTab = ({ card }) => {
                           title={`{${manaSymbol.symbol}}`}
                         />
                       ))
-                    ) : (
-                      parseManaCost("{3}{W}").map((manaSymbol, index) => (
-                        <img
-                          key={index}
-                          src={manaSymbol.svg_uri}
-                          alt={manaSymbol.symbol}
-                          className="w-5 h-5"
-                          title={`{${manaSymbol.symbol}}`}
-                        />
-                      ))
-                    )}
+                    ) : "-"}
                   </div>
                 </td>
               </tr>
@@ -313,16 +304,7 @@ const CardInfoTab = ({ card }) => {
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Rarity</td>
                 <td className="px-4 py-3 bg-gray-200">
                   <div className="flex items-center gap-2">
-                    <span className={`${(() => {
-                      const normalizedRarity = card.rarity?.toLowerCase();
-                      const mainRarities = ['common', 'uncommon', 'rare', 'mythic'];
-
-                      if (mainRarities.includes(normalizedRarity)) {
-                        return getRaritySolidColor(card.rarity);
-                      } else {
-                        return 'bg-blue-500';
-                      }
-                    })()} rounded-full w-4 h-4 ${card.rarity?.toLowerCase() === 'common' ? 'border border-black' : ''}`}></span>
+                    <RarityCircle rarity={card.rarity} size="large" />
                     <span className="capitalize">
                       {card.rarity || "Rare"}
                     </span>

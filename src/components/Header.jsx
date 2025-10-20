@@ -354,6 +354,15 @@ const Header = ({ onThemeSettingsClick }) => {
           Bulk Sell
         </button>
         <button
+          className={theme.components.header.userDropdownItem}
+          onClick={() => {
+            navigate('/admin');
+            setMobileMenuOpen(false);
+          }}
+        >
+          Admin Panel
+        </button>
+        <button
           className={theme.components.header.userDropdownLogout}
           onClick={() => {
             localStorage.removeItem("authToken");
@@ -392,6 +401,9 @@ const Header = ({ onThemeSettingsClick }) => {
             </li>
             <li className="border-t border-sky-100">
               <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/bulk-sell')}>Bulk Sell</button>
+            </li>
+            <li className="border-t border-sky-100">
+              <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/admin')}>Admin Panel</button>
             </li>
             <li className="border-t border-sky-100">
               <button

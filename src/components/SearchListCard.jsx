@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getRaritySolidColor } from '../utils/rarity';
 import { getLanguageFlag } from '../utils/languageFlags.jsx';
+import RarityCircle from './RarityCircle';
 
 const SearchListCard = ({
   card,
@@ -80,7 +80,7 @@ const SearchListCard = ({
           {/* Rarity */}
           <div className="text-center">
             {card.rarity ? (
-              <span className={`inline-block w-3 h-3 rounded-full ${getRaritySolidColor(card.rarity)}`}></span>
+              <RarityCircle rarity={card.rarity} size="medium" />
             ) : (
               <span className="text-sm text-gray-400">-</span>
             )}
@@ -173,7 +173,7 @@ const SearchListCard = ({
               <div className="flex items-center gap-1">
                 {card.rarity ? (
                   <>
-                    <span className={`inline-block w-2 h-2 rounded-full ${getRaritySolidColor(card.rarity)}`}></span>
+                    <RarityCircle rarity={card.rarity} size="small" />
                     <span className="capitalize">{card.rarity}</span>
                   </>
                 ) : (

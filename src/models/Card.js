@@ -132,7 +132,8 @@ class Card {
       price: cardData.price,
       condition: cardData.condition,
       quantity: cardData.quantity,
-      comments: cardData.comments
+      language: cardData.language || 'en',
+      comments: cardData.comments || ''
     };
   }
 

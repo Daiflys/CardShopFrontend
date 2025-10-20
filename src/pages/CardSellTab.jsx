@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { setCardToSell } from "../api/postCardToSell";
+import { conditionOptions } from "../utils/cardConditions";
 
 const CardSellTab = ({ card }) => {
   const [quantity, setQuantity] = useState(1);
@@ -12,16 +13,24 @@ const CardSellTab = ({ card }) => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const conditionOptions = [
-    { code: "MT", name: "Mint", color: "bg-cyan-400" },
-    { code: "NM", name: "Near Mint", color: "bg-green-500" },
-    { code: "EX", name: "Excellent", color: "bg-yellow-600" },
-    { code: "GD", name: "Good", color: "bg-yellow-500" },
-    { code: "LP", name: "Light Played", color: "bg-orange-500" },
-    { code: "PL", name: "Played", color: "bg-red-400" },
-    { code: "PO", name: "Poor", color: "bg-red-600" }
-  ];
+  // Map language names to codes
+  const languageNameToCode = {
+    "English": "en",
+    "Spanish": "es",
+    "German": "de",
+    "French": "fr"
+  };
 
+  // Get language code from card or state
+  const getLanguageCode = () => {
+    // Try to get from card first
+    const cardLang = card.language || card.lang;
+    if (cardLang) {
+      return cardLang.toLowerCase();
+    }
+    // Otherwise map from state
+    return languageNameToCode[language] || "en";
+  };
 
   const handleSubmit = async (e) => {
     console.log("handleSubmit called");
@@ -30,11 +39,24 @@ const CardSellTab = ({ card }) => {
     setError("");
     setSuccessMessage("");
     try {
-      const result = await setCardToSell(card.oracleId, card.id, card.setName, card.set_code, card.name, card.imageUrl, price, condition, quantity, comments);
+      const languageCode = getLanguageCode();
+      const result = await setCardToSell(
+        card.oracle_id,
+        card.id,
+        card.setName,
+        card.set_code,
+        card.name,
+        card.imageUrl,
+        price,
+        condition,
+        quantity,
+        comments,
+        languageCode
+      );
       console.log("result is: " + result + " result success is: " + result.success);
       setSuccessMessage("Card successfully put up for sale!");
     } catch (err) {
-      //console.error("Error posting card to sell: ", err);
+      console.error("Error posting card to sell: ", err);
       setError(err.message);
     } finally {
       setLoading(false);

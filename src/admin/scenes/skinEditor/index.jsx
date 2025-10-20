@@ -1,0 +1,466 @@
+import { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  useTheme as useMuiTheme,
+  Grid,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tabs,
+  Tab,
+  Switch,
+  FormControlLabel,
+  Slider,
+} from "@mui/material";
+import { tokens } from "../../theme";
+import AdminHeader from "../../components/Header";
+import MainHeader from "../../../components/Header";
+import { useSkin } from "../../../hooks/useComponent";
+import { useTheme as useAppTheme } from "../../../hooks/useTheme";
+
+const SkinEditor = () => {
+  const theme = useMuiTheme();
+  const colors = tokens(theme.palette.mode);
+
+  // Skin management
+  const { currentSkin, availableSkins, switchSkin } = useSkin();
+  const { theme: appTheme, updateTheme } = useAppTheme();
+
+  // Tab state
+  const [currentTab, setCurrentTab] = useState(0);
+
+  // Preview mode state
+  const [previewMode, setPreviewMode] = useState("desktop");
+
+  // Header element configurations
+  const [headerElements, setHeaderElements] = useState({
+    logo: { visible: true, width: '120px', fontSize: '24px' },
+    search: { visible: true, width: '400px' },
+    navigation: { visible: true },
+    cart: { visible: true },
+    userMenu: { visible: true },
+    languageSwitcher: { visible: true },
+  });
+
+  // Header style editor state
+  const [headerStyles, setHeaderStyles] = useState({
+    backgroundColor: '#f0f9ff',
+    textColor: '#0284c7',
+    borderColor: '#e0f2fe',
+    buttonBgColor: '#0284c7',
+    buttonTextColor: '#ffffff',
+    height: 'auto',
+    padding: '16px',
+  });
+
+  // Tab panel component
+  const TabPanel = ({ children, value, index }) => {
+    return (
+      <div role="tabpanel" hidden={value !== index}>
+        {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+      </div>
+    );
+  };
+
+  return (
+    <Box m="20px">
+      <AdminHeader title="SKIN EDITOR" subtitle="Visual editor for customizing your website components" />
+
+      {/* Main Tabs */}
+      <Box backgroundColor={colors.primary[400]} borderRadius="8px" mb={3}>
+        <Tabs
+          value={currentTab}
+          onChange={(e, newValue) => setCurrentTab(newValue)}
+          sx={{
+            "& .MuiTab-root": {
+              color: colors.grey[100],
+              fontSize: "16px",
+              fontWeight: "600",
+            },
+            "& .Mui-selected": {
+              color: colors.greenAccent[500],
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: colors.greenAccent[500],
+            },
+          }}
+        >
+          <Tab label="Header Editor" />
+          <Tab label="Footer Editor" />
+          <Tab label="Card Styles" />
+          <Tab label="Global Styles" />
+        </Tabs>
+      </Box>
+
+      {/* Skin Selector - Always visible */}
+      <Box backgroundColor={colors.primary[400]} p={3} borderRadius="8px" mb={3}>
+        <Typography variant="h4" mb={2} color={colors.grey[100]}>
+          Current Skin Template
+        </Typography>
+
+        <FormControl fullWidth>
+          <InputLabel>Select Skin</InputLabel>
+          <Select
+            value={currentSkin}
+            onChange={(e) => switchSkin(e.target.value)}
+            label="Select Skin"
+          >
+            {availableSkins.map((skin) => (
+              <MenuItem key={skin} value={skin}>
+                {skin.charAt(0).toUpperCase() + skin.slice(1)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Typography variant="body2" mt={2} color={colors.grey[300]}>
+          Currently active: <strong>{currentSkin}</strong>
+        </Typography>
+      </Box>
+
+      {/* TAB 0: Header Editor */}
+      <TabPanel value={currentTab} index={0}>
+        <Grid container spacing={3}>
+          {/* Header Preview */}
+          <Grid item xs={12}>
+            <Box backgroundColor={colors.primary[400]} p={3} borderRadius="8px">
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h4" color={colors.grey[100]}>
+                  Header Preview
+                </Typography>
+
+                {/* Mobile/Desktop Toggle */}
+                <Box display="flex" gap={1}>
+                  <Button
+                    variant={previewMode === "desktop" ? "contained" : "outlined"}
+                    onClick={() => setPreviewMode("desktop")}
+                    sx={{
+                      backgroundColor: previewMode === "desktop" ? colors.blueAccent[600] : "transparent",
+                      color: colors.grey[100],
+                      borderColor: colors.blueAccent[600],
+                    }}
+                  >
+                    Desktop
+                  </Button>
+                  <Button
+                    variant={previewMode === "mobile" ? "contained" : "outlined"}
+                    onClick={() => setPreviewMode("mobile")}
+                    sx={{
+                      backgroundColor: previewMode === "mobile" ? colors.blueAccent[600] : "transparent",
+                      color: colors.grey[100],
+                      borderColor: colors.blueAccent[600],
+                    }}
+                  >
+                    Mobile
+                  </Button>
+                </Box>
+              </Box>
+
+              <Box
+                sx={{
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  width: previewMode === "mobile" ? '375px' : '100%',
+                  maxWidth: '100%',
+                  margin: previewMode === "mobile" ? '0 auto' : '0',
+                  transition: 'width 0.3s ease',
+                  pointerEvents: 'none', // Disable all interactions in preview
+                  userSelect: 'none', // Disable text selection
+                  '& header': {
+                    background: `${headerStyles.backgroundColor} !important`,
+                    borderColor: `${headerStyles.borderColor} !important`,
+                    padding: `${headerStyles.padding} !important`,
+                  },
+                  '& header a, & header button[class*="logo"], & header nav a': {
+                    color: `${headerStyles.textColor} !important`,
+                  },
+                  '& header button[class*="signup"], & header button[class*="REGÍSTRATE"]': {
+                    background: `${headerStyles.buttonBgColor} !important`,
+                    color: `${headerStyles.buttonTextColor} !important`,
+                  },
+                  // Logo controls
+                  '& header button[class*="logo"], & header a[class*="logo"]': {
+                    display: headerElements.logo.visible ? 'flex' : 'none !important',
+                    width: headerElements.logo.width,
+                    fontSize: headerElements.logo.fontSize,
+                  },
+                  // Search controls
+                  '& header input[type="search"], & header [class*="search"], & header form': {
+                    display: headerElements.search.visible ? 'flex' : 'none !important',
+                    width: headerElements.search.width,
+                  },
+                  // Navigation controls
+                  '& header nav': {
+                    display: headerElements.navigation.visible ? 'flex' : 'none !important',
+                  },
+                  // Cart controls
+                  '& header [class*="cart"], & header button[aria-label*="cart"]': {
+                    display: headerElements.cart.visible ? 'flex' : 'none !important',
+                  },
+                  // User menu controls
+                  '& header [class*="user"], & header button[aria-label*="user"]': {
+                    display: headerElements.userMenu.visible ? 'flex' : 'none !important',
+                  },
+                  // Language switcher controls
+                  '& header [class*="language"], & header select[class*="lang"]': {
+                    display: headerElements.languageSwitcher.visible ? 'flex' : 'none !important',
+                  },
+                }}
+              >
+                <MainHeader />
+              </Box>
+
+              <Typography variant="body2" mt={2} color={colors.grey[300]}>
+                {previewMode === "mobile"
+                  ? "Mobile preview (375px width). Use the controls below to edit elements."
+                  : "Desktop preview. Use the controls below to edit elements."}
+              </Typography>
+            </Box>
+          </Grid>
+
+          {/* Element Inspector */}
+          <Grid item xs={12} md={6}>
+            <Box backgroundColor={colors.primary[400]} p={3} borderRadius="8px">
+              <Typography variant="h4" mb={3} color={colors.grey[100]}>
+                Element Visibility & Size
+              </Typography>
+
+              {Object.entries(headerElements).map(([key, config]) => (
+                <Box key={key} mb={3} p={2} backgroundColor={colors.primary[500]} borderRadius="4px">
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Typography variant="h6" color={colors.grey[100]}>
+                      {key.charAt(0).toUpperCase() + key.slice(1)}
+                    </Typography>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={config.visible}
+                          onChange={(e) =>
+                            setHeaderElements({
+                              ...headerElements,
+                              [key]: { ...config, visible: e.target.checked },
+                            })
+                          }
+                        />
+                      }
+                      label="Visible"
+                    />
+                  </Box>
+
+                  {config.width && (
+                    <TextField
+                      fullWidth
+                      label="Width"
+                      value={config.width}
+                      onChange={(e) =>
+                        setHeaderElements({
+                          ...headerElements,
+                          [key]: { ...config, width: e.target.value },
+                        })
+                      }
+                      size="small"
+                      placeholder="e.g., 200px, 50%, auto"
+                    />
+                  )}
+
+                  {config.fontSize && (
+                    <TextField
+                      fullWidth
+                      label="Font Size"
+                      value={config.fontSize}
+                      onChange={(e) =>
+                        setHeaderElements({
+                          ...headerElements,
+                          [key]: { ...config, fontSize: e.target.value },
+                        })
+                      }
+                      size="small"
+                      sx={{ mt: 1 }}
+                      placeholder="e.g., 16px, 1.5rem"
+                    />
+                  )}
+                </Box>
+              ))}
+            </Box>
+          </Grid>
+
+          {/* Color & Style Editor */}
+          <Grid item xs={12} md={6}>
+            <Box backgroundColor={colors.primary[400]} p={3} borderRadius="8px">
+              <Typography variant="h4" mb={3} color={colors.grey[100]}>
+                Colors & Styles
+              </Typography>
+
+              <Grid container spacing={2}>
+                {/* Background Color */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" mb={1} color={colors.grey[100]}>
+                    Background Color
+                  </Typography>
+                  <Box display="flex" gap={2}>
+                    <input
+                      type="color"
+                      value={headerStyles.backgroundColor}
+                      onChange={(e) =>
+                        setHeaderStyles({ ...headerStyles, backgroundColor: e.target.value })
+                      }
+                      style={{ width: "60px", height: "40px", cursor: "pointer" }}
+                    />
+                    <TextField
+                      fullWidth
+                      value={headerStyles.backgroundColor}
+                      onChange={(e) =>
+                        setHeaderStyles({ ...headerStyles, backgroundColor: e.target.value })
+                      }
+                      size="small"
+                    />
+                  </Box>
+                </Grid>
+
+                {/* Text Color */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" mb={1} color={colors.grey[100]}>
+                    Text Color
+                  </Typography>
+                  <Box display="flex" gap={2}>
+                    <input
+                      type="color"
+                      value={headerStyles.textColor}
+                      onChange={(e) =>
+                        setHeaderStyles({ ...headerStyles, textColor: e.target.value })
+                      }
+                      style={{ width: "60px", height: "40px", cursor: "pointer" }}
+                    />
+                    <TextField
+                      fullWidth
+                      value={headerStyles.textColor}
+                      onChange={(e) =>
+                        setHeaderStyles({ ...headerStyles, textColor: e.target.value })
+                      }
+                      size="small"
+                    />
+                  </Box>
+                </Grid>
+
+                {/* Button Colors */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" mb={1} color={colors.grey[100]}>
+                    Button Background
+                  </Typography>
+                  <Box display="flex" gap={2}>
+                    <input
+                      type="color"
+                      value={headerStyles.buttonBgColor}
+                      onChange={(e) =>
+                        setHeaderStyles({ ...headerStyles, buttonBgColor: e.target.value })
+                      }
+                      style={{ width: "60px", height: "40px", cursor: "pointer" }}
+                    />
+                    <TextField
+                      fullWidth
+                      value={headerStyles.buttonBgColor}
+                      onChange={(e) =>
+                        setHeaderStyles({ ...headerStyles, buttonBgColor: e.target.value })
+                      }
+                      size="small"
+                    />
+                  </Box>
+                </Grid>
+
+                {/* Padding */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" mb={1} color={colors.grey[100]}>
+                    Padding
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={headerStyles.padding}
+                    onChange={(e) =>
+                      setHeaderStyles({ ...headerStyles, padding: e.target.value })
+                    }
+                    size="small"
+                    placeholder="e.g., 16px, 1rem 2rem"
+                  />
+                </Grid>
+              </Grid>
+
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => {
+                  const updatedTheme = {
+                    ...appTheme,
+                    components: {
+                      ...appTheme.components,
+                      header: {
+                        ...appTheme.components.header,
+                      }
+                    }
+                  };
+                  updateTheme(updatedTheme);
+                  alert('Header styles saved to localStorage!');
+                }}
+                sx={{
+                  mt: 3,
+                  backgroundColor: colors.greenAccent[600],
+                  color: colors.grey[100],
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: colors.greenAccent[700],
+                  },
+                }}
+              >
+                Save Changes
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </TabPanel>
+
+      {/* TAB 1: Footer Editor */}
+      <TabPanel value={currentTab} index={1}>
+        <Box backgroundColor={colors.primary[400]} p={3} borderRadius="8px">
+          <Typography variant="h4" color={colors.grey[100]}>
+            Footer Editor (Coming Soon)
+          </Typography>
+          <Typography variant="body1" color={colors.grey[300]} mt={2}>
+            Configure footer styles, visibility, and layout here.
+          </Typography>
+        </Box>
+      </TabPanel>
+
+      {/* TAB 2: Card Styles */}
+      <TabPanel value={currentTab} index={2}>
+        <Box backgroundColor={colors.primary[400]} p={3} borderRadius="8px">
+          <Typography variant="h4" color={colors.grey[100]}>
+            Card Styles (Coming Soon)
+          </Typography>
+          <Typography variant="body1" color={colors.grey[300]} mt={2}>
+            Customize product card and search result card styles here.
+          </Typography>
+        </Box>
+      </TabPanel>
+
+      {/* TAB 3: Global Styles */}
+      <TabPanel value={currentTab} index={3}>
+        <Box backgroundColor={colors.primary[400]} p={3} borderRadius="8px">
+          <Typography variant="h4" color={colors.grey[100]}>
+            Global Styles (Coming Soon)
+          </Typography>
+          <Typography variant="body1" color={colors.grey[300]} mt={2}>
+            Configure typography, spacing, and global color palette here.
+          </Typography>
+        </Box>
+      </TabPanel>
+    </Box>
+  );
+};
+
+export default SkinEditor;
