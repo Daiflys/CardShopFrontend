@@ -8,7 +8,7 @@ const realGetAddresses = async (): Promise<Address[]> => {
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/addresses`, {
+  const response = await fetch(`${API_BASE_URL}/addresses`, {
     headers: {
       "Authorization": `Bearer ${token}`
     }
@@ -27,7 +27,7 @@ const realGetAddress = async (id: number): Promise<Address> => {
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/addresses/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/addresses/${id}`, {
     headers: {
       "Authorization": `Bearer ${token}`
     }
@@ -49,7 +49,7 @@ const realCreateAddress = async (data: AddressCreateRequest): Promise<Address> =
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/addresses`, {
+  const response = await fetch(`${API_BASE_URL}/addresses`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +75,7 @@ const realUpdateAddress = async (id: number, data: AddressUpdateRequest): Promis
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/addresses/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/addresses/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -104,7 +104,7 @@ const realDeleteAddress = async (id: number): Promise<void> => {
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/addresses/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/addresses/${id}`, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -125,7 +125,7 @@ const realSetPrimaryAddress = async (id: number): Promise<Address> => {
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/addresses/${id}/set-primary`, {
+  const response = await fetch(`${API_BASE_URL}/addresses/${id}/set-primary`, {
     method: "PUT",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -148,7 +148,7 @@ const realGetPrimaryAddress = async (): Promise<Address | null> => {
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/addresses/primary`, {
+  const response = await fetch(`${API_BASE_URL}/addresses/primary`, {
     headers: {
       "Authorization": `Bearer ${token}`
     }

@@ -169,6 +169,8 @@ const CardInfoTab = ({ card }) => {
                   const listingId = cardToSell.id ?? `listing-${i}`;
                   const selectedQty = selectedQuantities[listingId] || 1;
 
+                  console.log(`📋 Card to sell #${i}:`, cardToSell);
+
                   const cardForCart = {
                     id: listingId,
                     card_name: card.name,
@@ -181,6 +183,8 @@ const CardInfoTab = ({ card }) => {
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
                   };
+
+                  console.log(`🛒 CardForCart #${i}:`, cardForCart);
 
                   return (
                     <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>

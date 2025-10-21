@@ -29,7 +29,10 @@ const realAddToCart = async (card: CartItem): Promise<CartResponse> => {
     throw new Error("User not authenticated");
   }
 
+  console.log("🛒 AddToCart called with card:", card);
   const payload = { cardId: card.id, quantity: card.quantity || 1 };
+  console.log("📦 Payload being sent:", payload);
+  console.log("🌐 API URL:", `${API_BASE_URL}/cart/add`);
 
   const response = await fetch(`${API_BASE_URL}/cart/add`, {
     method: "POST",
@@ -40,11 +43,17 @@ const realAddToCart = async (card: CartItem): Promise<CartResponse> => {
     body: JSON.stringify(payload)
   });
 
+  console.log("📡 Response status:", response.status);
+
   if (!response.ok) {
-    throw new Error("Error adding to cart");
+    const errorText = await response.text();
+    console.error("❌ Error response:", errorText);
+    throw new Error(`Error adding to cart: ${response.status} - ${errorText}`);
   }
 
-  return response.json() as Promise<CartResponse>;
+  const result = await response.json() as CartResponse;
+  console.log("✅ Success response:", result);
+  return result;
 };
 
 const realRemoveFromCart = async (cardId: string | number): Promise<CartResponse> => {
