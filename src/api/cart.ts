@@ -1,7 +1,6 @@
 // src/api/cart.ts
 import type { CartItem } from './types';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface CartResponse {
@@ -24,65 +23,6 @@ interface CheckoutResponse {
   purchases?: CartItem[];
   message: string;
 }
-
-// --- MOCK DATA ---
-let mockCart: CartItem[] = [];
-
-const mockAddToCart = async (card: CartItem): Promise<CartResponse> => {
-  await new Promise(res => setTimeout(res, 200));
-
-  const quantityToAdd = card.quantity || 1;
-  const availableStock = card.available || Infinity;
-
-  const existingItem = mockCart.find(item => item.id === card.id);
-  const currentInCart = existingItem ? existingItem.quantity : 0;
-
-  // Check if we have enough stock
-  if (currentInCart + quantityToAdd > availableStock) {
-    const remaining = availableStock - currentInCart;
-    throw new Error(`Only ${remaining} items available. You already have ${currentInCart} in cart.`);
-  }
-
-  if (existingItem) {
-    existingItem.quantity += quantityToAdd;
-  } else {
-    mockCart.push({
-      ...card,
-      quantity: quantityToAdd
-    });
-  }
-
-  return { success: true, message: "Card added to cart" };
-};
-
-const mockRemoveFromCart = async (cardId: string | number): Promise<CartResponse> => {
-  await new Promise(res => setTimeout(res, 200));
-
-  mockCart = mockCart.filter(item => item.id !== cardId);
-  return { success: true, message: "Card removed from cart" };
-};
-
-const mockGetCart = async (): Promise<CartItem[]> => {
-  await new Promise(res => setTimeout(res, 300));
-  return mockCart;
-};
-
-const mockUpdateQuantity = async (cardId: string | number, quantity: number): Promise<CartResponse> => {
-  await new Promise(res => setTimeout(res, 200));
-
-  const item = mockCart.find(item => item.id === cardId);
-  if (item) {
-    if (quantity <= 0) {
-      mockCart = mockCart.filter(item => item.id !== cardId);
-    } else {
-      item.quantity = quantity;
-    }
-  }
-
-  return { success: true, message: "Cart updated" };
-};
-
-// --- REAL API ---
 const realAddToCart = async (card: CartItem): Promise<CartResponse> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
@@ -170,17 +110,6 @@ const realUpdateQuantity = async (cardId: string | number, quantity: number): Pr
   return response.json() as Promise<CartResponse>;
 };
 
-// --- CHECKOUT ---
-const mockCheckout = async (items: CartItem[]): Promise<CheckoutResponse> => {
-  await new Promise(res => setTimeout(res, 300));
-  return {
-    success: true,
-    transaction_id: "mock-transaction-" + Date.now(),
-    purchases: items,
-    message: "All items purchased successfully"
-  };
-};
-
 const realCheckout = async (items: CartItem[]): Promise<CheckoutResponse> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
@@ -222,8 +151,8 @@ const realCheckout = async (items: CartItem[]): Promise<CheckoutResponse> => {
 };
 
 // Export functions
-export const addToCart = USE_MOCK ? mockAddToCart : realAddToCart;
-export const removeFromCart = USE_MOCK ? mockRemoveFromCart : realRemoveFromCart;
-export const getCart = USE_MOCK ? mockGetCart : realGetCart;
-export const updateQuantity = USE_MOCK ? mockUpdateQuantity : realUpdateQuantity;
+export const addToCart = realAddToCart;
+export const removeFromCart = realRemoveFromCart;
+export const getCart = realGetCart;
+export const updateQuantity = realUpdateQuantity;
 export const checkout = realCheckout;

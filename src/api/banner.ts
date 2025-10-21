@@ -1,47 +1,11 @@
 // src/api/banner.ts
 import { Banner } from './types.js';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || !import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-// --- MOCK ---
-const banners: Banner[] = [
-  {
-    title: "AETHERDRIFT",
-    subtitle: "Ramp & Furious",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-  {
-    title: "MAGIC X FINAL FANTASY",
-    subtitle: "It's the Final (Fantasy) Countdown",
-    image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-  {
-    title: "MODERN HORIZONS",
-    subtitle: "New Horizons Await",
-    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-  {
-    title: "LEGENDARY BATTLES",
-    subtitle: "Epic Showdowns",
-    image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
-    cta: "BUY NOW",
-  },
-];
-
-const mockGetBanners = async (): Promise<Banner[]> => {
-  await new Promise(res => setTimeout(res, 200));
-  return banners;
-};
-
-// --- REAL ---
 const realGetBanners = async (): Promise<Banner[]> => {
   const response = await fetch(`${API_BASE_URL}/banners`);
   if (!response.ok) throw new Error("Error fetching banners");
   return response.json();
 };
 
-export const getBanners = USE_MOCK ? mockGetBanners : realGetBanners;
+export const getBanners = realGetBanners;

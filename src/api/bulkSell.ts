@@ -2,7 +2,6 @@
 import Card from '../models/Card.js';
 import { BulkSellResponse } from './types.js';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface CardSelectionData {
@@ -21,16 +20,6 @@ interface CardWithReactKey {
   reactKey?: string;
   [key: string]: any;
 }
-
-const mockBulkSell = async (
-  selectedCardEntries: CardSelectionEntry[],
-  filteredCards: CardWithReactKey[]
-): Promise<BulkSellResponse> => {
-  // Filter selected cards for mock response
-  const selectedCards = selectedCardEntries.filter(([cardKey, data]) => data.selected && data.quantity > 0);
-  await new Promise(res => setTimeout(res, 2000));
-  return { success: true, message: `Successfully listed ${selectedCards.length} cards for sale` };
-};
 
 const realBulkSell = async (
   selectedCardEntries: CardSelectionEntry[],

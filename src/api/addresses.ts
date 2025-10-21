@@ -1,119 +1,7 @@
 // src/api/addresses.ts
 import type { Address, AddressCreateRequest, AddressUpdateRequest } from './types';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-// --- MOCK DATA ---
-let mockAddresses: Address[] = [];
-let nextMockId = 1;
-
-const mockGetAddresses = async (): Promise<Address[]> => {
-  await new Promise(res => setTimeout(res, 300));
-  return [...mockAddresses];
-};
-
-const mockGetAddress = async (id: number): Promise<Address> => {
-  await new Promise(res => setTimeout(res, 200));
-  const address = mockAddresses.find(addr => addr.id === id);
-  if (!address) {
-    throw new Error('Address not found');
-  }
-  return address;
-};
-
-const mockCreateAddress = async (data: AddressCreateRequest): Promise<Address> => {
-  await new Promise(res => setTimeout(res, 300));
-
-  // Check max 5 addresses limit
-  if (mockAddresses.length >= 5) {
-    throw new Error('Maximum 5 addresses allowed per user');
-  }
-
-  const now = new Date().toISOString();
-  const isFirstAddress = mockAddresses.length === 0;
-
-  const newAddress: Address = {
-    id: nextMockId++,
-    userId: 1, // Mock user ID
-    recipientName: data.recipientName,
-    street: data.street,
-    additionalInfo: data.additionalInfo || null,
-    city: data.city,
-    state: data.state || null,
-    postalCode: data.postalCode,
-    country: data.country,
-    phone: data.phone || null,
-    isPrimary: isFirstAddress, // First address is automatically primary
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  mockAddresses.push(newAddress);
-  return newAddress;
-};
-
-const mockUpdateAddress = async (id: number, data: AddressUpdateRequest): Promise<Address> => {
-  await new Promise(res => setTimeout(res, 300));
-
-  const address = mockAddresses.find(addr => addr.id === id);
-  if (!address) {
-    throw new Error('Address not found');
-  }
-
-  const updatedAddress: Address = {
-    ...address,
-    recipientName: data.recipientName,
-    street: data.street,
-    additionalInfo: data.additionalInfo || null,
-    city: data.city,
-    state: data.state || null,
-    postalCode: data.postalCode,
-    country: data.country,
-    phone: data.phone || null,
-    updatedAt: new Date().toISOString(),
-  };
-
-  mockAddresses = mockAddresses.map(addr => addr.id === id ? updatedAddress : addr);
-  return updatedAddress;
-};
-
-const mockDeleteAddress = async (id: number): Promise<void> => {
-  await new Promise(res => setTimeout(res, 200));
-
-  const address = mockAddresses.find(addr => addr.id === id);
-  if (!address) {
-    throw new Error('Address not found');
-  }
-
-  mockAddresses = mockAddresses.filter(addr => addr.id !== id);
-};
-
-const mockSetPrimaryAddress = async (id: number): Promise<Address> => {
-  await new Promise(res => setTimeout(res, 300));
-
-  const address = mockAddresses.find(addr => addr.id === id);
-  if (!address) {
-    throw new Error('Address not found');
-  }
-
-  // Unmark all other addresses as primary
-  mockAddresses = mockAddresses.map(addr => ({
-    ...addr,
-    isPrimary: addr.id === id,
-    updatedAt: addr.id === id ? new Date().toISOString() : addr.updatedAt,
-  }));
-
-  return mockAddresses.find(addr => addr.id === id)!;
-};
-
-const mockGetPrimaryAddress = async (): Promise<Address | null> => {
-  await new Promise(res => setTimeout(res, 200));
-  const primary = mockAddresses.find(addr => addr.isPrimary);
-  return primary || null;
-};
-
-// --- REAL API ---
 const realGetAddresses = async (): Promise<Address[]> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
@@ -278,10 +166,10 @@ const realGetPrimaryAddress = async (): Promise<Address | null> => {
 };
 
 // Export functions
-export const getAddresses = USE_MOCK ? mockGetAddresses : realGetAddresses;
-export const getAddress = USE_MOCK ? mockGetAddress : realGetAddress;
-export const createAddress = USE_MOCK ? mockCreateAddress : realCreateAddress;
-export const updateAddress = USE_MOCK ? mockUpdateAddress : realUpdateAddress;
-export const deleteAddress = USE_MOCK ? mockDeleteAddress : realDeleteAddress;
-export const setPrimaryAddress = USE_MOCK ? mockSetPrimaryAddress : realSetPrimaryAddress;
-export const getPrimaryAddress = USE_MOCK ? mockGetPrimaryAddress : realGetPrimaryAddress;
+export const getAddresses = realGetAddresses;
+export const getAddress = realGetAddress;
+export const createAddress = realCreateAddress;
+export const updateAddress = realUpdateAddress;
+export const deleteAddress = realDeleteAddress;
+export const setPrimaryAddress = realSetPrimaryAddress;
+export const getPrimaryAddress = realGetPrimaryAddress;

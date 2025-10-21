@@ -5,7 +5,6 @@ import {
 } from '../utils/pagination.js';
 import type { PageResponse } from './types';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 export interface Purchase {

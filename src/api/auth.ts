@@ -1,28 +1,7 @@
 // src/api/auth.ts
 import type { LoginResponse, RegisterResponse, OAuthUserData } from './types';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-// --- MOCKS ---
-const mockLogin = async (email: string, password: string): Promise<LoginResponse> => {
-  await new Promise(res => setTimeout(res, 1000));
-  if (email === "test@test.com" && password === "1234") {
-    return { success: true, token: "mock-token" };
-  } else {
-    throw new Error("Incorrect credentials (mock)");
-  }
-};
-
-const mockRegister = async (username: string, email: string, password: string): Promise<RegisterResponse> => {
-  await new Promise(res => setTimeout(res, 1000));
-  if (email === "test@test.com") {
-    throw new Error("Email is already registered (mock)");
-  }
-  return { success: true };
-};
-
-// --- REAL ---
 const realLogin = async (email: string, password: string): Promise<Response> => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",

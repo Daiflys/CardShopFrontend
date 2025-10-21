@@ -3,102 +3,7 @@ import { createPaginationParams } from '../utils/pagination.js';
 import { formatCardDetailResponse } from '../utils/cardFormatters.js';
 import { Card, PageResponse } from './types.js';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-// --- MOCK ---
-interface MockCard {
-  id: string;
-  name: string;
-  set: string;
-  rarity: string;
-  number: number;
-  printedIn: string;
-  available: number;
-  from: number;
-  priceTrend: number;
-  avg30: number;
-  avg7: number;
-  avg1: number;
-  image: string;
-  rules: string[];
-  sellers: Array<{
-    name: string;
-    country: string;
-    offer: number;
-    quantity: number;
-  }>;
-}
-
-const mockCard: MockCard = {
-  id: "dragon-wings",
-  name: "Dragon Wings",
-  set: "Scourge",
-  rarity: "common",
-  number: 34,
-  printedIn: "Scourge",
-  available: 2685,
-  from: 0.02,
-  priceTrend: 0.20,
-  avg30: 0.20,
-  avg7: 0.13,
-  avg1: 0.27,
-  image: "https://cards.scryfall.io/large/front/2/2/22b7e2e2-2e7e-4e2e-8e2e-2e7e2e2e2e2e.jpg?1682206500",
-  rules: [
-    "Enchanted creature has flying.",
-    "Cycling {2}{U} ({2}{U}, Discard this card: Draw a card.)",
-    "When a creature with converted mana cost 6 or more enters the battlefield, you may return Dragon Wings from your graveyard to play enchanting that creature."
-  ],
-  sellers: [
-    { name: "NibiruCardsTCG", country: "FR", offer: 0.02, quantity: 1 },
-    { name: "NibiruCardsTCG", country: "FR", offer: 0.02, quantity: 4 },
-    { name: "NibiruCardsTCG", country: "FR", offer: 0.02, quantity: 1 },
-    { name: "ledouble6", country: "FR", offer: 0.02, quantity: 1 },
-  ],
-};
-
-interface MockCardToSell {
-  id: string;
-  oracleId: string;
-  setName: string;
-  name: string;
-  imageUrl: string;
-  cardPrice: number;
-  userId: number;
-}
-
-const mockCardsToSell: MockCardToSell[] = [
-  {
-    id: "sell-1",
-    oracleId: "12345",
-    setName: "Scourge",
-    name: "Dragon Wings",
-    imageUrl: "https://cards.scryfall.io/large/front/2/2/22b7e2e2-2e7e-4e2e-8e2e-2e7e2e2e2e2e.jpg?1682206500",
-    cardPrice: 0.02,
-    userId: 1
-  },
-  {
-    id: "sell-2",
-    oracleId: "12345",
-    setName: "Scourge",
-    name: "Dragon Wings",
-    imageUrl: "https://cards.scryfall.io/large/front/2/2/22b7e2e2-2e7e-4e2e-8e2e-2e7e2e2e2e2e.jpg?1682206500",
-    cardPrice: 0.03,
-    userId: 2
-  }
-];
-
-const mockGetCardDetail = async (cardId: string): Promise<MockCard> => {
-  await new Promise(res => setTimeout(res, 500));
-  return mockCard;
-};
-
-const mockGetCardsToSell = async (cardName: string): Promise<MockCardToSell[]> => {
-  await new Promise(res => setTimeout(res, 300));
-  return mockCardsToSell;
-};
-
-// --- REAL ---
 const realGetCardDetail = async (cardId: string): Promise<Card> => {
   console.log("going to search for cardId", cardId);
   const response = await fetch(`${API_BASE_URL}/cards/id/${cardId}`);
@@ -147,7 +52,6 @@ const realGetCardsByOracleId = async (oracleId: string, page: number = 1, size: 
   return data;
 };
 
-//export const getCardDetail = USE_MOCK ? mockGetCardDetail : realGetCardDetail;
 export const getCardDetail = realGetCardDetail;
 export const getCardsToSell = realGetCardsToSell;
 export const getCardsToSellById = realGetCardsToSellById;
