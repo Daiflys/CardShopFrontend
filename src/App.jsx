@@ -14,6 +14,7 @@ import AccountLayout from "./pages/account/AccountLayout";
 import Profile from "./pages/account/Profile";
 import Transactions from "./pages/account/Transactions";
 import Settings from "./pages/account/Settings";
+import Addresses from "./pages/account/Addresses";
 import BulkSell from "./pages/BulkSell";
 import AdvancedSearch from "./pages/AdvancedSearch";
 import RequireAuth from "./pages/RequireAuth";
@@ -80,6 +81,7 @@ function App() {
               <Route index element={<Profile />} />
               <Route path="profile" element={<Profile />} />
               <Route path="transactions" element={<Transactions />} />
+              <Route path="addresses" element={<Addresses />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Route>

@@ -211,3 +211,42 @@ export interface AdvancedSearchCriteria {
   maxPrice?: number;
   [key: string]: any;
 }
+
+// Address types
+export interface Address {
+  id: number;
+  userId: number;
+  recipientName: string;
+  street: string;
+  additionalInfo: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
+  phone: string | null;
+  isPrimary: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AddressCreateRequest {
+  recipientName: string;
+  street: string;
+  additionalInfo?: string | null;
+  city: string;
+  state?: string | null;
+  postalCode: string;
+  country: string;
+  phone?: string | null;
+}
+
+export interface AddressUpdateRequest {
+  recipientName: string;
+  street: string;
+  additionalInfo?: string | null;
+  city: string;
+  state?: string | null;
+  postalCode: string;
+  country: string;
+  phone?: string | null;
+}
