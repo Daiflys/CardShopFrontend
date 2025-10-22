@@ -51,7 +51,7 @@ export const defaultTheme = {
   },
   components: {
     header: {
-      container: "w-full bg-gradient-to-r from-sky-50 to-blue-50 shadow-md border-b border-sky-200 font-sans",
+      container: "sticky top-0 z-50 w-full bg-gradient-to-r from-sky-50 to-blue-50 shadow-md border-b border-sky-200 font-sans",
       desktopContainer: "hidden lg:flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 w-full max-w-none gap-4",
       mobileContainer: "lg:hidden",
       logo: "text-2xl font-bold text-sky-700 cursor-pointer hover:text-sky-600 transition-colors whitespace-nowrap",
