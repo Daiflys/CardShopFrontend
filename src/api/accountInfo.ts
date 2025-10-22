@@ -17,6 +17,11 @@ export interface Purchase {
   totalPrice: number;
   purchaseDate: string;
   sellerId: number;
+  status?: "PENDING" | "CONFIRMED" | "CANCELLED";
+  paymentProvider?: string;
+  transactionId?: string;
+  cardId?: number;
+  buyerId?: number;
 }
 
 export interface Sell {
@@ -29,6 +34,12 @@ export interface Sell {
   totalPrice: number;
   saleDate: string;
   buyerId: number;
+  status?: "PENDING" | "CONFIRMED" | "CANCELLED";
+  paymentProvider?: string;
+  transactionId?: string;
+  cardId?: number;
+  sellerId?: number;
+  purchaseDate?: string;
 }
 
 export interface TransactionsResponse {

@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import useCartStore from "../store/cartStore";
 import useAddressStore from "../store/addressStore";
 import { useNavigate } from "react-router-dom";
-import { checkout } from "../api/cart";
+import { batchCheckout } from "../api/purchases";
+import { mockPayment } from "../utils/mockPayment";
 import ConditionIcon from "../components/ConditionIcon";
 import AddressSelector from "../components/AddressSelector";
 import CheckoutAddressForm from "../components/CheckoutAddressForm";
@@ -13,6 +14,7 @@ const Checkout = () => {
     updateItemQuantity,
     removeItemFromCart,
     getCartTotal,
+    clearCart,
     loading: cartLoading,
     error: cartError,
   } = useCartStore();
@@ -32,20 +34,20 @@ const Checkout = () => {
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [newAddressData, setNewAddressData] = useState(null);
 
-  const handleQuantityChange = async (itemId, quantity) => {
+  const handleQuantityChange = (itemId, quantity) => {
     const sanitizedQty = Math.max(0, Number(quantity || 0));
     setUpdatingId(itemId);
     try {
-      await updateItemQuantity(itemId, sanitizedQty);
+      updateItemQuantity(itemId, sanitizedQty);
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const handleRemove = async (itemId) => {
+  const handleRemove = (itemId) => {
     setUpdatingId(itemId);
     try {
-      await removeItemFromCart(itemId);
+      removeItemFromCart(itemId);
     } finally {
       setUpdatingId(null);
     }
@@ -112,22 +114,71 @@ const Checkout = () => {
 
       console.log("📋 Shipping address:", shippingAddress);
 
-      // TODO: When backend supports address in checkout, send it here
-      // For now, we just do the checkout without address
-      const result = await checkout(cartItems);
-      console.log("📋 Checkout result:", result);
+      // Step 1: Mock payment
+      console.log("💳 Processing mock payment...");
+      const paymentResult = await mockPayment();
+      console.log("✅ Payment successful:", paymentResult);
 
-      if (result.success) {
-        // Clear cart after successful batch purchase
-        console.log("✅ Checkout successful, clearing cart");
-        for (const item of cartItems) {
-          await updateItemQuantity(item.id, 0);
+      if (!paymentResult.success) {
+        throw new Error("Payment failed");
+      }
+
+      // Step 2: Prepare batch checkout request
+      console.log("📦 Preparing batch checkout...");
+      console.log("🛒 Cart items full data:", JSON.stringify(cartItems, null, 2));
+
+      // Debug localStorage
+      const localStorageCart = localStorage.getItem('shopping_cart');
+      console.log("💾 localStorage cart:", localStorageCart);
+
+      // Map cart items to the format expected by backend
+      const items = cartItems.map(item => {
+        console.log(`🔍 Item details:`, {
+          id: item.id,
+          cardToSellId: item.cardToSellId,
+          name: item.name
+        });
+
+        const cardToSellId = item.cardToSellId || (typeof item.id === 'string' ? Number(item.id) : item.id);
+        console.log(`   ➡️ Mapping item: ${item.name} -> card_to_sell_id: ${cardToSellId} (from ${item.cardToSellId ? 'cardToSellId' : 'id'})`);
+
+        if (!cardToSellId || cardToSellId === null || isNaN(cardToSellId)) {
+          console.error(`❌ Invalid cardToSellId for item ${item.name}:`, {
+            cardToSellId: item.cardToSellId,
+            id: item.id,
+            computed: cardToSellId
+          });
         }
+
+        return {
+          card_to_sell_id: cardToSellId,
+          quantity: item.quantity || 1
+        };
+      });
+
+      const checkoutRequest = {
+        items: items,
+        payment_provider_id: paymentResult.transactionId,
+        payment_provider: paymentResult.provider
+      };
+
+      console.log("📦 Batch checkout request:", JSON.stringify(checkoutRequest, null, 2));
+
+      // Make single batch checkout call
+      const result = await batchCheckout(checkoutRequest);
+
+      console.log("📊 Batch checkout result:", result);
+
+      if (result.success && result.purchases && result.purchases.length > 0) {
+        // Clear cart after successful checkout
+        console.log("🧹 Clearing cart...");
+        clearCart();
         setOrderSuccess(true);
+        console.log(`✅ Successfully created ${result.purchases.length} purchases with transaction ID: ${result.transactionId}`);
       } else {
-        // Handle partial failure or complete failure
-        console.log("⚠️ Checkout failed:", result.message);
-        setCheckoutError(result.message || "Some items could not be purchased");
+        // Handle failure
+        console.warn("⚠️ Checkout failed:", result.message);
+        setCheckoutError(result.message || "Checkout failed");
       }
     } catch (e) {
       console.error("❌ Checkout exception:", e);
@@ -158,14 +209,22 @@ const Checkout = () => {
 
       {orderSuccess ? (
         <div className="max-w-xl bg-white border rounded-lg shadow p-6">
-          <p className="text-green-700 font-semibold mb-2">Your order was placed successfully.</p>
-          <p className="text-gray-600 mb-4">You will receive a confirmation email shortly.</p>
+          <p className="text-green-700 font-semibold mb-2">Your order is pending confirmation.</p>
+          <p className="text-gray-600 mb-4">
+            The seller will review your order and confirm it shortly. You will receive a notification once confirmed.
+          </p>
           <div className="flex gap-3">
             <button
               className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
               onClick={() => navigate('/')}
             >
               Continue shopping
+            </button>
+            <button
+              className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
+              onClick={() => navigate('/account/transactions')}
+            >
+              View my orders
             </button>
           </div>
         </div>

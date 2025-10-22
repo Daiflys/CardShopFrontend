@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getUserTransactions } from "../../api/accountInfo";
 import ConditionIcon from "../../components/ConditionIcon";
+import PurchaseStatusBadge from "../../components/PurchaseStatusBadge";
 
 const Transactions = () => {
   const [purchases, setPurchases] = useState([]);
@@ -146,8 +147,13 @@ const Transactions = () => {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900">
-                          Card ID: {purchase.cardId}
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="font-medium text-gray-900">
+                            Card ID: {purchase.cardId}
+                          </div>
+                          {purchase.status && (
+                            <PurchaseStatusBadge status={purchase.status} size="sm" />
+                          )}
                         </div>
                         <div className="text-sm text-gray-500">
                           Purchase ID: {purchase.id}

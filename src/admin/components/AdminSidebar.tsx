@@ -14,6 +14,7 @@ import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import PriceChangeOutlinedIcon from "@mui/icons-material/PriceChangeOutlined";
+import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
 
 interface AdminSidebarProps {
   isSidebar?: boolean;
@@ -110,6 +111,22 @@ const AdminSidebar: React.FC<AdminSidebarProps> = () => {
               style={{ color: colors.grey[100] }}
             >
               Dashboard
+            </MenuItem>
+
+            <Typography
+              variant="h6"
+              color={colors.grey[300]}
+              sx={{ m: "15px 0 5px 20px" }}
+            >
+              {!isCollapsed && "Orders"}
+            </Typography>
+
+            <MenuItem
+              icon={<HourglassEmptyOutlinedIcon />}
+              component={<Link to="/admin/pending-orders" />}
+              style={{ color: colors.grey[100] }}
+            >
+              Pending Orders
             </MenuItem>
 
             <Typography
