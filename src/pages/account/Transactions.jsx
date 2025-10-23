@@ -1,22 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { getUserTransactions } from "../../api/accountInfo";
+import { getUserPurchases } from "../../api/accountInfo";
 import ConditionIcon from "../../components/ConditionIcon";
 import PurchaseStatusBadge from "../../components/PurchaseStatusBadge";
 
 const Transactions = () => {
   const [purchases, setPurchases] = useState([]);
-  const [sells, setSells] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [purchasesPagination, setPurchasesPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    hasNext: false,
-    hasPrev: false
-  });
-  const [sellsPagination, setSellsPagination] = useState({
+  const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
@@ -55,64 +47,32 @@ const Transactions = () => {
   };
 
   const groupedPurchases = Object.values(groupTransactions(purchases));
-  const groupedSells = Object.values(groupTransactions(sells));
-
-  // Calculate current month sales total
-  const getCurrentMonthSalesTotal = () => {
-    if (!Array.isArray(sells)) return 0;
-    
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-
-    return sells.filter(sale => {
-      if (!sale.purchaseDate) return false;
-      const saleDate = new Date(sale.purchaseDate);
-      return saleDate.getFullYear() === currentYear && saleDate.getMonth() === currentMonth;
-    }).reduce((total, sale) => {
-      return total + (Number(sale.price) || 0);
-    }, 0);
-  };
-
-  const currentMonthSalesTotal = getCurrentMonthSalesTotal();
 
   // Helper function to render transaction section
-  const renderTransactionSection = (transactions, sectionTitle, sectionType) => {
-    const headerBgColor = sectionType === 'purchase' ? 'bg-blue-50 border-blue-100' : 'bg-indigo-50 border-indigo-100';
-    const titleColor = sectionType === 'purchase' ? 'text-blue-900' : 'text-indigo-900';
-    const iconColor = sectionType === 'purchase' ? 'text-blue-600' : 'text-indigo-600';
-
+  const renderTransactionSection = (transactions, sectionTitle) => {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h3 className={`text-lg font-semibold ${sectionType === 'purchase' ? 'text-blue-900' : 'text-indigo-900'}`}>
+          <h3 className="text-lg font-semibold text-blue-900">
             {sectionTitle}
           </h3>
-          {sectionType === 'sold' && (
-            <div className="text-right">
-              <div className="text-sm text-gray-600">Current Month Sales</div>
-              <div className="text-xl font-bold text-green-600">
-                €{currentMonthSalesTotal.toFixed(2)}
-              </div>
-            </div>
-          )}
         </div>
         {transactions.length === 0 ? (
           <div className="text-gray-600 text-sm bg-gray-50 p-6 rounded-lg text-center">
-            No {sectionType === 'purchase' ? 'purchases' : 'sales'} found for this period.
+            No purchases found for this period.
           </div>
         ) : (
           transactions.map(transaction => (
             <div key={transaction.transaction_id || transaction.id} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
               {/* Transaction Header */}
-              <div className={`${headerBgColor} px-6 py-4 border-b`}>
+              <div className="bg-blue-50 border-blue-100 px-6 py-4 border-b">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                      <svg className={`w-5 h-5 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      <span className={`font-semibold ${titleColor}`}>
+                      <span className="font-semibold text-blue-900">
                         Transaction #{transaction.transaction_id || transaction.id}
                       </span>
                     </div>
@@ -163,7 +123,7 @@ const Transactions = () => {
                             Qty: {purchase.quantity}
                           </span>
                           <span className="text-sm text-gray-600">
-                            • {sectionType === 'purchase' ? 'Seller' : 'Buyer'}: {sectionType === 'purchase' ? purchase.sellerId : purchase.buyerId || purchase.sellerId}
+                            • Seller: {purchase.sellerId}
                           </span>
                         </div>
                       </div>
@@ -189,28 +149,24 @@ const Transactions = () => {
   const loadTransactions = async (page = 1) => {
     setLoading(true);
     try {
-      const data = await getUserTransactions(page, itemsPerPage);
-      console.log("📊 Transactions data received:", data);
-      console.log("📊 Purchases type:", typeof data.purchases, "Array?", Array.isArray(data.purchases), data.purchases);
-      console.log("📊 Sells type:", typeof data.sells, "Array?", Array.isArray(data.sells), data.sells);
-      setPurchases(data.purchases || []);
-      setSells(data.sells || []);
-      setPurchasesPagination(data.pagination?.purchases || {
-        currentPage: 1,
-        totalPages: 1,
-        totalItems: 0,
-        hasNext: false,
-        hasPrev: false
-      });
-      setSellsPagination(data.pagination?.sells || {
-        currentPage: 1,
-        totalPages: 1,
-        totalItems: 0,
-        hasNext: false,
-        hasPrev: false
+      const response = await getUserPurchases(page, itemsPerPage);
+      console.log("📊 Purchases data received:", response);
+
+      // Handle PageResponse structure
+      const purchasesList = response.content || [];
+      const totalPages = response.totalPages || 1;
+      const totalItems = response.totalElements || 0;
+
+      setPurchases(purchasesList);
+      setPagination({
+        currentPage: page,
+        totalPages: totalPages,
+        totalItems: totalItems,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
       });
     } catch (err) {
-      console.error("❌ Error loading transactions:", err);
+      console.error("❌ Error loading purchases:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -235,7 +191,7 @@ const Transactions = () => {
     return <div className="text-center text-red-600">Error: {error}</div>;
   }
 
-  const renderPagination = (pagination, sectionType) => {
+  const renderPagination = () => {
     if (pagination.totalPages <= 1) return null;
 
     const pages = [];
@@ -254,7 +210,7 @@ const Transactions = () => {
     return (
       <div className="flex justify-between items-center mt-6 p-4 bg-gray-50 rounded-lg">
         <div className="text-sm text-gray-600">
-          Showing {((pagination.currentPage - 1) * itemsPerPage) + 1} to {Math.min(pagination.currentPage * itemsPerPage, pagination.totalItems)} of {pagination.totalItems} {sectionType}
+          Showing {((pagination.currentPage - 1) * itemsPerPage) + 1} to {Math.min(pagination.currentPage * itemsPerPage, pagination.totalItems)} of {pagination.totalItems} purchases
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -291,25 +247,19 @@ const Transactions = () => {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-xl font-semibold text-gray-900">Transactions</h2>
-      
+      <h2 className="text-xl font-semibold text-gray-900">My Purchases</h2>
+
       {/* No transactions message */}
-      {groupedPurchases.length === 0 && groupedSells.length === 0 ? (
+      {groupedPurchases.length === 0 ? (
         <div className="text-gray-600 text-sm bg-gray-50 p-6 rounded-lg text-center">
-          No transactions found for this period.
+          No purchases found for this period.
         </div>
       ) : (
         <div className="space-y-8">
           {/* Purchases Section */}
           <div>
-            {renderTransactionSection(groupedPurchases, "Purchases", "purchase")}
-            {renderPagination(purchasesPagination, "purchases")}
-          </div>
-          
-          {/* Sells Section */}
-          <div>
-            {renderTransactionSection(groupedSells, "Sales", "sold")}
-            {renderPagination(sellsPagination, "sales")}
+            {renderTransactionSection(groupedPurchases, "Purchases")}
+            {renderPagination()}
           </div>
         </div>
       )}

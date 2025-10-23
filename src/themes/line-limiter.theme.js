@@ -3,7 +3,7 @@ export const lineLimiterTheme = {
   name: 'Line Limiter',
   components: {
     header: {
-      container: "sticky top-0 z-50 bg-blue-600 text-white shadow-lg",
+      container: "sticky top-0 z-[100] bg-blue-600 text-white shadow-lg",
       wrapper: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
       content: "flex items-center justify-between h-16",
       leftSection: "flex items-center space-x-8",

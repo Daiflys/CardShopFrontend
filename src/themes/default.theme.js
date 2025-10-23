@@ -51,7 +51,7 @@ export const defaultTheme = {
   },
   components: {
     header: {
-      container: "sticky top-0 z-50 w-full bg-gradient-to-r from-sky-50 to-blue-50 shadow-md border-b border-sky-200 font-sans",
+      container: "sticky top-0 z-[100] w-full bg-gradient-to-r from-sky-50 to-blue-50 shadow-md border-b border-sky-200 font-sans",
       desktopContainer: "hidden lg:flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 w-full max-w-none gap-4",
       mobileContainer: "lg:hidden",
       logo: "text-2xl font-bold text-sky-700 cursor-pointer hover:text-sky-600 transition-colors whitespace-nowrap",
@@ -60,7 +60,7 @@ export const defaultTheme = {
       navigationLink: "hover:text-sky-600 transition-colors",
       searchContainer: "w-96 mx-6 relative",
       searchInput: "w-full px-3 py-2 border border-sky-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 bg-white/80 text-base min-h-[44px]",
-      searchDropdown: "absolute z-[60] left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto",
+      searchDropdown: "absolute z-10 left-0 right-0 bg-white border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto",
       searchItem: "px-4 py-3 hover:bg-sky-50 border-b border-sky-100 last:border-b-0 cursor-pointer",
       userAvatar: "inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600 text-white font-bold shadow-md",
       userAvatarMobile: "inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600 text-white font-bold text-sm",
