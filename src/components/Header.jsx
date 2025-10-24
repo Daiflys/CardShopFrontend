@@ -167,6 +167,17 @@ const Header = ({ onThemeSettingsClick }) => {
     };
   }, []);
 
+  // Hide dropdown when scrolling
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setShowDropdown(false);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   // Get the Header component from current skin
   const HeaderComponent = useComponent('Header');
   const { theme } = useTheme();

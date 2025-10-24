@@ -25,6 +25,7 @@ import Users from "./admin/scenes/users";
 import SkinEditor from "./admin/scenes/skinEditor";
 import AuditLogs from "./admin/scenes/auditLogs";
 import BulkPriceChange from "./admin/scenes/bulkPrice";
+import PendingOrders from "./admin/scenes/pendingOrders";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
 import "./App.css";
@@ -39,6 +40,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="bulk-upload" element={<BulkUpload />} />
             <Route path="users" element={<Users />} />
+            <Route path="pending-orders" element={<PendingOrders />} />
             <Route path="skin-editor" element={<SkinEditor />} />
             <Route path="audit-logs" element={<AuditLogs />} />
             <Route path="bulk-price" element={<BulkPriceChange />} />

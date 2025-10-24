@@ -250,3 +250,23 @@ export interface AddressUpdateRequest {
   country: string;
   phone?: string | null;
 }
+
+// Purchase types
+export type PurchaseStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
+
+export interface PurchaseResponse {
+  id: number;
+  buyerId: number;
+  sellerId: number;
+  cardId: number;
+  price: number;
+  purchaseDate: string;
+  transactionId?: string;
+  quantity: number;
+  status: PurchaseStatus;
+  paymentProvider?: string;
+  // Additional fields that might come from backend
+  cardName?: string;
+  setName?: string;
+  condition?: string;
+}

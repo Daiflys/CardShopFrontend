@@ -173,6 +173,7 @@ const CardInfoTab = ({ card }) => {
 
                   const cardForCart = {
                     id: listingId,
+                    cardToSellId: cardToSell.id, // The actual ID needed for checkout
                     card_name: card.name,
                     image_url: card.imageUrl || card.image,
                     name: card.name,
