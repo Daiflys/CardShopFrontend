@@ -122,9 +122,6 @@ const Transactions = () => {
                           <span className="text-sm text-gray-600">
                             Qty: {purchase.quantity}
                           </span>
-                          <span className="text-sm text-gray-600">
-                            • Seller: {purchase.sellerId}
-                          </span>
                         </div>
                       </div>
                       <div className="text-right">
