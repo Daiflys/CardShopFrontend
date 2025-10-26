@@ -81,8 +81,8 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
       // Create card object for cart based on CardInfoTab example
       const cardToAdd = {
         id: listingId, // Use the specific cardToSell ID
-        card_name: card.name,
-        image_url: card.imageUrl,
+        cardName: card.name,
+        imageUrl: card.imageUrl,
         name: card.name,
         price: cheapestNMPrice,
         set: card.setName,

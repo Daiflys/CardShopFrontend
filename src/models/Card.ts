@@ -26,7 +26,7 @@ export interface CardData {
   manaCost?: string;
   convertedManaCost?: number | null;
   typeLine?: string;
-  colors?: string[];
+  cardColors?: string[];
   oracleText?: string;
   flavorText?: string;
   artistName?: string;
@@ -73,7 +73,7 @@ class Card {
   manaCost: string;
   convertedManaCost: number | null;
   typeLine: string;
-  colors: string[];
+  cardColors: string[];
   oracleText: string;
   flavorText: string;
   artistName: string;
@@ -110,7 +110,7 @@ class Card {
     this.manaCost = data.manaCost || '';
     this.convertedManaCost = data.convertedManaCost || null;
     this.typeLine = data.typeLine || '';
-    this.colors = data.colors || [];
+    this.cardColors = data.cardColors || [];
     this.oracleText = data.oracleText || '';
     this.flavorText = data.flavorText || '';
     this.artistName = data.artistName || '';

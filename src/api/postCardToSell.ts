@@ -7,7 +7,7 @@ interface SetCardToSellResponse {
 }
 
 const realSetCardToSell = async (
-  oracle_id: string,
+  oracleId: string,
   cardId: string,
   setName: string,
   setCode: string,
@@ -20,26 +20,31 @@ const realSetCardToSell = async (
   language: string
 ): Promise<SetCardToSellResponse> => {
   const token = localStorage.getItem("authToken");
-  console.log("oracle id: " + cardId);
+
+  const requestBody = {
+    cardId: cardId,
+    oracleId: oracleId,
+    setName: setName,
+    setCode: setCode,
+    cardName: cardName,
+    imageUrl: imageUrl,
+    price: price,
+    condition: condition,
+    quantity: quantity,
+    comments: comments,
+    language: language || 'en'
+  };
+
+  console.log("=== POST /cardsToSell/auth REQUEST ===");
+  console.log("Request body:", JSON.stringify(requestBody, null, 2));
+
   const response = await fetch(`${API_BASE_URL}/cardsToSell/auth`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      card_id: cardId,
-      oracle_id: oracle_id,
-      set_name: setName,
-      set_code: setCode,
-      card_name: cardName,
-      image_url: imageUrl,
-      price: price,
-      condition: condition,
-      quantity: quantity,
-      comments: comments,
-      language: language || 'en'
-    }),
+    body: JSON.stringify(requestBody),
   });
   if (!response.ok) throw new Error("Error posting card to sell");
   return response.json();

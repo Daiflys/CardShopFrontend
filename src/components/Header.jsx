@@ -111,9 +111,9 @@ const Header = ({ onThemeSettingsClick }) => {
           if (currentSearchId === currentSearchRef.current) {
             // Remove duplicates by card name (prioritizing exact matches and lower IDs)
             const uniqueResults = searchResults.filter((card, index, self) => {
-              const cardName = card.name || card.card_name;
+              const cardName = card.name;
               return index === self.findIndex(c => {
-                const cName = c.name || c.card_name;
+                const cName = c.name;
                 return cName && cardName && cName.toLowerCase() === cardName.toLowerCase();
               });
             });

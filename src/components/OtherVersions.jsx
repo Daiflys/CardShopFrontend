@@ -17,11 +17,11 @@ const OtherVersions = ({ card, currentCardId }) => {
   const { handlePaginatedResponse } = usePaginationStore();
 
   useEffect(() => {
-    if (!card?.oracleId && !card?.oracle_id) {
+    if (!card?.oracleId) {
       return;
     }
 
-    const oracleId = card.oracleId || card.oracle_id;
+    const oracleId = card.oracleId;
 
     const fetchOtherVersions = async () => {
       try {

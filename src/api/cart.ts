@@ -9,7 +9,7 @@ interface CartResponse {
 }
 
 interface CheckoutItem {
-  card_to_sell_id: number;
+  cardToSellId: number;
   quantity: number;
 }
 
@@ -129,7 +129,7 @@ const realCheckout = async (items: CartItem[]): Promise<CheckoutResponse> => {
 
   const batchRequest: CheckoutRequest = {
     items: items.map(item => ({
-      card_to_sell_id: typeof item.id === 'string' ? Number(item.id) : item.id as number,
+      cardToSellId: typeof item.id === 'string' ? Number(item.id) : item.id as number,
       quantity: item.quantity || 1
     }))
   };

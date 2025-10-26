@@ -51,15 +51,11 @@ interface SearchResponse {
 interface Card {
   id: string;
   oracleId?: string;
-  oracle_id?: string;
   name: string;
   setName?: string;
-  set_name?: string;
   setCode?: string;
-  set_code?: string;
   set?: string;
   imageUrl?: string;
-  image_url?: string;
   collectorNumber?: string;
   rarity?: string;
   reactKey?: string;
@@ -246,7 +242,6 @@ const BulkUpload: React.FC = () => {
               reactKey: cardKey,
               name: result.requestedCard.cardName,
               setName: result.requestedCard.setName,
-              set_name: result.requestedCard.setName,
               collectorNumber: result.requestedCard.collectorNumber,
               csvQuantity: csvAddToQuantity,
               currentQuantity: 0,
@@ -309,12 +304,12 @@ const BulkUpload: React.FC = () => {
       const cardsToSubmit = selectedCards.map(([cardKey, data]) => {
         const card = foundCards.find(c => c.reactKey === cardKey);
         return {
-          card_id: data.cardId,
-          oracle_id: data.oracleId,
-          set_name: card?.setName || '',
-          set_code: card?.setCode || '',
-          card_name: card?.name || '',
-          image_url: card?.imageUrl || '',
+          cardId: data.cardId,
+          oracleId: data.oracleId,
+          setName: card?.setName || '',
+          setCode: card?.setCode || '',
+          name: card?.name || '',
+          imageUrl: card?.imageUrl || '',
           price: parseFloat(String(data.price)),
           condition: data.condition,
           quantity: parseInt(String(data.quantity)),

@@ -1,5 +1,4 @@
 // src/api/types.ts
-// Backend usa camelCase
 
 // Auth types
 export interface LoginResponse {
@@ -22,6 +21,7 @@ export interface Card {
   id: string;
   oracleId?: string;
   name: string;
+  printedName?: string;
   imageUrl?: string;
   set: string;
   setCode?: string;
@@ -30,7 +30,8 @@ export interface Card {
   language?: string;
   typeLine?: string;
   manaCost?: string;
-  colors?: string[];
+  convertedManaCost?: number;
+  cardColors?: string[];
   oracleText?: string;
   flavorText?: string;
   artistName?: string;

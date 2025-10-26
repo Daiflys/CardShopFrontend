@@ -99,7 +99,7 @@ const CardInfoTab = ({ card }) => {
               </h1>
             </div>
             <div className="text-sm text-gray-600 mb-4">
-              Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; {card.rarity ?? "Unknown"}
+              Home &gt; {card.setName ?? "Unknown"} &gt; {card.rarity ?? "Unknown"}
             </div>
           </div>
 
@@ -174,8 +174,8 @@ const CardInfoTab = ({ card }) => {
                   const cardForCart = {
                     id: listingId,
                     cardToSellId: cardToSell.id, // The actual ID needed for checkout
-                    card_name: card.name,
-                    image_url: card.imageUrl || card.image,
+                    cardName: card.name,
+                    imageUrl: card.imageUrl || card.image,
                     name: card.name,
                     price: cardToSell.cardPrice,
                     set: cardToSell.setName,

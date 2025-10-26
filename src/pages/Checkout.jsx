@@ -140,7 +140,7 @@ const Checkout = () => {
         });
 
         const cardToSellId = item.cardToSellId || (typeof item.id === 'string' ? Number(item.id) : item.id);
-        console.log(`   ➡️ Mapping item: ${item.name} -> card_to_sell_id: ${cardToSellId} (from ${item.cardToSellId ? 'cardToSellId' : 'id'})`);
+        console.log(`   ➡️ Mapping item: ${item.name} -> cardToSellId: ${cardToSellId} (from ${item.cardToSellId ? 'cardToSellId' : 'id'})`);
 
         if (!cardToSellId || cardToSellId === null || isNaN(cardToSellId)) {
           console.error(`❌ Invalid cardToSellId for item ${item.name}:`, {
@@ -151,15 +151,15 @@ const Checkout = () => {
         }
 
         return {
-          card_to_sell_id: cardToSellId,
+          cardToSellId: cardToSellId,
           quantity: item.quantity || 1
         };
       });
 
       const checkoutRequest = {
         items: items,
-        payment_provider_id: paymentResult.transactionId,
-        payment_provider: paymentResult.provider
+        paymentProviderId: paymentResult.transactionId,
+        paymentProvider: paymentResult.provider
       };
 
       console.log("📦 Batch checkout request:", JSON.stringify(checkoutRequest, null, 2));
@@ -250,15 +250,15 @@ const Checkout = () => {
             {cartItems.map((item) => (
               <div key={item.id} className="flex items-center gap-4 bg-white rounded-lg border p-4 shadow-sm">
                 <div className="w-16 h-20 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" />
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
                   ) : (
                     <span className="text-gray-400 text-xs">IMG</span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-gray-900 truncate">{item.name}</div>
-                  <div className="text-sm text-gray-500 truncate">{item.set_name || item.set}</div>
+                  <div className="text-sm text-gray-500 truncate">{item.setName || item.set}</div>
                   {item.condition && (
                     <div className="mt-1">
                       <ConditionIcon condition={item.condition} size="xs" />
@@ -410,15 +410,15 @@ const Checkout = () => {
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 pb-3 border-b last:border-b-0">
                     <div className="w-12 h-16 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
-                      {item.image_url ? (
-                        <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" />
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
                       ) : (
                         <span className="text-gray-400 text-xs">IMG</span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-gray-900 text-sm truncate">{item.name}</div>
-                      <div className="text-xs text-gray-500 truncate">{item.set_name || item.set}</div>
+                      <div className="text-xs text-gray-500 truncate">{item.setName || item.set}</div>
                       {item.condition && (
                         <div className="mt-1">
                           <ConditionIcon condition={item.condition} size="xs" />
