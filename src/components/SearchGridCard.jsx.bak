@@ -151,7 +151,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
   const cardImage = card.imageUrl ? (
     <img
       src={card.imageUrl}
-      alt={card.name}
+      alt={card.card_name || card.name}
       className="w-full h-full object-contain group-hover:scale-105 transition-transform rounded-md"
     />
   ) : (

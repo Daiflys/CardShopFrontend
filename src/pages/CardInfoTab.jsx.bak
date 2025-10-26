@@ -340,7 +340,7 @@ const CardInfoTab = ({ card }) => {
                       return setIconUrl ? (
                         <img
                           src={setIconUrl}
-                          alt={`${card.setName || "Urza's Destiny"} icon`}
+                          alt={`${card.set_name || card.setName || "Urza's Destiny"} icon`}
                           className="w-4 h-4"
                         />
                       ) : null;
@@ -349,7 +349,7 @@ const CardInfoTab = ({ card }) => {
                       onClick={handleExpansionClick}
                       className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
                     >
-                      {card.setName || "Urza's Destiny"}
+                      {card.set_name || card.setName || "Urza's Destiny"}
                     </button>
                   </div>
                 </td>
