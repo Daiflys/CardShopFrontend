@@ -111,9 +111,9 @@ const Header = ({ onThemeSettingsClick }) => {
           if (currentSearchId === currentSearchRef.current) {
             // Remove duplicates by card name (prioritizing exact matches and lower IDs)
             const uniqueResults = searchResults.filter((card, index, self) => {
-              const cardName = card.name;
+              const cardName = card.cardName;
               return index === self.findIndex(c => {
-                const cName = c.name;
+                const cName = c.cardName;
                 return cName && cardName && cName.toLowerCase() === cardName.toLowerCase();
               });
             });
@@ -149,9 +149,9 @@ const Header = ({ onThemeSettingsClick }) => {
   };
 
   const handleResultClick = (card) => {
-    setSearch(card.name);
+    setSearch(card.cardName);
     setShowDropdown(false);
-    navigate(`/search?q=${encodeURIComponent(card.name)}`);
+    navigate(`/search?q=${encodeURIComponent(card.cardName)}`);
   };
 
   // Hide dropdown if clicked outside
@@ -305,7 +305,7 @@ const Header = ({ onThemeSettingsClick }) => {
                       className="w-4 h-4 flex-shrink-0"
                     />
                   )}
-                  <div className="font-medium text-gray-900">{card.name}</div>
+                  <div className="font-medium text-gray-900">{card.cardName}</div>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   {card.price && <span className="text-green-600 font-semibold">${card.price}</span>}

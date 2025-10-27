@@ -50,7 +50,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
   const handleWantNotice = (e) => {
     e.stopPropagation(); // Prevent card click when clicking Want Notice
     // TODO: Implement Want Notice functionality
-    console.log('Want Notice clicked for:', card.name);
+    console.log('Want Notice clicked for:', card.cardName);
   };
 
   const handleAddToCart = async (e) => {
@@ -81,9 +81,8 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
       // Create card object for cart based on CardInfoTab example
       const cardToAdd = {
         id: listingId, // Use the specific cardToSell ID
-        cardName: card.name,
+        cardName: card.cardName,
         imageUrl: card.imageUrl,
-        name: card.name,
         price: cheapestNMPrice,
         set: card.setName,
         quantity: quantity,
@@ -95,7 +94,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
       const result = await addItemToCart(cardToAdd);
       
       if (result.success) {
-        console.log(`Added ${quantity} x ${card.name} (ID: ${listingId}) to cart`);
+        console.log(`Added ${quantity} x ${card.cardName} (ID: ${listingId}) to cart`);
         // Optionally show success message or reset quantity
         setQuantity(1);
       } else {
@@ -151,7 +150,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
   const cardImage = card.imageUrl ? (
     <img
       src={card.imageUrl}
-      alt={card.name}
+      alt={card.cardName}
       className="w-full h-full object-contain group-hover:scale-105 transition-transform rounded-md"
     />
   ) : (
@@ -165,7 +164,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
       {/* Card name with language flag */}
       <div className="flex items-start gap-1 sm:gap-2 mb-1 sm:mb-2 relative">
         <h3 className="text-xs sm:text-sm font-semibold text-black-900 flex-1 min-w-0 break-words leading-tight">
-          {truncateText(card.printedName || card.name)}
+          {truncateText(card.printedName || card.cardName)}
         </h3>
         <div className="flex-shrink-0 self-start">
           {getLanguageFlag(card.language || 'en', 'small')}

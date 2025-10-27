@@ -40,7 +40,7 @@ const realSearchCards = async (name: string, filters: SearchFilters = {}, page: 
   }
 
   // Add default sortBy parameter
-  additionalParams.sortBy = 'collector_number';
+  additionalParams.sortBy = 'collectorNumber';
 
   // Create pagination parameters with additional search params (page is already 0-based)
   const params = createPaginationParamsRaw(page, size, additionalParams);
@@ -59,7 +59,7 @@ const realSearchCards = async (name: string, filters: SearchFilters = {}, page: 
 
 // --- SEARCH BY SET ---
 const realSearchCardsBySet = async (setCode: string, page: number = 0, size: number = 21): Promise<PageResponse<Card>> => {
-  const params = createPaginationParamsRaw(page, size, { set: setCode, sortBy: 'collector_number' });
+  const params = createPaginationParamsRaw(page, size, { set: setCode, sortBy: 'collectorNumber' });
 
   const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
   if (!response.ok) throw new Error("Search by set error");
@@ -91,7 +91,7 @@ const realSearchCardsBulk = async (filters: BulkSearchFilters = {}, page: number
   if (filters.sortBy) {
     // Map UI sortBy values to server expected values
     const sortByMapping: Record<string, string> = {
-      'Collectors Number': 'collector_number',
+      'Collectors Number': 'collectorNumber',
       'English Name': 'name',
       'Local Name': 'printed_name',
       'Rarity, Number': 'rarity'

@@ -14,7 +14,7 @@ export interface CardData {
   id?: string | null;
   oracleId?: string | null;
   idAsUUID?: string | null;
-  name?: string;
+  cardName?: string;
   printedName?: string | null;
   imageUrl?: string;
   set?: string;
@@ -61,7 +61,7 @@ class Card {
   id: string | null;
   oracleId: string | null;
   idAsUUID: string | null;
-  name: string;
+  cardName: string;
   printedName: string | null;
   imageUrl: string;
   set: string;
@@ -98,7 +98,7 @@ class Card {
     this.id = data.id || null;
     this.oracleId = data.oracleId || null;
     this.idAsUUID = data.idAsUUID || null;
-    this.name = data.name || '';
+    this.cardName = data.cardName || '';
     this.printedName = data.printedName || null;
     this.imageUrl = data.imageUrl || '';
     this.set = data.set || '';
@@ -153,7 +153,7 @@ class Card {
   toCartFormat() {
     return {
       id: this.cardToSellId || this.id,
-      name: this.name,
+      cardName: this.cardName,
       imageUrl: this.imageUrl,
       price: this.price,
       setName: this.setName || this.set,
@@ -170,7 +170,7 @@ class Card {
       oracleId: this.oracleId,
       setName: this.setName,
       setCode: this.setCode,
-      name: this.name,
+      cardName: this.cardName,
       imageUrl: this.imageUrl,
       price: cardData.price,
       condition: cardData.condition,
@@ -181,7 +181,7 @@ class Card {
   }
 
   getDisplayName(): string {
-    return this.printedName || this.name || 'Unknown Card';
+    return this.printedName || this.cardName || 'Unknown Card';
   }
 
   getImageUrl(): string {

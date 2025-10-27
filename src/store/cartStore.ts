@@ -5,7 +5,7 @@ const CART_STORAGE_KEY = 'shopping_cart';
 export interface CartItem {
   id: string;
   cardToSellId?: number; // The actual ID needed for checkout
-  name: string;
+  cardName: string;
   price: number;
   quantity: number;
   imageUrl?: string;
@@ -93,7 +93,7 @@ const useCartStore = create<CartStore>((set, get) => ({
         const newItem: CartItem = {
           id: card.id,
           cardToSellId: card.cardToSellId || (typeof card.id === 'number' ? card.id : Number(card.id)),
-          name: card.name,
+          cardName: card.cardName,
           price: card.price || 0,
           quantity: card.quantity || 1,
           imageUrl: card.imageUrl,

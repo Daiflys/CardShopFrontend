@@ -519,7 +519,7 @@ const BulkPriceChange: React.FC = () => {
                           }}
                           size="small"
                         />
-                        <Typography>{c.name}</Typography>
+                        <Typography>{c.cardName}</Typography>
                       </Box>
                     </MenuItem>
                   ))}

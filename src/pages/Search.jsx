@@ -174,8 +174,8 @@ const Search = () => {
     }
     
     // Second priority: collection number (ascending order)
-    const aCollectorNumber = a.collectorNumber || a.collector_number || '';
-    const bCollectorNumber = b.collectorNumber || b.collector_number || '';
+    const aCollectorNumber = a.collectorNumber || '';
+    const bCollectorNumber = b.collectorNumber || '';
     
     // Cards without collection number go to the end
     if (!aCollectorNumber && !bCollectorNumber) return 0;

@@ -395,7 +395,7 @@ const BulkSell = () => {
                             >
                               <img 
                                 src={card.imageUrl} 
-                                alt={card.name}
+                                alt={card.cardName}
                                 className="w-full h-auto rounded max-h-full object-contain"
                                 onError={(e) => {
                                   e.target.style.display = 'none';
@@ -403,7 +403,7 @@ const BulkSell = () => {
                               />
                             </div>
                           )}
-                          <span className="text-blue-600 hover:underline">{card.name}</span>
+                          <span className="text-blue-600 hover:underline">{card.cardName}</span>
                         </div>
                       </td>
                       <td className="p-3 text-center">

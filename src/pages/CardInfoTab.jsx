@@ -39,14 +39,14 @@ const CardInfoTab = ({ card }) => {
   }, []);
 
   useEffect(() => {
-    if (card?.name) {
-      fetchCardsToSell(card.name, card.id);
+    if (card?.cardName) {
+      fetchCardsToSell(card.cardName, card.id);
     }
-  }, [card?.name, card?.id, fetchCardsToSell]);
+  }, [card?.cardName, card?.id, fetchCardsToSell]);
 
   // Add card to recently viewed when component mounts
   useEffect(() => {
-    if (card && card.id && card.name) {
+    if (card && card.id && card.cardName) {
       addRecentlyViewed(card);
     }
   }, [card, addRecentlyViewed]);
@@ -71,7 +71,7 @@ const CardInfoTab = ({ card }) => {
           <div className="relative">
             <img
               src={card.imageUrl ?? card.image ?? ""}
-              alt={card.name ?? ""}
+              alt={card.cardName ?? ""}
               className="w-80 h-auto rounded-lg shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
               onClick={() => setShowZoomModal(true)}
             />
@@ -95,7 +95,7 @@ const CardInfoTab = ({ card }) => {
                 })()}
               </div>
               <h1 className="text-2xl font-bold text-gray-700 mb-0">
-                {card.name ?? "Unknown"}
+                {card.cardName ?? "Unknown"}
               </h1>
             </div>
             <div className="text-sm text-gray-600 mb-4">
@@ -111,7 +111,7 @@ const CardInfoTab = ({ card }) => {
             <div className="text-center py-8">
               <div className="text-red-600 mb-2">Error: {error}</div>
               <button
-                onClick={() => fetchCardsToSell(card.name, card.id)}
+                onClick={() => fetchCardsToSell(card.cardName, card.id)}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Retry
@@ -174,9 +174,8 @@ const CardInfoTab = ({ card }) => {
                   const cardForCart = {
                     id: listingId,
                     cardToSellId: cardToSell.id, // The actual ID needed for checkout
-                    cardName: card.name,
+                    cardName: card.cardName,
                     imageUrl: card.imageUrl || card.image,
-                    name: card.name,
                     price: cardToSell.cardPrice,
                     set: cardToSell.setName,
                     sellerId: cardToSell.userId,
@@ -255,7 +254,7 @@ const CardInfoTab = ({ card }) => {
             <tbody className="divide-y divide-gray-200">
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100 w-32">Name</td>
-                <td className="px-4 py-3 bg-white">{card.name || "Unknown"}</td>
+                <td className="px-4 py-3 bg-white">{card.cardName || "Unknown"}</td>
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Color</td>
@@ -378,7 +377,7 @@ const CardInfoTab = ({ card }) => {
           <div className="max-w-2xl max-h-full p-4">
             <img
               src={card.imageUrl ?? card.image ?? ""}
-              alt={card.name ?? ""}
+              alt={card.cardName ?? ""}
               className="max-w-full max-h-full object-contain rounded-lg"
             />
           </div>

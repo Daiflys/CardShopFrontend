@@ -45,7 +45,7 @@ const CardSellTab = ({ card }) => {
         card.id,
         card.setName,
         card.setCode,
-        card.name,
+        card.cardName,
         card.imageUrl,
         price,
         condition,

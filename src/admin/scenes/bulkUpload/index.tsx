@@ -308,7 +308,7 @@ const BulkUpload: React.FC = () => {
           oracleId: data.oracleId,
           setName: card?.setName || '',
           setCode: card?.setCode || '',
-          name: card?.name || '',
+          cardName: card?.cardName || '',
           imageUrl: card?.imageUrl || '',
           price: parseFloat(String(data.price)),
           condition: data.condition,
@@ -529,7 +529,7 @@ const BulkUpload: React.FC = () => {
                                   >
                                     <img
                                       src={hoveredCard.imageUrl}
-                                      alt={card.name}
+                                      alt={card.cardName}
                                       className="w-full h-auto rounded max-h-full object-contain"
                                       onError={(e) => {
                                         (e.target as HTMLImageElement).style.display = 'none';
@@ -538,7 +538,7 @@ const BulkUpload: React.FC = () => {
                                   </div>
                                 )}
                                 <span className="text-blue-600 hover:underline">
-                                  {card.name}
+                                  {card.cardName}
                                 </span>
                               </div>
                             </td>
@@ -627,7 +627,7 @@ const BulkUpload: React.FC = () => {
 
                         return (
                           <tr key={card.reactKey} className={rowClass}>
-                            <td className="p-3 text-sm font-medium text-red-900">{card.name}</td>
+                            <td className="p-3 text-sm font-medium text-red-900">{card.cardName}</td>
                             <td className="p-3 text-sm text-gray-700">{card.setName}</td>
                             <td className="p-3 text-sm text-gray-700">{card.collectorNumber || '-'}</td>
                             <td className="p-3 text-sm text-center">{card.language?.toUpperCase() || 'EN'}</td>

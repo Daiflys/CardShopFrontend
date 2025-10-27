@@ -20,7 +20,7 @@ export interface OAuthUserData {
 export interface Card {
   id: string;
   oracleId?: string;
-  name: string;
+  cardName: string;
   printedName?: string;
   imageUrl?: string;
   set: string;
@@ -43,7 +43,7 @@ export interface Card {
 // Cart types
 export interface CartItem {
   id: string | number;
-  name: string;
+  cardName: string;
   imageUrl?: string;
   price: number;
   quantity: number;
@@ -61,7 +61,7 @@ export interface CardToSell {
   oracleId: string;
   setName: string;
   setCode?: string;
-  name: string;
+  cardName: string;
   imageUrl: string;
   price?: number;
   condition: string;
@@ -143,7 +143,7 @@ export interface BulkSellCardData {
   oracleId: string;
   setName: string;
   setCode: string;
-  name: string;
+  cardName: string;
   imageUrl: string;
   price: number;
   condition: string;
@@ -176,7 +176,7 @@ export interface CSVSearchResponse {
 // Trends types
 export interface TrendingCard {
   id: string | number;
-  name: string;
+  cardName: string;
   imageUrl: string;
 }
 

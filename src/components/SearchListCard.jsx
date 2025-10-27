@@ -69,8 +69,8 @@ const SearchListCard = ({
 
           {/* Name */}
           <div className="min-w-0 overflow-hidden">
-            <h3 className="font-medium text-blue-600 hover:underline truncate text-sm" title={card.name}>
-              {card.name}
+            <h3 className="font-medium text-blue-600 hover:underline truncate text-sm" title={card.cardName}>
+              {card.cardName}
             </h3>
             <p className="text-xs text-gray-500 truncate" title={card.setName || 'Unknown Set'}>
               {card.setName || 'Unknown Set'}
@@ -93,7 +93,7 @@ const SearchListCard = ({
 
           {/* # (Edition/Set Number) */}
           <div className="text-center text-sm text-gray-600 truncate">
-            {card.number || card.collector_number || '-'}
+            {card.collectorNumber || '-'}
           </div>
 
           {/* Available */}
@@ -151,8 +151,8 @@ const SearchListCard = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-blue-600 text-sm leading-tight mb-1 break-words" title={card.name}>
-                  {card.name}
+                <h3 className="font-medium text-blue-600 text-sm leading-tight mb-1 break-words" title={card.cardName}>
+                  {card.cardName}
                 </h3>
                 <p className="text-xs text-gray-500 mb-2 break-words" title={card.setName || 'Unknown Set'}>
                   {card.setName || 'Unknown Set'}
@@ -168,7 +168,7 @@ const SearchListCard = ({
             {/* Secondary Info Row */}
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <div className="flex items-center gap-1">
-                <span>#{card.number || card.collector_number || '-'}</span>
+                <span>#{card.collectorNumber || '-'}</span>
               </div>
               <div className="flex items-center gap-1">
                 {card.rarity ? (
@@ -205,7 +205,7 @@ const SearchListCard = ({
         >
           <img
             src={card.imageUrl}
-            alt={card.name}
+            alt={card.cardName}
             className="w-full h-auto rounded max-h-full object-contain"
             onError={(e) => {
               e.target.style.display = 'none';
