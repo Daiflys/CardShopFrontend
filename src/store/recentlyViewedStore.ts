@@ -35,7 +35,7 @@ const useRecentlyViewedStore = create<RecentlyViewedStore>()(
         const cardToAdd: RecentlyViewedCard = {
           cardId: card.id || card.cardId || '',
           image: card.imageUrl || card.image || '',
-          name: card.name
+          cardName: card.cardName
         };
 
         // Remove if already exists to avoid duplicates

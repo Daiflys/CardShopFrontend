@@ -95,7 +95,7 @@ export interface CardToSellDTO {
   oracleId: string;
   setName: string;
   set: string | null;
-  name: string;
+  cardName: string;
   imageUrl: string;
   cardPrice: number;
   condition: string;

@@ -51,11 +51,15 @@ interface SearchResponse {
 interface Card {
   id: string;
   oracleId?: string;
+  oracle_id?: string;
   name: string;
   setName?: string;
+  set_name?: string;
   setCode?: string;
+  set_code?: string;
   set?: string;
   imageUrl?: string;
+  image_url?: string;
   collectorNumber?: string;
   rarity?: string;
   reactKey?: string;
@@ -217,7 +221,7 @@ const BulkUpload: React.FC = () => {
                 price: 0,
                 csvData: csvCard || null,
                 cardId: card.id,
-                oracleId: card.oracleId || null
+                oracleId: card.oracleId || card.oracle_id || null
               };
             });
           } else {
@@ -242,6 +246,7 @@ const BulkUpload: React.FC = () => {
               reactKey: cardKey,
               name: result.requestedCard.cardName,
               setName: result.requestedCard.setName,
+              set_name: result.requestedCard.setName,
               collectorNumber: result.requestedCard.collectorNumber,
               csvQuantity: csvAddToQuantity,
               currentQuantity: 0,
@@ -304,12 +309,12 @@ const BulkUpload: React.FC = () => {
       const cardsToSubmit = selectedCards.map(([cardKey, data]) => {
         const card = foundCards.find(c => c.reactKey === cardKey);
         return {
-          cardId: data.cardId,
-          oracleId: data.oracleId,
-          setName: card?.setName || '',
-          setCode: card?.setCode || '',
-          cardName: card?.cardName || '',
-          imageUrl: card?.imageUrl || '',
+          card_id: data.cardId,
+          oracle_id: data.oracleId,
+          set_name: card?.setName || card?.set_name || '',
+          set_code: card?.setCode || card?.set_code || card?.set || '',
+          card_name: card?.name || '',
+          image_url: card?.imageUrl || card?.image_url || '',
           price: parseFloat(String(data.price)),
           condition: data.condition,
           quantity: parseInt(String(data.quantity)),
@@ -491,7 +496,7 @@ const BulkUpload: React.FC = () => {
                                   className="relative card-hover"
                                   onMouseEnter={(e) => {
                                     const rect = e.currentTarget.getBoundingClientRect();
-                                    setHoveredCard({ id: cardKey, rect, imageUrl: card.imageUrl || '' });
+                                    setHoveredCard({ id: cardKey, rect, imageUrl: card.imageUrl || card.image_url || '' });
                                   }}
                                   onMouseLeave={() => setHoveredCard(null)}
                                 >
@@ -529,7 +534,7 @@ const BulkUpload: React.FC = () => {
                                   >
                                     <img
                                       src={hoveredCard.imageUrl}
-                                      alt={card.cardName}
+                                      alt={card.name}
                                       className="w-full h-auto rounded max-h-full object-contain"
                                       onError={(e) => {
                                         (e.target as HTMLImageElement).style.display = 'none';
@@ -538,11 +543,11 @@ const BulkUpload: React.FC = () => {
                                   </div>
                                 )}
                                 <span className="text-blue-600 hover:underline">
-                                  {card.cardName}
+                                  {card.name}
                                 </span>
                               </div>
                             </td>
-                            <td className="p-3 text-sm">{card.setName}</td>
+                            <td className="p-3 text-sm">{card.setName || card.set_name}</td>
                             <td className="p-3 text-sm text-center">{card.language?.toUpperCase() || 'EN'}</td>
                             <td className="p-3 text-center">
                               <RarityCircle rarity={card.rarity} size="medium" />
@@ -627,8 +632,8 @@ const BulkUpload: React.FC = () => {
 
                         return (
                           <tr key={card.reactKey} className={rowClass}>
-                            <td className="p-3 text-sm font-medium text-red-900">{card.cardName}</td>
-                            <td className="p-3 text-sm text-gray-700">{card.setName}</td>
+                            <td className="p-3 text-sm font-medium text-red-900">{card.name}</td>
+                            <td className="p-3 text-sm text-gray-700">{card.setName || card.set_name}</td>
                             <td className="p-3 text-sm text-gray-700">{card.collectorNumber || '-'}</td>
                             <td className="p-3 text-sm text-center">{card.language?.toUpperCase() || 'EN'}</td>
                             <td className="p-3 text-sm text-center">{card.csvQuantity}</td>

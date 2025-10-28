@@ -8,14 +8,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 // ============================================
 
 export interface CheckoutItem {
-  card_to_sell_id: number;  // snake_case as per backend @JsonProperty
+  cardToSellId: number;
   quantity: number;
 }
 
 export interface CheckoutRequest {
   items: CheckoutItem[];
-  payment_provider_id: string;  // snake_case as per backend @JsonProperty
-  payment_provider: string;      // snake_case as per backend @JsonProperty
+  paymentProviderId: string;
+  paymentProvider: string;
 }
 
 export interface CheckoutResponse {

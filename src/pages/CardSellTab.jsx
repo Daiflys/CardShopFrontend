@@ -41,11 +41,11 @@ const CardSellTab = ({ card }) => {
     try {
       const languageCode = getLanguageCode();
       const result = await setCardToSell(
-        card.oracle_id,
+        card.oracleId,
         card.id,
         card.setName,
-        card.set_code,
-        card.name,
+        card.setCode,
+        card.cardName,
         card.imageUrl,
         price,
         condition,

@@ -116,7 +116,7 @@ const BulkPriceChange: React.FC = () => {
       // Handle paginated response and map to include id
       const cards: CardToSellDTO[] = (result.content || result).map((card: CardToSellDTO) => ({
         ...card,
-        id: card.cardToSellId
+        id: card.cardToSellId || card.id
       }));
       setUpdatedCards(cards);
 
@@ -519,7 +519,7 @@ const BulkPriceChange: React.FC = () => {
                           }}
                           size="small"
                         />
-                        <Typography>{c.cardName}</Typography>
+                        <Typography>{c.name}</Typography>
                       </Box>
                     </MenuItem>
                   ))}

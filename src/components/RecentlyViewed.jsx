@@ -31,7 +31,7 @@ const RecentlyViewed = () => {
             >
               <img
                 src={card.image}
-                alt={card.name}
+                alt={card.cardName}
                 className="w-full aspect-[3/4] object-contain rounded-lg transition-colors bg-gray-50"
                 loading="lazy"
                 onError={(e) => {

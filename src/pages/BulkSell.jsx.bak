@@ -382,7 +382,7 @@ const BulkSell = () => {
                           </div>
 
                           {/* Large image tooltip on hover - Fixed positioning */}
-                          {hoveredCard && hoveredCard.id === cardKey && (card.imageUrl) && (
+                          {hoveredCard && hoveredCard.id === cardKey && (card.image_url || card.imageUrl) && (
                             <div 
                               className="fixed z-[9999] bg-white border rounded-lg shadow-2xl p-2 pointer-events-none"
                               style={{
@@ -394,8 +394,8 @@ const BulkSell = () => {
                               }}
                             >
                               <img 
-                                src={card.imageUrl} 
-                                alt={card.cardName}
+                                src={card.image_url || card.imageUrl} 
+                                alt={card.name}
                                 className="w-full h-auto rounded max-h-full object-contain"
                                 onError={(e) => {
                                   e.target.style.display = 'none';
@@ -403,7 +403,7 @@ const BulkSell = () => {
                               />
                             </div>
                           )}
-                          <span className="text-blue-600 hover:underline">{card.cardName}</span>
+                          <span className="text-blue-600 hover:underline">{card.name}</span>
                         </div>
                       </td>
                       <td className="p-3 text-center">

@@ -1,4 +1,5 @@
 // src/api/types.ts
+// Shared TypeScript types for API calls
 
 // Auth types
 export interface LoginResponse {
@@ -19,23 +20,28 @@ export interface OAuthUserData {
 // Card types
 export interface Card {
   id: string;
-  oracleId?: string;
-  cardName: string;
-  printedName?: string;
+  oracle_id?: string;
+  name: string;
+  card_name?: string;
+  image_url?: string;
   imageUrl?: string;
+  image?: string;
   set: string;
   setCode?: string;
+  set_code?: string;
+  set_name?: string;
   setName?: string;
   rarity: string;
   language?: string;
+  lang?: string;
   typeLine?: string;
   manaCost?: string;
-  convertedManaCost?: number;
   cardColors?: string[];
   oracleText?: string;
   flavorText?: string;
   artistName?: string;
-  collectorNumber?: string;
+  number?: string;
+  collector_number?: string;
   minPrice?: number;
   maxPrice?: number;
 }
@@ -43,12 +49,17 @@ export interface Card {
 // Cart types
 export interface CartItem {
   id: string | number;
-  cardName: string;
+  card_name: string;
+  name?: string;
+  image_url?: string;
   imageUrl?: string;
   price: number;
+  cardPrice?: number;
   quantity: number;
   condition: string;
+  set?: string;
   setName?: string;
+  sellerId?: number;
   userId?: number;
   available?: number;
 }
@@ -57,12 +68,18 @@ export interface CartItem {
 export interface CardToSell {
   cardToSellId?: number;
   id?: string | number;
-  cardId?: string;
-  oracleId: string;
-  setName: string;
-  setCode?: string;
-  cardName: string;
-  imageUrl: string;
+  card_id?: string;
+  oracle_id: string;
+  oracleId?: string;
+  set_name: string;
+  setName?: string;
+  set_code?: string;
+  set?: string;
+  card_name: string;
+  name?: string;
+  image_url: string;
+  imageUrl?: string;
+  cardPrice?: number;
   price?: number;
   condition: string;
   quantity: number;
@@ -132,19 +149,19 @@ export interface Product {
   id: string;
   name: string;
   icon?: string;
-  imageUrl: string;
+  image_url: string;
   price: number;
   set: string;
 }
 
 // Bulk sell types
 export interface BulkSellCardData {
-  cardId: string;
-  oracleId: string;
-  setName: string;
-  setCode: string;
-  cardName: string;
-  imageUrl: string;
+  card_id: string;
+  oracle_id: string;
+  set_name: string;
+  set_code: string;
+  card_name: string;
+  image_url: string;
   price: number;
   condition: string;
   quantity: number;
@@ -176,8 +193,10 @@ export interface CSVSearchResponse {
 // Trends types
 export interface TrendingCard {
   id: string | number;
-  cardName: string;
-  imageUrl: string;
+  card_name: string;
+  name?: string;
+  image_url: string;
+  imageUrl?: string;
 }
 
 // Advanced search criteria
@@ -246,6 +265,7 @@ export interface PurchaseResponse {
   quantity: number;
   status: PurchaseStatus;
   paymentProvider?: string;
+  // Additional fields that might come from backend
   cardName?: string;
   setName?: string;
   condition?: string;
