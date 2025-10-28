@@ -38,6 +38,7 @@ export interface Card {
   collectorNumber?: string;
   minPrice?: number;
   maxPrice?: number;
+  legalities?: Record<string, string>;
 }
 
 // Cart types
@@ -93,6 +94,8 @@ export interface SearchFilters {
   sortBy?: string;
   page?: number;
   size?: number;
+  legalityFormat?: string;
+  legalityStatus?: string;
 }
 
 // Pagination types
@@ -190,6 +193,8 @@ export interface AdvancedSearchCriteria {
   type?: string;
   minPrice?: number;
   maxPrice?: number;
+  legalityFormat?: string;
+  legalityStatus?: string;
   [key: string]: any;
 }
 

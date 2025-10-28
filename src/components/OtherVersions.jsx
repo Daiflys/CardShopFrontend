@@ -43,7 +43,7 @@ const OtherVersions = ({ card, currentCardId }) => {
 
         // Filter out the current card from results
         const filteredVersions = cards.filter(version => {
-          return version.id !== currentCardId && version.name && version.id;
+          return version.id !== currentCardId && version.cardName && version.id;
         });
 
         console.log('Other versions found after filtering:', filteredVersions);
@@ -96,7 +96,7 @@ const OtherVersions = ({ card, currentCardId }) => {
 
           // Filter out the current card from results
           const filteredVersions = cards.filter(version => {
-            return version.id !== currentCardId && version.name && version.id;
+            return version.id !== currentCardId && version.cardName && version.id;
           });
 
           console.log('Other versions found after filtering:', filteredVersions);
