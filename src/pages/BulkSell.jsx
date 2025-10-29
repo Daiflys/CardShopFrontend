@@ -7,6 +7,7 @@ import { conditionOptions } from '../utils/cardConditions';
 import { rarityOptions } from '../utils/rarityOptions';
 import RarityCircle from '../components/RarityCircle';
 import Pagination from '../components/Pagination';
+import CollectionSelector from '../components/CollectionSelector';
 import usePaginationStore from '../store/paginationStore';
 
 const BulkSell = () => {
@@ -32,11 +33,6 @@ const BulkSell = () => {
     handlePageChange,
     setPaginationData
   } = usePaginationStore();
-
-  const expansions = Object.values(MTG_SETS).map(set => ({
-    code: set.code,
-    name: set.name
-  })).sort((a, b) => a.name.localeCompare(b.name));
 
   const sortingOptions = ['Collectors Number', 'English Name', 'Local Name', 'Rarity, Number'];
 
@@ -211,21 +207,12 @@ const BulkSell = () => {
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             {/* Expansion */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Expansion</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={selectedExpansion}
-                onChange={(e) => setSelectedExpansion(e.target.value)}
-              >
-                <option value="">Select expansion...</option>
-                {expansions.map(expansion => (
-                  <option key={expansion.code} value={expansion.code}>
-                    {expansion.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CollectionSelector
+              value={selectedExpansion}
+              onChange={setSelectedExpansion}
+              label="Expansion"
+              placeholder="Select expansion..."
+            />
 
             {/* Rarity */}
             <div>
