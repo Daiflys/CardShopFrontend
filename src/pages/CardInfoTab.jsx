@@ -11,6 +11,12 @@ import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
 import RecentlyViewed from "../components/RecentlyViewed.jsx";
 import OtherVersions from "../components/OtherVersions.jsx";
 import { getLanguageFlag } from "../utils/languageFlags.jsx";
+import {
+  filterDisplayedLegalities,
+  formatLegalityFormat,
+  formatLegalityStatus,
+  getLegalityStatusColor
+} from '../utils/cardLegalities';
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
@@ -357,6 +363,41 @@ const CardInfoTab = ({ card }) => {
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Illustrator</td>
                 <td className="px-4 py-3 bg-gray-200">
                   {card.artistName || "Jim Nelson"}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Legalities</td>
+                <td className="px-4 py-3 bg-white">
+                  {(() => {
+                    const displayedLegalities = filterDisplayedLegalities(card.legalities);
+                    const entries = Object.entries(displayedLegalities);
+
+                    if (entries.length === 0) {
+                      return <span className="text-gray-500">No legality information available</span>;
+                    }
+
+                    return (
+                      <div className="flex flex-wrap gap-2">
+                        {entries
+                          .sort((a, b) => {
+                            // Sort order: legal first, then restricted, then banned/not_legal
+                            const order = { legal: 0, restricted: 1, banned: 2, not_legal: 3 };
+                            return (order[a[1]] || 4) - (order[b[1]] || 4);
+                          })
+                          .map(([format, status]) => (
+                            <div
+                              key={format}
+                              className={`px-3 py-1.5 rounded-md text-xs font-medium border ${getLegalityStatusColor(status)}`}
+                            >
+                              <span className="font-semibold">{formatLegalityFormat(format)}</span>
+                              <span className="mx-1">•</span>
+                              <span>{formatLegalityStatus(status)}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    );
+                  })()}
                 </td>
               </tr>
             </tbody>

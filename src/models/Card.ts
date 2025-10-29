@@ -47,6 +47,7 @@ export interface CardData {
   cardToSellId?: string | null;
   reactKey?: string | null;
   card?: CardData;
+  legalities?: Record<string, string>;
 }
 
 export interface BulkSellCardData {
@@ -93,6 +94,7 @@ class Card {
   userId: string | null;
   cardToSellId: string | null;
   reactKey: string | null;
+  legalities: Record<string, string>;
 
   constructor(data: CardData = {}) {
     this.id = data.id || null;
@@ -130,6 +132,7 @@ class Card {
     this.userId = data.userId || null;
     this.cardToSellId = data.cardToSellId || null;
     this.reactKey = data.reactKey || null;
+    this.legalities = data.legalities || {};
   }
 
   static fromApiResponse(data: CardData): Card {

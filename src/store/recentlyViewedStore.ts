@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface RecentlyViewedCard {
   cardId: string;
   image: string;
-  name: string;
+  cardName: string;
 }
 
 export interface CardInput {
@@ -12,7 +12,7 @@ export interface CardInput {
   cardId?: string;
   imageUrl?: string;
   image?: string;
-  name: string;
+  cardName: string;
 }
 
 export interface RecentlyViewedStore {

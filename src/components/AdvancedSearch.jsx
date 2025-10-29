@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { languageOptions } from '../utils/languageFlags.jsx';
 import { MTG_SETS, getSetIcon } from '../data/sets.js';
 import { useTheme } from '../hooks/useTheme';
+import { LEGALITY_FORMATS, LEGALITY_STATUSES } from '../utils/cardLegalities';
 
 const AdvancedSearch = ({ onSearch, onReset }) => {
   const { t } = useTranslation();
@@ -18,14 +19,18 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
     cmcMin: '',
     cmcMax: '',
     typeLine: '',
-    artist: ''
+    artist: '',
+    legalityFormat: '',
+    legalityStatus: ''
   });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState({
     sets: false,
     languages: false,
     colors: false,
-    rarity: false
+    rarity: false,
+    legalityFormat: false,
+    legalityStatus: false
   });
 
   const rarityOptions = [
@@ -101,7 +106,9 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
       cmcMin: '',
       cmcMax: '',
       typeLine: '',
-      artist: ''
+      artist: '',
+      legalityFormat: '',
+      legalityStatus: ''
     });
     if (onReset) {
       onReset();
@@ -369,6 +376,85 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Legality Filters */}
+        <div className="border-t border-gray-200 pt-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Legality Filters</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Legality Format */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Format
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => handleDropdownToggle('legalityFormat')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between"
+                >
+                  <span>{LEGALITY_FORMATS.find(f => f.value === formData.legalityFormat)?.label || 'Any Format'}</span>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isDropdownOpen.legalityFormat && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {LEGALITY_FORMATS.map((format) => (
+                      <div
+                        key={format.value}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => {
+                          handleInputChange('legalityFormat', format.value);
+                          handleDropdownToggle('legalityFormat');
+                        }}
+                      >
+                        {format.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Legality Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => handleDropdownToggle('legalityStatus')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between"
+                >
+                  <span>{LEGALITY_STATUSES.find(s => s.value === formData.legalityStatus)?.label || 'Any Status'}</span>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isDropdownOpen.legalityStatus && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg">
+                    {LEGALITY_STATUSES.map((status) => (
+                      <div
+                        key={status.value}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => {
+                          handleInputChange('legalityStatus', status.value);
+                          handleDropdownToggle('legalityStatus');
+                        }}
+                      >
+                        {status.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
