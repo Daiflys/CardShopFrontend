@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languageOptions } from '../utils/languageFlags.jsx';
-import { MTG_SETS, getSetIcon } from '../data/sets.js';
 import useSearchFiltersStore from '../store/searchFiltersStore.js';
+import CollectionSelector from './CollectionSelector.jsx';
 
 const SearchFilters = ({ initialQuery = '', onSearch }) => {
   const { t } = useTranslation();
@@ -22,37 +22,11 @@ const SearchFilters = ({ initialQuery = '', onSearch }) => {
   
   // Local UI states (not persisted)
   const [isLanguageSectionOpen, setIsLanguageSectionOpen] = useState(false);
-  const [isCollectionDropdownOpen, setIsCollectionDropdownOpen] = useState(false);
-  const [collectionSearchText, setCollectionSearchText] = useState('');
 
   // Update search text when initialQuery changes
   useEffect(() => {
     setSearchText(initialQuery);
   }, [initialQuery, setSearchText]);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isCollectionDropdownOpen && !event.target.closest('.collection-dropdown')) {
-        setIsCollectionDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isCollectionDropdownOpen]);
-
-  // Get collections from MTG_SETS data, same as BulkSell
-  const allCollections = Object.values(MTG_SETS).map(set => ({
-    code: set.code,
-    name: set.name
-  })).sort((a, b) => a.name.localeCompare(b.name));
-
-  // Filter collections based on search text
-  const filteredCollections = allCollections.filter(collection =>
-    collection.name.toLowerCase().includes(collectionSearchText.toLowerCase())
-  );
 
   // Use centralized language options
   const languages = languageOptions;
@@ -94,95 +68,13 @@ const SearchFilters = ({ initialQuery = '', onSearch }) => {
       </div>
 
       {/* Collection Filter */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Collection
-        </label>
-        <div className="relative collection-dropdown">
-          <button
-            type="button"
-            onClick={() => setIsCollectionDropdownOpen(!isCollectionDropdownOpen)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between"
-          >
-            <div className="flex items-center space-x-2">
-              {selectedCollection && getSetIcon(selectedCollection) && (
-                <img 
-                  src={getSetIcon(selectedCollection)} 
-                  alt={selectedCollection}
-                  className="w-4 h-4 flex-shrink-0"
-                />
-              )}
-              <span className="truncate">
-                {selectedCollection
-                  ? allCollections.find(c => c.code === selectedCollection)?.name || selectedCollection
-                  : 'All Collections'
-                }
-              </span>
-            </div>
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {isCollectionDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden">
-              {/* Search input inside dropdown */}
-              <div className="p-2 border-b border-gray-200">
-                <input
-                  type="text"
-                  value={collectionSearchText}
-                  onChange={(e) => setCollectionSearchText(e.target.value)}
-                  placeholder="Search collections..."
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-
-              {/* Scrollable options */}
-              <div className="max-h-48 overflow-auto">
-                <div
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center space-x-2"
-                  onClick={() => {
-                    setSelectedCollection('');
-                    setIsCollectionDropdownOpen(false);
-                    setCollectionSearchText('');
-                  }}
-                >
-                  <span className="w-4 h-4"></span>
-                  <span>All Collections</span>
-                </div>
-                {filteredCollections.map((collection) => (
-                  <div
-                    key={collection.code}
-                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center space-x-2"
-                    onClick={() => {
-                      setSelectedCollection(collection.code);
-                      setIsCollectionDropdownOpen(false);
-                      setCollectionSearchText('');
-                    }}
-                  >
-                    {getSetIcon(collection.code) ? (
-                      <img
-                        src={getSetIcon(collection.code)}
-                        alt={collection.code}
-                        className="w-4 h-4 flex-shrink-0"
-                      />
-                    ) : (
-                      <span className="w-4 h-4"></span>
-                    )}
-                    <span className="truncate">{collection.name}</span>
-                  </div>
-                ))}
-                {filteredCollections.length === 0 && collectionSearchText && (
-                  <div className="px-3 py-2 text-gray-500 text-sm">
-                    No collections found
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <CollectionSelector
+        value={selectedCollection}
+        onChange={setSelectedCollection}
+        label="Collection"
+        placeholder="All Collections"
+        className="mb-4"
+      />
 
       {/* Language Filter */}
       <div className="mb-6">

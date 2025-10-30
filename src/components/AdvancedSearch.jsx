@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languageOptions } from '../utils/languageFlags.jsx';
-import { MTG_SETS, getSetIcon } from '../data/sets.js';
 import { useTheme } from '../hooks/useTheme';
 import { LEGALITY_FORMATS, LEGALITY_STATUSES } from '../utils/cardLegalities';
+import CollectionSelector from './CollectionSelector.jsx';
 
 const AdvancedSearch = ({ onSearch, onReset }) => {
   const { t } = useTranslation();
@@ -50,11 +50,6 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
     { value: 'G', label: 'Green', class: 'bg-green-100 text-green-800' },
     { value: 'C', label: 'Colorless', class: 'bg-gray-200 text-gray-600' }
   ];
-
-  const allSets = Object.values(MTG_SETS).map(set => ({
-    code: set.code,
-    name: set.name
-  })).sort((a, b) => a.name.localeCompare(b.name));
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -115,8 +110,6 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
     }
   };
 
-  const selectedSet = allSets.find(set => set.code === formData.setCode);
-
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="mb-6">
@@ -142,67 +135,12 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Set Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Set
-            </label>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => handleDropdownToggle('sets')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between"
-              >
-                <div className="flex items-center space-x-2">
-                  {selectedSet && getSetIcon(selectedSet.code) && (
-                    <img
-                      src={getSetIcon(selectedSet.code)}
-                      alt={selectedSet.code}
-                      className="w-4 h-4 flex-shrink-0"
-                    />
-                  )}
-                  <span className="truncate">
-                    {selectedSet ? selectedSet.name : 'Any Set'}
-                  </span>
-                </div>
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {isDropdownOpen.sets && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                  <div
-                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      handleInputChange('setCode', '');
-                      handleDropdownToggle('sets');
-                    }}
-                  >
-                    Any Set
-                  </div>
-                  {allSets.map((set) => (
-                    <div
-                      key={set.code}
-                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center space-x-2"
-                      onClick={() => {
-                        handleInputChange('setCode', set.code);
-                        handleDropdownToggle('sets');
-                      }}
-                    >
-                      {getSetIcon(set.code) && (
-                        <img
-                          src={getSetIcon(set.code)}
-                          alt={set.code}
-                          className="w-4 h-4 flex-shrink-0"
-                        />
-                      )}
-                      <span className="truncate">{set.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <CollectionSelector
+            value={formData.setCode}
+            onChange={(value) => handleInputChange('setCode', value)}
+            label="Set"
+            placeholder="Any Set"
+          />
 
           {/* Rarity */}
           <div>
