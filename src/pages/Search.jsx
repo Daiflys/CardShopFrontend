@@ -20,12 +20,20 @@ const Search = () => {
   const setFilter = searchParams.get('set') || searchParams.get('setCode');
   const colorsParam = searchParams.get('colors');
   const rarityParam = searchParams.get('rarity');
-  const typesParam = searchParams.get('types');
-  const textParam = searchParams.get('text');
-  const cmcParam = searchParams.get('cmc');
-  const powerParam = searchParams.get('power');
-  const toughnessParam = searchParams.get('toughness');
   const languagesParam = searchParams.get('languages');
+
+  // CMC params
+  const cmcEqualsParam = searchParams.get('cmcEquals');
+  const cmcMinParam = searchParams.get('cmcMin');
+  const cmcMaxParam = searchParams.get('cmcMax');
+
+  // Type and Artist
+  const typeLineParam = searchParams.get('typeLine');
+  const artistParam = searchParams.get('artist');
+
+  // Legality params
+  const legalityFormatParam = searchParams.get('legalityFormat');
+  const legalityStatusParam = searchParams.get('legalityStatus');
   const { resetFilters } = useSearchFiltersStore();
   const {
     currentPage,
@@ -54,24 +62,41 @@ const Search = () => {
     }
 
     // Check if we have any search criteria
-    if (query || setFilter || colorsParam || rarityParam || typesParam || textParam || cmcParam || powerParam || toughnessParam || languagesParam) {
+    const hasSearchCriteria = query || setFilter || colorsParam || rarityParam || languagesParam ||
+      cmcEqualsParam || cmcMinParam || cmcMaxParam || typeLineParam || artistParam ||
+      legalityFormatParam || legalityStatusParam;
+
+    if (hasSearchCriteria) {
       // Build criteria object from URL params
       const criteria = {};
 
+      // Basic fields
       if (query) criteria.name = query;
       if (setFilter) criteria.setCode = setFilter;
-      if (colorsParam) criteria.colors = colorsParam.split(',');
       if (rarityParam) criteria.rarity = rarityParam;
-      if (typesParam) criteria.types = typesParam;
-      if (textParam) criteria.text = textParam;
-      if (cmcParam) criteria.cmc = cmcParam;
-      if (powerParam) criteria.power = powerParam;
-      if (toughnessParam) criteria.toughness = toughnessParam;
+
+      // Arrays
+      if (colorsParam) criteria.colors = colorsParam.split(',');
       if (languagesParam) criteria.languages = languagesParam.split(',');
+
+      // CMC
+      if (cmcEqualsParam) criteria.cmcEquals = cmcEqualsParam;
+      if (cmcMinParam) criteria.cmcMin = cmcMinParam;
+      if (cmcMaxParam) criteria.cmcMax = cmcMaxParam;
+
+      // Type and Artist
+      if (typeLineParam) criteria.typeLine = typeLineParam;
+      if (artistParam) criteria.artist = artistParam;
+
+      // Legality
+      if (legalityFormatParam) criteria.legalityFormat = legalityFormatParam;
+      if (legalityStatusParam) criteria.legalityStatus = legalityStatusParam;
 
       performSearch(criteria, 0);
     }
-  }, [query, setFilter, colorsParam, rarityParam, typesParam, textParam, cmcParam, powerParam, toughnessParam, languagesParam]);
+  }, [query, setFilter, colorsParam, rarityParam, languagesParam,
+      cmcEqualsParam, cmcMinParam, cmcMaxParam, typeLineParam, artistParam,
+      legalityFormatParam, legalityStatusParam]);
 
   // Reset filters when component unmounts (user leaves search page)
   useEffect(() => {
