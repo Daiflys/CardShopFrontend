@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { searchCards, searchCardsBySet } from '../api/search';
+import { advancedSearchCards } from '../api/search';
 import SearchResultsGrid from '../components/SearchResultsGrid';
 import SearchListCard from '../components/SearchListCard';
 import SearchFilters from '../components/SearchFilters';
@@ -15,10 +15,17 @@ const Search = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const query = searchParams.get('q');
-  const setFilter = searchParams.get('set');
+  // Read all possible URL params for advanced search
+  const query = searchParams.get('q') || searchParams.get('name');
+  const setFilter = searchParams.get('set') || searchParams.get('setCode');
   const colorsParam = searchParams.get('colors');
   const rarityParam = searchParams.get('rarity');
+  const typesParam = searchParams.get('types');
+  const textParam = searchParams.get('text');
+  const cmcParam = searchParams.get('cmc');
+  const powerParam = searchParams.get('power');
+  const toughnessParam = searchParams.get('toughness');
+  const languagesParam = searchParams.get('languages');
   const { resetFilters } = useSearchFiltersStore();
   const {
     currentPage,
@@ -46,24 +53,25 @@ const Search = () => {
       return;
     }
 
-    if (query || setFilter || colorsParam || rarityParam) {
-      // Build filters from URL params
-      const filters = pendingFiltersRef.current || {};
+    // Check if we have any search criteria
+    if (query || setFilter || colorsParam || rarityParam || typesParam || textParam || cmcParam || powerParam || toughnessParam || languagesParam) {
+      // Build criteria object from URL params
+      const criteria = {};
 
-      if (setFilter) {
-        filters.collection = setFilter;
-      }
-      if (colorsParam) {
-        filters.colors = colorsParam.split(',');
-      }
-      if (rarityParam) {
-        filters.rarity = rarityParam.split(',');
-      }
+      if (query) criteria.name = query;
+      if (setFilter) criteria.setCode = setFilter;
+      if (colorsParam) criteria.colors = colorsParam.split(',');
+      if (rarityParam) criteria.rarity = rarityParam;
+      if (typesParam) criteria.types = typesParam;
+      if (textParam) criteria.text = textParam;
+      if (cmcParam) criteria.cmc = cmcParam;
+      if (powerParam) criteria.power = powerParam;
+      if (toughnessParam) criteria.toughness = toughnessParam;
+      if (languagesParam) criteria.languages = languagesParam.split(',');
 
-      pendingFiltersRef.current = null; // Reset after use
-      performSearch(query || '', filters, 0);
+      performSearch(criteria, 0);
     }
-  }, [query, setFilter, colorsParam, rarityParam]);
+  }, [query, setFilter, colorsParam, rarityParam, typesParam, textParam, cmcParam, powerParam, toughnessParam, languagesParam]);
 
   // Reset filters when component unmounts (user leaves search page)
   useEffect(() => {
@@ -72,26 +80,24 @@ const Search = () => {
     };
   }, [resetFilters]);
 
-  const performSearch = async (searchQuery, filters = {}, page = 0) => {
+  const performSearch = async (criteria = {}, page = 0) => {
     try {
       setLoading(true);
-      
+
       // Only reset pagination if starting from page 0 (new search)
       if (page === 0) {
         resetPagination();
       }
-      const searchResults = await searchCards(searchQuery, filters, page, 21);
-      
-      console.log('Raw search response:', searchResults);
-      
-      // Transform search results is now handled by formatPaginatedCardsResponse in API layer
-      console.log('Search results after formatting:', searchResults);
+
+      const searchResults = await advancedSearchCards(criteria, page, 21);
+
+      console.log('Advanced search response:', searchResults);
 
       // Use centralized pagination response handler
       const cards = handlePaginatedResponse(searchResults, page, 21);
       setResults(cards);
-      
-      setCurrentFilters(filters);
+
+      setCurrentFilters(criteria);
     } catch (error) {
       console.error('Search error:', error);
       setResults([]);
@@ -101,51 +107,46 @@ const Search = () => {
     }
   };
 
-  const performSetSearch = async (setCode, page = 0) => {
-    try {
-      setLoading(true);
-      
-      // Only reset pagination if starting from page 0 (new search)
-      if (page === 0) {
-        resetPagination();
-      }
-      const searchResults = await searchCardsBySet(setCode, page, 21);
-      
-      // Transform search results is now handled by formatPaginatedCardsResponse in API layer
-      console.log('Set search results after formatting:', searchResults);
-
-      // Use centralized pagination response handler
-      const cards = handlePaginatedResponse(searchResults, page, 21);
-      setResults(cards);
-      
-      setCurrentFilters({ set: setCode });
-    } catch (error) {
-      console.error('Set search error:', error);
-      setResults([]);
-      resetPagination();
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleFilteredSearch = (filters) => {
     console.log('handleFilteredSearch received filters:', filters);
-    
-    // Simply execute the search with current filters
-    performSearch(filters.query || '', filters);
-    
-    // Skip the next useEffect search since we just executed one
-    skipNextSearchRef.current = true;
-    
-    // Update URL to reflect the search (for browser history/bookmarking)
-    const newParams = new URLSearchParams();
+
+    // Convert filters to criteria format for advanced search
+    const criteria = {};
     if (filters.query && filters.query.trim()) {
-      newParams.set('q', filters.query.trim());
+      criteria.name = filters.query.trim();
     }
     if (filters.collection && filters.collection !== 'All Collections') {
-      newParams.set('set', filters.collection);
+      criteria.setCode = filters.collection;
     }
-    
+    if (filters.colors && filters.colors.length > 0) {
+      criteria.colors = filters.colors;
+    }
+    if (filters.rarity) {
+      criteria.rarity = filters.rarity;
+    }
+    if (filters.languages && Object.keys(filters.languages).length > 0) {
+      const activeLanguages = Object.entries(filters.languages)
+        .filter(([, isEnabled]) => isEnabled)
+        .map(([lang]) => lang);
+      if (activeLanguages.length > 0) {
+        criteria.languages = activeLanguages;
+      }
+    }
+
+    // Execute the search
+    performSearch(criteria);
+
+    // Skip the next useEffect search since we just executed one
+    skipNextSearchRef.current = true;
+
+    // Update URL to reflect the search (for browser history/bookmarking)
+    const newParams = new URLSearchParams();
+    if (criteria.name) newParams.set('q', criteria.name);
+    if (criteria.setCode) newParams.set('set', criteria.setCode);
+    if (criteria.colors) newParams.set('colors', criteria.colors.join(','));
+    if (criteria.rarity) newParams.set('rarity', criteria.rarity);
+    if (criteria.languages) newParams.set('languages', criteria.languages.join(','));
+
     const newUrl = newParams.toString() ? `/search?${newParams.toString()}` : '/search';
     navigate(newUrl);
   };
@@ -153,11 +154,7 @@ const Search = () => {
   const handleLocalPageChange = (newPage) => {
     // Use centralized page change handler
     handlePageChange(newPage, (validPage) => {
-      if (query) {
-        performSearch(query, currentFilters, validPage);
-      } else if (setFilter) {
-        performSetSearch(setFilter, validPage);
-      }
+      performSearch(currentFilters, validPage);
     });
   };
 
