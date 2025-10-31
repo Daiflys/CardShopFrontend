@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CollectionSelector from './CollectionSelector';
+import ColorSelector from './ColorSelector';
 
 const HomePageSearch = () => {
   const navigate = useNavigate();
@@ -11,16 +12,6 @@ const HomePageSearch = () => {
     colors: [],
     rarities: []
   });
-
-  // Color options - using direct paths to mana symbol SVGs
-  const colorOptions = [
-    { value: 'W', name: 'White', svg: '/assets/mana-symbols/W.svg' },
-    { value: 'U', name: 'Blue', svg: '/assets/mana-symbols/U.svg' },
-    { value: 'B', name: 'Black', svg: '/assets/mana-symbols/B.svg' },
-    { value: 'R', name: 'Red', svg: '/assets/mana-symbols/R.svg' },
-    { value: 'G', name: 'Green', svg: '/assets/mana-symbols/G.svg' },
-    { value: 'C', name: 'Colorless', svg: '/assets/mana-symbols/C.svg' }
-  ];
 
   // Rarity options
   const rarityOptions = [
@@ -106,34 +97,13 @@ const HomePageSearch = () => {
         </div>
 
         {/* Colors */}
-        <div>
-          <label className="block text-xs font-semibold text-red-600 mb-1">
-            Color
-          </label>
-          <div className="flex justify-between gap-2">
-            {colorOptions.map((color) => {
-              const isActive = formData.colors.includes(color.value);
-              return (
-                <button
-                  key={color.value}
-                  type="button"
-                  onClick={() => handleColorToggle(color.value)}
-                  className={`
-                    p-0 bg-transparent border-none cursor-pointer rounded-full
-                    transition-transform outline-offset-2
-                  `}
-                  title={color.name}
-                >
-                  <img
-                    src={color.svg}
-                    alt={color.name}
-                    className="w-12 h-12 rounded-full"
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <ColorSelector
+          selectedColors={formData.colors}
+          onColorToggle={handleColorToggle}
+          size="medium"
+          label="Color"
+          labelClassName="block text-xs font-semibold text-red-600 mb-1"
+        />
 
         {/* Rarity */}
         <div>
