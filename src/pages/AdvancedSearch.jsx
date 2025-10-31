@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AdvancedSearchComponent from '../components/AdvancedSearch';
 import { advancedSearchCards } from '../api/search';
 import SearchResultsGrid from '../components/SearchResultsGrid';
@@ -12,6 +12,7 @@ const AdvancedSearchPage = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
 
   const [searchResults, setSearchResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +22,24 @@ const AdvancedSearchPage = () => {
   const [currentCriteria, setCurrentCriteria] = useState({});
   const [sortBy, setSortBy] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
+
+  // Auto-search if URL params are present
+  useEffect(() => {
+    const name = searchParams.get('name');
+    const setCode = searchParams.get('setCode');
+    const colors = searchParams.get('colors');
+    const rarity = searchParams.get('rarity');
+
+    if (name || setCode || colors || rarity) {
+      const criteria = {};
+      if (name) criteria.name = name;
+      if (setCode) criteria.setCode = setCode;
+      if (colors) criteria.colors = colors.split(',');
+      if (rarity) criteria.rarity = rarity;
+
+      handleSearch(criteria);
+    }
+  }, [searchParams]);
 
 
   const handleSearch = async (criteria, page = 0) => {

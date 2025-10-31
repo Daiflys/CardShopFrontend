@@ -4,6 +4,7 @@ import MainLayout from "./components/MainLayout";
 import BannerNew from "./components/BannerNew";
 import Trends from "./components/Trends";
 import SetsSidebar from "./components/SetsSidebar";
+import HomePageSearch from "./components/HomePageSearch";
 import PageLayout from "./components/PageLayout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -51,7 +52,12 @@ function App() {
             <Route path="/" element={
               <main className="w-full">
                 <PageLayout
-                  sidebar={<SetsSidebar />}
+                  sidebar={
+                    <>
+                      <HomePageSearch />
+                      <SetsSidebar />
+                    </>
+                  }
                   sidebarTitle="Collections"
                   showMobileSidebarButton={false}
                   containerClassName="py-6 lg:py-8"

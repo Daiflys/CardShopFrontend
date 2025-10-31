@@ -17,6 +17,8 @@ const Search = () => {
   const navigate = useNavigate();
   const query = searchParams.get('q');
   const setFilter = searchParams.get('set');
+  const colorsParam = searchParams.get('colors');
+  const rarityParam = searchParams.get('rarity');
   const { resetFilters } = useSearchFiltersStore();
   const {
     currentPage,
@@ -43,16 +45,25 @@ const Search = () => {
       skipNextSearchRef.current = false;
       return;
     }
-    
-    if (query) {
-      // Use pendingFilters if available (from filtered search), otherwise just query
+
+    if (query || setFilter || colorsParam || rarityParam) {
+      // Build filters from URL params
       const filters = pendingFiltersRef.current || {};
+
+      if (setFilter) {
+        filters.collection = setFilter;
+      }
+      if (colorsParam) {
+        filters.colors = colorsParam.split(',');
+      }
+      if (rarityParam) {
+        filters.rarity = rarityParam.split(',');
+      }
+
       pendingFiltersRef.current = null; // Reset after use
-      performSearch(query, filters, 0);
-    } else if (setFilter) {
-      performSetSearch(setFilter, 0);
+      performSearch(query || '', filters, 0);
     }
-  }, [query, setFilter]);
+  }, [query, setFilter, colorsParam, rarityParam]);
 
   // Reset filters when component unmounts (user leaves search page)
   useEffect(() => {
