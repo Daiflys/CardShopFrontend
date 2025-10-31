@@ -2,44 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdvancedSearchComponent from '../components/AdvancedSearch';
 import PageLayout from '../components/PageLayout';
+import { buildSearchUrl } from '../utils/searchUtils';
 
 const AdvancedSearchPage = () => {
   const navigate = useNavigate();
 
   const handleSearch = (criteria) => {
-    // Build URL params from criteria
-    const params = new URLSearchParams();
-
-    // Basic search fields
-    if (criteria.name) params.set('name', criteria.name);
-    if (criteria.setCode) params.set('setCode', criteria.setCode);
-    if (criteria.rarity) params.set('rarity', criteria.rarity);
-
-    // Colors
-    if (criteria.colors && criteria.colors.length > 0) {
-      params.set('colors', criteria.colors.join(','));
-    }
-
-    // Languages
-    if (criteria.languages && criteria.languages.length > 0) {
-      params.set('languages', criteria.languages.join(','));
-    }
-
-    // CMC (Converted Mana Cost)
-    if (criteria.cmcEquals) params.set('cmcEquals', criteria.cmcEquals);
-    if (criteria.cmcMin) params.set('cmcMin', criteria.cmcMin);
-    if (criteria.cmcMax) params.set('cmcMax', criteria.cmcMax);
-
-    // Type and Artist
-    if (criteria.typeLine) params.set('typeLine', criteria.typeLine);
-    if (criteria.artist) params.set('artist', criteria.artist);
-
-    // Legality
-    if (criteria.legalityFormat) params.set('legalityFormat', criteria.legalityFormat);
-    if (criteria.legalityStatus) params.set('legalityStatus', criteria.legalityStatus);
-
-    // Redirect to /search with all criteria as URL params
-    navigate(`/search?${params.toString()}`);
+    // Use centralized search URL builder
+    const searchUrl = buildSearchUrl(criteria);
+    navigate(searchUrl);
   };
 
   const handleReset = () => {

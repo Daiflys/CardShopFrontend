@@ -10,6 +10,7 @@ import useSearchFiltersStore from '../store/searchFiltersStore';
 import usePaginationStore from '../store/paginationStore';
 import RecentlyViewed from '../components/RecentlyViewed';
 import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
+import { buildSearchUrl, convertFiltersToCriteria } from '../utils/searchUtils';
 
 const Search = () => {
   const { t } = useTranslation();
@@ -135,28 +136,8 @@ const Search = () => {
   const handleFilteredSearch = (filters) => {
     console.log('handleFilteredSearch received filters:', filters);
 
-    // Convert filters to criteria format for advanced search
-    const criteria = {};
-    if (filters.query && filters.query.trim()) {
-      criteria.name = filters.query.trim();
-    }
-    if (filters.collection && filters.collection !== 'All Collections') {
-      criteria.setCode = filters.collection;
-    }
-    if (filters.colors && filters.colors.length > 0) {
-      criteria.colors = filters.colors;
-    }
-    if (filters.rarity) {
-      criteria.rarity = filters.rarity;
-    }
-    if (filters.languages && Object.keys(filters.languages).length > 0) {
-      const activeLanguages = Object.entries(filters.languages)
-        .filter(([, isEnabled]) => isEnabled)
-        .map(([lang]) => lang);
-      if (activeLanguages.length > 0) {
-        criteria.languages = activeLanguages;
-      }
-    }
+    // Convert filters to criteria format using centralized utility
+    const criteria = convertFiltersToCriteria(filters);
 
     // Execute the search
     performSearch(criteria);
@@ -164,16 +145,9 @@ const Search = () => {
     // Skip the next useEffect search since we just executed one
     skipNextSearchRef.current = true;
 
-    // Update URL to reflect the search (for browser history/bookmarking)
-    const newParams = new URLSearchParams();
-    if (criteria.name) newParams.set('q', criteria.name);
-    if (criteria.setCode) newParams.set('set', criteria.setCode);
-    if (criteria.colors) newParams.set('colors', criteria.colors.join(','));
-    if (criteria.rarity) newParams.set('rarity', criteria.rarity);
-    if (criteria.languages) newParams.set('languages', criteria.languages.join(','));
-
-    const newUrl = newParams.toString() ? `/search?${newParams.toString()}` : '/search';
-    navigate(newUrl);
+    // Update URL using centralized search URL builder
+    const searchUrl = buildSearchUrl(criteria);
+    navigate(searchUrl);
   };
 
   const handleLocalPageChange = (newPage) => {
