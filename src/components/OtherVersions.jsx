@@ -57,10 +57,10 @@ const OtherVersions = ({ card, currentCardId }) => {
     };
 
     fetchOtherVersions();
-  }, [card?.oracleId, card?.oracle_id, currentCardId]);
+  }, [card?.oracleId, currentCardId]);
 
   // Don't render if no oracle ID available
-  if (!card?.oracleId && !card?.oracle_id) {
+  if (!card?.oracleId) {
     return null;
   }
 
@@ -74,8 +74,8 @@ const OtherVersions = ({ card, currentCardId }) => {
   };
 
   const fetchOtherVersionsRetry = () => {
-    if (card?.oracleId || card?.oracle_id) {
-      const oracleId = card.oracleId || card.oracle_id;
+    if (card?.oracleId) {
+      const oracleId = card.oracleId;
       const fetchOtherVersions = async () => {
         try {
           setLoading(true);

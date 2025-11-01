@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { searchCards } from "../api/search";
+import { advancedSearchCards } from "../api/search";
 import { validateToken } from "../api/auth";
 import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
@@ -102,7 +102,7 @@ const Header = ({ onThemeSettingsClick }) => {
       // Debounce search by 300ms
       searchTimeoutRef.current = setTimeout(async () => {
         try {
-          const res = await searchCards(value, {}, 0, 21); // First page, 21 results
+          const res = await advancedSearchCards({ name: value }, 0, 21); // First page, 21 results
 
           // Handle paginated response - now formatted by API layer
           const searchResults = res.content ? res.content : res;
@@ -298,10 +298,10 @@ const Header = ({ onThemeSettingsClick }) => {
                 aria-selected={false}
               >
                 <div className="flex items-center gap-2">
-                  {card.set_code && getSetIcon(card.set_code) && (
+                  {card.setCode && getSetIcon(card.setCode) && (
                     <img
-                      src={getSetIcon(card.set_code)}
-                      alt={card.set_code}
+                      src={getSetIcon(card.setCode)}
+                      alt={card.setCode}
                       className="w-4 h-4 flex-shrink-0"
                     />
                   )}
