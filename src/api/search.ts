@@ -4,69 +4,6 @@ import { formatPaginatedCardsResponse } from '../utils/cardFormatters.js';
 import { Card, PageResponse, AdvancedSearchCriteria } from './types.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-interface SearchFilters {
-  collection?: string;
-  languages?: Record<string, boolean>;
-  [key: string]: any;
-}
-
-const realSearchCards = async (name: string, filters: SearchFilters = {}, page: number = 0, size: number = 21): Promise<PageResponse<Card>> => {
-  // Build additional parameters for search
-  const additionalParams: Record<string, string> = {};
-
-  console.log('Search filters received:', filters);
-
-  if (name && name.trim()) {
-    additionalParams.name = name.trim();
-  }
-
-  if (filters.collection && filters.collection !== 'All Collections') {
-    additionalParams.set = filters.collection;
-  }
-
-  // Handle language filters
-  if (filters.languages && Object.keys(filters.languages).length > 0) {
-    // Only include languages that are enabled (true)
-    const activeLanguages = Object.entries(filters.languages)
-      .filter(([, isEnabled]) => isEnabled === true)
-      .map(([lang]) => lang)
-      .join(',');
-
-    console.log('Active languages:', activeLanguages);
-
-    if (activeLanguages) {
-      additionalParams.languages = activeLanguages;
-    }
-  }
-
-  // Add default sortBy parameter
-  additionalParams.sortBy = 'collectorNumber';
-
-  // Create pagination parameters with additional search params (page is already 0-based)
-  const params = createPaginationParamsRaw(page, size, additionalParams);
-
-  const finalUrl = `${API_BASE_URL}/cards/search?${params.toString()}`;
-  console.log('Final search URL:', finalUrl);
-
-  const response = await fetch(finalUrl);
-  if (!response.ok) throw new Error("Search error");
-  const data = await response.json();
-
-  console.log('API response data:', data);
-
-  return formatPaginatedCardsResponse(data);
-};
-
-// --- SEARCH BY SET ---
-const realSearchCardsBySet = async (setCode: string, page: number = 0, size: number = 21): Promise<PageResponse<Card>> => {
-  const params = createPaginationParamsRaw(page, size, { set: setCode, sortBy: 'collectorNumber' });
-
-  const response = await fetch(`${API_BASE_URL}/cards/search/set?${params.toString()}`);
-  if (!response.ok) throw new Error("Search by set error");
-  const data = await response.json();
-
-  return formatPaginatedCardsResponse(data);
-};
 
 // --- BULK SEARCH (for BulkSell - returns all cards with filters) ---
 interface BulkSearchFilters {
@@ -93,7 +30,7 @@ const realSearchCardsBulk = async (filters: BulkSearchFilters = {}, page: number
     const sortByMapping: Record<string, string> = {
       'Collectors Number': 'collectorNumber',
       'English Name': 'name',
-      'Local Name': 'printed_name',
+      'Local Name': 'printedName',
       'Rarity, Number': 'rarity'
     };
     const serverSortBy = sortByMapping[filters.sortBy] || filters.sortBy;
@@ -216,7 +153,5 @@ const realAdvancedSearchCards = async (
   return formatPaginatedCardsResponse(data);
 };
 
-export const searchCards = realSearchCards;
-export const searchCardsBySet = realSearchCardsBySet;
 export const searchCardsBulk = realSearchCardsBulk;
 export const advancedSearchCards = realAdvancedSearchCards;

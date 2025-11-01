@@ -59,7 +59,7 @@ const CardInfoTab = ({ card }) => {
 
   const handleExpansionClick = (e) => {
     e.preventDefault();
-    const setCode = card.set || card.setCode || card.set_code;
+    const setCode = card.set || card.setCode;
     if (setCode) {
       navigate(`/search?set=${encodeURIComponent(setCode)}`);
     }
@@ -340,7 +340,7 @@ const CardInfoTab = ({ card }) => {
                 <td className="px-4 py-3 bg-white">
                   <div className="flex items-center gap-1">
                     {(() => {
-                      const setCode = card.set || card.setCode || card.set_code;
+                      const setCode = card.set || card.setCode;
                       const setIconUrl = getSetIcon(setCode);
                       return setIconUrl ? (
                         <img
