@@ -15,12 +15,23 @@ import {
   Switch,
   FormControlLabel,
   SelectChangeEvent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import AdminHeader from "../../components/Header";
 import MainHeader from "../../../components/Header";
 import { useSkin } from "../../../hooks/useComponent";
 import { useTheme as useAppTheme } from "../../../hooks/useTheme";
+import { useThemeConfigStore } from "../../../store/themeConfigStore";
 
 interface HeaderElementConfig {
   visible: boolean;
@@ -61,11 +72,23 @@ const SkinEditor: React.FC = () => {
   const { currentSkin, availableSkins, switchSkin } = useSkin();
   const { theme: appTheme, updateTheme } = useAppTheme();
 
+  // Theme config store
+  const { themes, fetchThemes, createTheme, activateTheme } = useThemeConfigStore();
+
   // Tab state
   const [currentTab, setCurrentTab] = useState<number>(0);
 
   // Preview mode state
   const [previewMode, setPreviewMode] = useState<string>("desktop");
+
+  // Dialog states
+  const [saveDialogOpen, setSaveDialogOpen] = useState<boolean>(false);
+  const [loadDialogOpen, setLoadDialogOpen] = useState<boolean>(false);
+  const [themeName, setThemeName] = useState<string>("");
+  const [themeDescription, setThemeDescription] = useState<string>("");
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   // Header element configurations
   const [headerElements, setHeaderElements] = useState<HeaderElements>({
@@ -88,6 +111,13 @@ const SkinEditor: React.FC = () => {
     padding: '16px',
   });
 
+  // Load themes on mount
+  useEffect(() => {
+    fetchThemes().catch((err) => {
+      console.error("Failed to fetch themes:", err);
+    });
+  }, [fetchThemes]);
+
   // Tab panel component
   const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
     return (
@@ -97,9 +127,140 @@ const SkinEditor: React.FC = () => {
     );
   };
 
+  // Serialize current configuration to JSON
+  const serializeConfig = () => {
+    return JSON.stringify({
+      skin: currentSkin,
+      components: {
+        header: {
+          elements: headerElements,
+          styles: headerStyles,
+        },
+      },
+    });
+  };
+
+  // Deserialize JSON config and apply to state
+  const deserializeConfig = (configJson: string) => {
+    try {
+      const config = JSON.parse(configJson);
+
+      if (config.skin && availableSkins.includes(config.skin)) {
+        switchSkin(config.skin);
+      }
+
+      if (config.components?.header?.elements) {
+        setHeaderElements(config.components.header.elements);
+      }
+
+      if (config.components?.header?.styles) {
+        setHeaderStyles(config.components.header.styles);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Failed to deserialize config:", error);
+      return false;
+    }
+  };
+
+  // Handle save theme
+  const handleSaveTheme = async () => {
+    if (!themeName.trim()) {
+      setSnackbarMessage("Please enter a theme name");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    try {
+      const configJson = serializeConfig();
+      await createTheme({
+        name: themeName,
+        description: themeDescription,
+        configJson,
+      });
+
+      setSnackbarMessage("Theme saved successfully!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      setSaveDialogOpen(false);
+      setThemeName("");
+      setThemeDescription("");
+
+      // Refresh themes list
+      fetchThemes();
+    } catch (error: any) {
+      setSnackbarMessage("Failed to save theme: " + error.message);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Handle load theme
+  const handleLoadTheme = async (themeId: number) => {
+    try {
+      const themeToLoad = themes.find((t) => t.id === themeId);
+      if (!themeToLoad) {
+        throw new Error("Theme not found");
+      }
+
+      const success = deserializeConfig(themeToLoad.configJson);
+      if (success) {
+        // Also activate the theme
+        await activateTheme(themeId);
+
+        setSnackbarMessage("Theme loaded and activated successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+        setLoadDialogOpen(false);
+      } else {
+        throw new Error("Invalid theme configuration");
+      }
+    } catch (error: any) {
+      setSnackbarMessage("Failed to load theme: " + error.message);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
   return (
     <Box m="20px">
       <AdminHeader title="SKIN EDITOR" subtitle="Visual editor for customizing your website components" />
+
+      {/* Save/Load Theme Buttons */}
+      <Box display="flex" gap={2} mb={3}>
+        <Button
+          variant="contained"
+          onClick={() => setSaveDialogOpen(true)}
+          sx={{
+            backgroundColor: colors.greenAccent[600],
+            color: colors.grey[100],
+            fontSize: "14px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: colors.greenAccent[700],
+            },
+          }}
+        >
+          💾 Save Theme
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => setLoadDialogOpen(true)}
+          sx={{
+            backgroundColor: colors.blueAccent[600],
+            color: colors.grey[100],
+            fontSize: "14px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: colors.blueAccent[700],
+            },
+          }}
+        >
+          📂 Load Theme
+        </Button>
+      </Box>
 
       {/* Main Tabs */}
       <Box backgroundColor={colors.primary[400]} borderRadius="8px" mb={3}>
@@ -193,6 +354,7 @@ const SkinEditor: React.FC = () => {
 
               <Box
                 sx={{
+                  position: 'relative',
                   backgroundColor: 'white',
                   borderRadius: '8px',
                   overflow: 'hidden',
@@ -201,8 +363,38 @@ const SkinEditor: React.FC = () => {
                   maxWidth: '100%',
                   margin: previewMode === "mobile" ? '0 auto' : '0',
                   transition: 'width 0.3s ease',
-                  pointerEvents: 'none',
-                  userSelect: 'none',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                    zIndex: 10,
+                    pointerEvents: 'all',
+                    cursor: 'not-allowed',
+                  },
+                  '&::after': {
+                    content: '"🔒 PREVIEW MODE - Click disabled"',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    zIndex: 11,
+                    pointerEvents: 'none',
+                    opacity: 0,
+                    transition: 'opacity 0.2s',
+                  },
+                  '&:hover::after': {
+                    opacity: 1,
+                  },
                   '& header': {
                     background: `${headerStyles.backgroundColor} !important`,
                     borderColor: `${headerStyles.borderColor} !important`,
@@ -484,6 +676,99 @@ const SkinEditor: React.FC = () => {
           </Typography>
         </Box>
       </TabPanel>
+
+      {/* Save Theme Dialog */}
+      <Dialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Save Theme Configuration</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Theme Name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={themeName}
+            onChange={(e) => setThemeName(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Description (optional)"
+            type="text"
+            fullWidth
+            variant="outlined"
+            multiline
+            rows={3}
+            value={themeDescription}
+            onChange={(e) => setThemeDescription(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSaveDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleSaveTheme} variant="contained" color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Load Theme Dialog */}
+      <Dialog
+        open={loadDialogOpen}
+        onClose={() => setLoadDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Load Theme Configuration</DialogTitle>
+        <DialogContent>
+          {themes.length === 0 ? (
+            <Typography variant="body1" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+              No saved themes found. Create one by clicking "Save Theme" button.
+            </Typography>
+          ) : (
+            <List>
+              {themes.map((theme) => (
+                <ListItem key={theme.id} disablePadding>
+                  <ListItemButton onClick={() => handleLoadTheme(theme.id!)}>
+                    <ListItemText
+                      primary={theme.name}
+                      secondary={
+                        <>
+                          {theme.description && <span>{theme.description}<br /></span>}
+                          <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>
+                            Created: {new Date(theme.createdAt!).toLocaleDateString()}
+                            {theme.isActive && ' • Active'}
+                          </span>
+                        </>
+                      }
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLoadDialogOpen(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

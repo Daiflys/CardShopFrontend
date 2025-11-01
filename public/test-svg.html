@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 2px solid #ccc; }
+        .color-buttons { display: flex; gap: 10px; }
+        .color-button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-center;
+            background: white;
+        }
+        .color-button img { width: 32px; height: 32px; }
+    </style>
+</head>
+<body>
+    <h1>Mana Symbol SVG Test</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Direct SVG paths (as used in HomePageSearch)</h2>
+        <div class="color-buttons">
+            <div class="color-button">
+                <img src="/assets/mana-symbols/W.svg" alt="White">
+            </div>
+            <div class="color-button">
+                <img src="/assets/mana-symbols/U.svg" alt="Blue">
+            </div>
+            <div class="color-button">
+                <img src="/assets/mana-symbols/B.svg" alt="Black">
+            </div>
+            <div class="color-button">
+                <img src="/assets/mana-symbols/R.svg" alt="Red">
+            </div>
+            <div class="color-button">
+                <img src="/assets/mana-symbols/G.svg" alt="Green">
+            </div>
+            <div class="color-button">
+                <img src="/assets/mana-symbols/C.svg" alt="Colorless">
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Inline check if images load</h2>
+        <p>Check browser console for errors</p>
+        <script>
+            const colors = ['W', 'U', 'B', 'R', 'G', 'C'];
+            colors.forEach(color => {
+                const img = new Image();
+                img.onload = () => console.log(`✓ ${color}.svg loaded successfully`);
+                img.onerror = () => console.error(`✗ ${color}.svg failed to load`);
+                img.src = `/assets/mana-symbols/${color}.svg`;
+            });
+        </script>
+    </div>
+</body>
+</html>
