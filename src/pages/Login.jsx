@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { login } from "../api/auth";
 import GoogleSignInSafe from "../components/GoogleSignInSafe";
+import ExternalAuthButtons from "../components/ExternalAuthButtons";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -164,7 +165,12 @@ const Login = () => {
           onError={(err) => setError(err)}
           onLoading={setOauthLoading}
         />
-        
+
+        {/* External Auth Providers (Shopify, WordPress, etc.) */}
+        <div className="mt-4">
+          <ExternalAuthButtons />
+        </div>
+
         <div className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{' '}
           <Link to="/register" className="text-blue-700 hover:underline font-semibold">Sign up</Link>
