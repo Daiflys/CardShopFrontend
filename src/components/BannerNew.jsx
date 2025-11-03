@@ -67,9 +67,17 @@ const BannerNew = () => {
   // Original sliding animation logic
   const goTo = (idx, direction = "right") => {
     if (isAnimating || idx === current) return;
+
+    // If page is hidden or carousel DOM not ready, switch instantly without animation
+    const container = document.querySelector('.carousel-container');
+    if (document.visibilityState !== 'visible' || !container) {
+      setCurrent(idx);
+      setIsAnimating(false);
+      return;
+    }
+
     setIsAnimating(true);
     
-    const container = document.querySelector('.carousel-container');
     const currentSlide = container.querySelector('.current-slide');
     const nextSlide = container.querySelector('.next-slide');
     
@@ -109,7 +117,8 @@ const BannerNew = () => {
       nextSlide.style.transform = 'translateX(0)';
     });
     
-    setTimeout(() => {
+    // Use a transitionend listener with a timeout fallback to be robust when tab visibility changes
+    const finalize = () => {
       setIsAnimating(false);
       // Disable transitions temporarily to avoid visual jumps
       currentSlide.style.transition = 'none';
@@ -128,7 +137,13 @@ const BannerNew = () => {
         currentSlide.style.transition = '';
         nextSlide.style.transition = '';
       }, 50);
-    }, 500);
+      nextSlide.removeEventListener('transitionend', onEnd);
+    };
+
+    const onEnd = () => finalize();
+    nextSlide.addEventListener('transitionend', onEnd, { once: true });
+    // Fallback in case transitionend doesn't fire (background tab, etc.)
+    setTimeout(finalize, 700);
     
     clearTimeout(timeoutRef.current);
   };

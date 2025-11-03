@@ -177,6 +177,82 @@ export const useEditorStore = create((set, get) => ({
   },
 
   /**
+   * PAGE SECTIONS (Home)
+   */
+  addPageSection: (page, section) => {
+    set((state) => {
+      const id = 'sec_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      const current = state.config.pages?.[page]?.sections || [];
+      const nextSection = { id, ...section };
+      return {
+        config: {
+          ...state.config,
+          pages: {
+            ...state.config.pages,
+            [page]: { sections: [...current, nextSection] }
+          }
+        },
+        isDirty: true,
+      };
+    });
+  },
+  updatePageSection: (page, sectionId, partial) => {
+    set((state) => {
+      const list = state.config.pages?.[page]?.sections || [];
+      const next = list.map(s => s.id === sectionId ? { ...s, ...partial, settings: { ...s.settings, ...(partial.settings || {}) } } : s);
+      return {
+        config: {
+          ...state.config,
+          pages: { ...state.config.pages, [page]: { sections: next } }
+        },
+        isDirty: true,
+      };
+    });
+  },
+  removePageSection: (page, sectionId) => {
+    set((state) => {
+      const list = state.config.pages?.[page]?.sections || [];
+      const next = list.filter(s => s.id !== sectionId);
+      return {
+        config: {
+          ...state.config,
+          pages: { ...state.config.pages, [page]: { sections: next } }
+        },
+        isDirty: true,
+      };
+    });
+  },
+  movePageSection: (page, sectionId, newIndex) => {
+    set((state) => {
+      const list = [...(state.config.pages?.[page]?.sections || [])];
+      const from = list.findIndex(s => s.id === sectionId);
+      if (from < 0 || newIndex < 0 || newIndex >= list.length) return {};
+      const [item] = list.splice(from, 1);
+      list.splice(newIndex, 0, item);
+      return {
+        config: {
+          ...state.config,
+          pages: { ...state.config.pages, [page]: { sections: list } }
+        },
+        isDirty: true,
+      };
+    });
+  },
+  togglePageSection: (page, sectionId, enabled) => {
+    set((state) => {
+      const list = state.config.pages?.[page]?.sections || [];
+      const next = list.map(s => s.id === sectionId ? { ...s, enabled: !!enabled } : s);
+      return {
+        config: {
+          ...state.config,
+          pages: { ...state.config.pages, [page]: { sections: next } }
+        },
+        isDirty: true,
+      };
+    });
+  },
+
+  /**
    * Save configuration to localStorage
    */
   save: () => {
