@@ -23,7 +23,6 @@ import AdminLayout from "./admin/components/AdminLayout";
 import Dashboard from "./admin/scenes/dashboard";
 import BulkUpload from "./admin/scenes/bulkUpload";
 import Users from "./admin/scenes/users";
-import SkinEditor from "./admin/scenes/skinEditor";
 import AuditLogs from "./admin/scenes/auditLogs";
 import BulkPriceChange from "./admin/scenes/bulkPrice";
 import PendingOrders from "./admin/scenes/pendingOrders";
@@ -57,7 +56,6 @@ function App() {
             <Route path="bulk-upload" element={<BulkUpload />} />
             <Route path="users" element={<Users />} />
             <Route path="pending-orders" element={<PendingOrders />} />
-            <Route path="skin-editor" element={<SkinEditor />} />
             <Route path="audit-logs" element={<AuditLogs />} />
             <Route path="bulk-price" element={<BulkPriceChange />} />
           </Route>
