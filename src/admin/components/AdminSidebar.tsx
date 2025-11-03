@@ -10,7 +10,6 @@ import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
-import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
@@ -217,14 +216,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = () => {
               style={{ color: colors.grey[100] }}
             >
               Storefront Editor
-            </MenuItem>
-
-            <MenuItem
-              icon={<PaletteOutlinedIcon />}
-              component={<Link to="/admin/skin-editor" />}
-              style={{ color: colors.grey[100] }}
-            >
-              Skin Editor
             </MenuItem>
 
             {/* Back to Website */}
