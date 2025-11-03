@@ -7,7 +7,7 @@ import PropertiesPanel from './components/PropertiesPanel';
 
 const StorefrontEditor = () => {
   const navigate = useNavigate();
-  const { save, isDirty, isSaving, lastSaved } = useEditorStore();
+  const { save, isDirty, isSaving, lastSaved, config, setApplyToSiteAndSave } = useEditorStore();
 
   const [currentPage, setCurrentPage] = useState('home'); // For future: home, product, cart, etc.
   const [viewport, setViewport] = useState('desktop');
@@ -69,6 +69,36 @@ const StorefrontEditor = () => {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
+          {/* Apply to site toggle */}
+          <div className="flex items-center gap-3 mr-3" title="Apply changes to the live site">
+            <span className="text-xs font-medium text-gray-700">Apply to site</span>
+            <button
+              onClick={() => setApplyToSiteAndSave(!config.applyToSite)}
+              role="switch"
+              aria-checked={config.applyToSite}
+              className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${config.applyToSite ? 'bg-emerald-500 focus:ring-emerald-400' : 'bg-gray-300 focus:ring-gray-400'}`}
+            >
+              {/* Knob */}
+              <span
+                className={`absolute top-1 left-1 inline-flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/5 transition-transform duration-200 ${config.applyToSite ? 'translate-x-7' : 'translate-x-0'}`}
+                aria-hidden="true"
+              >
+                {config.applyToSite ? (
+                  <svg className="h-3.5 w-3.5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.42l2.293 2.293 6.793-6.793a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="h-3.5 w-3.5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M6.28 5.22a.75.75 0 10-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 10-1.06-1.06L10 8.94 6.28 5.22z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </span>
+              {/* ON/OFF label inside track for clarity */}
+              <span className={`mx-auto text-[10px] font-bold tracking-wide ${config.applyToSite ? 'text-white' : 'text-gray-700'}`}>
+                {config.applyToSite ? 'ON' : 'OFF'}
+              </span>
+            </button>
+          </div>
           {/* Dirty indicator */}
           {isDirty && (
             <span className="text-xs text-amber-600 flex items-center gap-1">

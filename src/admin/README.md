@@ -37,3 +37,30 @@ Uses Tailwind CSS for all styling, matching the main application.
 ## Authentication
 
 All admin routes are protected with `RequireAuth` component. Make sure to verify admin role on the backend as well.
+
+## Storefront Editor (Theme Customization)
+
+The Storefront Editor lets admins customize a single theme with a Shopify-like experience and live preview. It currently stores config in localStorage to keep frontend-first development simple, and is designed to swap to a backend later.
+
+- Location: `src/admin/scenes/storefrontEditor`
+- Live preview iframe sends updates via `postMessage`
+- Runtime applier: `src/components/StorefrontConfigListener.jsx`
+
+Sections available:
+- Logo & Favicon
+- Colors (schemes)
+- Typography (headings/body fonts and scale)
+- Header (announcement bar, sticky, colors)
+- Buttons (radius, casing, primary colors)
+- Layout (container width, section spacing, card gap)
+- Product Cards (image ratio, density, meta visibility)
+
+Storage schema and key:
+- Key: `STOREFRONT_EDITOR_CONFIG`
+- Schema defined in `storageManager.js` (DEFAULT_CONFIG)
+
+Runtime application:
+- Preview mode (`/?preview=true`): applies updates from the editor instantly
+- Normal mode: reads saved config on mount and applies it so shops see their theme by default
+
+Backend handoff: replace reads/writes in `storageManager.js` with API calls keeping the same schema. The editor UI and preview pipeline will remain working.

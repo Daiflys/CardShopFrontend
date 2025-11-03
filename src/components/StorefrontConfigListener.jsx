@@ -44,6 +44,65 @@ const StorefrontConfigListener = () => {
     };
   }, [isPreviewMode]);
 
+  // Apply saved config in non-preview mode so shops see their theme
+  useEffect(() => {
+    if (isPreviewMode) return;
+    try {
+      const raw = localStorage.getItem('STOREFRONT_EDITOR_CONFIG');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.applyToSite === false) {
+          clearAppliedStyles();
+          return;
+        }
+        // Apply base (colors/typography/favicon) and extended (header/buttons/layout/cards)
+        applyConfiguration(parsed);
+        applyExtendedConfiguration(parsed);
+      } else {
+        // No config, clear any previously injected styles
+        clearAppliedStyles();
+      }
+    } catch (e) {
+      console.warn('Failed to load storefront config from localStorage:', e);
+    }
+  }, [isPreviewMode]);
+
+  // React to config changes from other tabs (editor saves to localStorage)
+  useEffect(() => {
+    if (isPreviewMode) return;
+    const onStorage = (e) => {
+      if (e.key !== 'STOREFRONT_EDITOR_CONFIG') return;
+      try {
+        const raw = e.newValue;
+        if (!raw) { clearAppliedStyles(); return; }
+        const parsed = JSON.parse(raw);
+        if (parsed?.applyToSite === false) {
+          clearAppliedStyles();
+        } else {
+          applyConfiguration(parsed);
+          applyExtendedConfiguration(parsed);
+        }
+      } catch (err) {
+        console.warn('Failed parsing updated storefront config:', err);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [isPreviewMode]);
+
+  // In preview, also listen and apply extended settings (header/buttons/layout/cards)
+  useEffect(() => {
+    if (!isPreviewMode) return;
+    const handler = (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === 'STOREFRONT_CONFIG_UPDATE') {
+        applyExtendedConfiguration(event.data.payload);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [isPreviewMode]);
+
   return null; // This is a listener component, no UI
 };
 
@@ -88,35 +147,12 @@ const applyConfiguration = (config) => {
 };
 
 /**
- * Apply logo configuration - Replace SVG logo with uploaded image
+ * Apply logo configuration
+ * Moved to React component (Logo.tsx) to avoid DOM replacement conflicts with React.
+ * This no-op is kept to maintain call sites.
  */
-const applyLogo = (logoConfig) => {
-  // Find the Logo component container
-  const logoContainers = document.querySelectorAll('header .flex.items-center.gap-2');
-
-  logoContainers.forEach((container) => {
-    // Check if this is actually the logo (contains SVG + text)
-    const hasSVG = container.querySelector('svg');
-    const hasText = container.querySelector('span');
-
-    if (hasSVG && hasText) {
-      // This is the logo container
-      if (logoConfig.file) {
-        // Replace entire content with uploaded image
-        container.innerHTML = `
-          <img
-            src="${logoConfig.file}"
-            alt="Store Logo"
-            style="width: ${logoConfig.width}px; height: auto; max-height: 60px; object-fit: contain;"
-            data-storefront-logo="true"
-          />
-        `;
-      } else {
-        // No logo uploaded, restore original if needed
-        // (we don't implement restore for now - they need to refresh)
-      }
-    }
-  });
+const applyLogo = (_logoConfig) => {
+  // Intentionally handled by Logo.tsx via localStorage + postMessage
 };
 
 /**
@@ -388,6 +424,135 @@ const applyTypography = (typographyConfig) => {
 
   styleElement.textContent = css;
   console.log(`✅ Applied typography - Headings: ${headings.font} (${headings.scale}%), Body: ${body.font} (${body.scale}%)`);
+};
+
+/**
+ * Apply only the new sections so we don't duplicate the existing handlers
+ */
+const applyExtendedConfiguration = (config) => {
+  if (!config) return;
+  if (config.header) applyHeader(config.header);
+  if (config.buttons) applyButtons(config.buttons);
+  if (config.layout) applyLayout(config.layout);
+  if (config.productCards) applyProductCards(config.productCards);
+};
+
+/**
+ * Remove injected styles and announcement bar when not applying to site
+ */
+const clearAppliedStyles = () => {
+  const ids = [
+    'storefront-color-scheme',
+    'storefront-typography',
+    'storefront-header-style',
+    'storefront-buttons-style',
+    'storefront-layout-style',
+    'storefront-product-cards-style',
+  ];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  const bar = document.getElementById('storefront-announcement-bar');
+  if (bar) bar.remove();
+};
+
+/**
+ * Apply header settings: announcement bar + header colors
+ */
+const applyHeader = (header) => {
+  const id = 'storefront-announcement-bar';
+  let bar = document.getElementById(id);
+  if (header.showAnnouncementBar) {
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = id;
+      document.body.prepend(bar);
+    }
+    bar.textContent = header.announcementText || '';
+    bar.setAttribute('style', `width:100%;box-sizing:border-box;padding:8px 12px;text-align:center;font-size:14px;background:${header.announcementBg};color:${header.announcementTextColor};position:relative;z-index:40;`);
+  } else if (bar) {
+    bar.remove();
+  }
+
+  const styleId = 'storefront-header-style';
+  let styleElement = document.getElementById(styleId);
+  if (!styleElement) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    document.head.appendChild(styleElement);
+  }
+  const css = `
+    header, header[class], header > div { background:${header.headerBg} !important; border-color:${header.headerBorder} !important; color:${header.headerText} !important; }
+    header a, header span, header button { color:${header.headerText} !important; }
+    ${header.stickyHeader ? 'header { position: sticky !important; top: 0; }' : ''}
+  `;
+  styleElement.textContent = css;
+};
+
+/**
+ * Apply buttons settings globally
+ */
+const applyButtons = (buttons) => {
+  const styleId = 'storefront-buttons-style';
+  let styleElement = document.getElementById(styleId);
+  if (!styleElement) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    document.head.appendChild(styleElement);
+  }
+  const css = `
+    button, a.button, .btn, .btn-primary, button[class], a[class*="bg-blue"], a[class*="bg-sky"], button[class*="bg-"] { border-radius: ${buttons.radius} !important; text-transform: ${buttons.uppercase ? 'uppercase' : 'none'} !important; font-weight: ${buttons.fontWeight || 600} !important; }
+    .btn-primary, a[class*="bg-blue"], a[class*="bg-sky"], button[class*="bg-blue"], button[class*="bg-sky"] { background: ${buttons.primaryBg} !important; color: ${buttons.primaryText} !important; border-color: ${buttons.primaryBg} !important; }
+    .btn-primary:hover, a[class*="bg-blue"]:hover, a[class*="bg-sky"]:hover, button[class*="bg-blue"]:hover, button[class*="bg-sky"]:hover { background: ${buttons.primaryBgHover} !important; border-color: ${buttons.primaryBgHover} !important; }
+  `;
+  styleElement.textContent = css;
+};
+
+/**
+ * Apply layout (container width, spacing, grid gaps)
+ */
+const applyLayout = (layout) => {
+  const styleId = 'storefront-layout-style';
+  let styleElement = document.getElementById(styleId);
+  if (!styleElement) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    document.head.appendChild(styleElement);
+  }
+  const css = `
+    main, .container, [class*="max-w-"] { max-width: ${layout.containerMaxWidth}px !important; margin-left:auto !important; margin-right:auto !important; }
+    section, section[class], .section { padding-top: ${layout.sectionSpacing}px !important; padding-bottom: ${layout.sectionSpacing}px !important; }
+    .grid, [class*="grid"], .cards, .cards[class] { gap: ${layout.cardGap}px !important; }
+  `;
+  styleElement.textContent = css;
+};
+
+/**
+ * Apply product card settings (image ratio & density)
+ */
+const applyProductCards = (pc) => {
+  const styleId = 'storefront-product-cards-style';
+  let styleElement = document.getElementById(styleId);
+  if (!styleElement) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    document.head.appendChild(styleElement);
+  }
+  const [w, h] = (pc.imageRatio || '3/4').split('/').map(Number);
+  const ratio = h ? (h / w) * 100 : 133.33;
+  const densityMap = { compact: '0.25rem', comfortable: '0.5rem', spacious: '0.75rem' };
+  const textSpace = densityMap[pc.density] || densityMap.comfortable;
+  const css = `
+    .product-card .image, [class*="card"] [class*="image"], .card [class*="image"] { position: relative !important; width: 100% !important; }
+    .product-card .image::before, [class*="card"] [class*="image"]::before, .card [class*="image"]::before { content: ''; display: block; padding-top: ${ratio}%; }
+    .product-card .image > img, [class*="card"] [class*="image"] > img, .card [class*="image"] > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .product-card .meta, [class*="card"] [class*="meta"], .card [class*="meta"], .product-card .details, [class*="card"] [class*="details"], .card [class*="details"] { line-height: 1.2 !important; gap: ${textSpace} !important; row-gap: ${textSpace} !important; margin-top: ${textSpace} !important; }
+    ${pc.showCondition ? '' : '.product-card [data-meta="condition"], [class*="card"] [data-meta="condition"] { display:none !important; }'}
+    ${pc.showSet ? '' : '.product-card [data-meta="set"], [class*="card"] [data-meta="set"] { display:none !important; }'}
+    ${pc.showSeller ? '' : '.product-card [data-meta="seller"], [class*="card"] [data-meta="seller"] { display:none !important; }'}
+  `;
+  styleElement.textContent = css;
 };
 
 export default StorefrontConfigListener;

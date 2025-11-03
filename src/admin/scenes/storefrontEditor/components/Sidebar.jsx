@@ -32,6 +32,42 @@ const Sidebar = () => {
         </svg>
       )
     },
+    {
+      id: 'header',
+      name: 'Header',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
+        </svg>
+      )
+    },
+    {
+      id: 'buttons',
+      name: 'Buttons',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 12h10M4 16h8" />
+        </svg>
+      )
+    },
+    {
+      id: 'layout',
+      name: 'Layout',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      )
+    },
+    {
+      id: 'productCards',
+      name: 'Product Cards',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h7v7H4zM13 6h7v7h-7zM4 15h7v7H4zM13 15h7v7h-7z" />
+        </svg>
+      )
+    },
   ];
 
   return (

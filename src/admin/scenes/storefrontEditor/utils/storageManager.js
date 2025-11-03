@@ -12,6 +12,7 @@ const STORAGE_VERSION = '1.0.0';
 const DEFAULT_CONFIG = {
   version: STORAGE_VERSION,
   lastModified: null,
+  applyToSite: true,
 
   logo: {
     file: null,      // Will store base64 or URL
@@ -92,6 +93,41 @@ const DEFAULT_CONFIG = {
       font: 'Assistant',
       scale: 100,
     }
+  },
+
+  // New sections for Shopify-like customization
+  header: {
+    showAnnouncementBar: false,
+    announcementText: 'Welcome to our shop! Free shipping over $50',
+    announcementBg: '#0ea5e9',
+    announcementTextColor: '#ffffff',
+    stickyHeader: true,
+    headerBg: '#ffffff',
+    headerText: '#0f172a',
+    headerBorder: '#e2e8f0'
+  },
+
+  buttons: {
+    radius: '8px',
+    uppercase: false,
+    fontWeight: 600,
+    primaryBg: '#0284c7',
+    primaryBgHover: '#0ea5e9',
+    primaryText: '#ffffff'
+  },
+
+  layout: {
+    containerMaxWidth: 1200, // px
+    sectionSpacing: 32, // px top/bottom
+    cardGap: 16 // px
+  },
+
+  productCards: {
+    imageRatio: '3/4', // '1/1', '3/4', '2/3'
+    density: 'comfortable', // 'compact' | 'comfortable' | 'spacious'
+    showCondition: true,
+    showSet: true,
+    showSeller: false
   }
 };
 
