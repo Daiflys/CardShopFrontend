@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Search from "./pages/Search";
 import CardDetail from "./pages/CardDetail";
 import Checkout from "./pages/Checkout";
+import PaymentReturn from "./pages/payments/PaymentReturn";
 import AccountLayout from "./pages/account/AccountLayout";
 import Profile from "./pages/account/Profile";
 import Transactions from "./pages/account/Transactions";
@@ -90,6 +91,7 @@ function App() {
             <Route path="/advanced-search" element={<AdvancedSearch />} />
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Checkout /></main>} />
+            <Route path="/payment/return" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><PaymentReturn /></main>} />
 
             <Route
               path="/account/*"

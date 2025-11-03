@@ -3,7 +3,8 @@ import useCartStore from "../store/cartStore";
 import useAddressStore from "../store/addressStore";
 import { useNavigate } from "react-router-dom";
 import { batchCheckout } from "../api/purchases";
-import { mockPayment } from "../utils/mockPayment";
+import { getPaymentProviderByKey } from "../payments/providers";
+import PaymentMethodSelector from "../components/PaymentMethodSelector";
 import ConditionIcon from "../components/ConditionIcon";
 import AddressSelector from "../components/AddressSelector";
 import CheckoutAddressForm from "../components/CheckoutAddressForm";
@@ -28,6 +29,7 @@ const Checkout = () => {
   const [placing, setPlacing] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [selectedPayment, setSelectedPayment] = useState('redsys');
 
   // Address state
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -114,9 +116,17 @@ const Checkout = () => {
 
       console.log("📋 Shipping address:", shippingAddress);
 
-      // Step 1: Mock payment
-      console.log("💳 Processing mock payment...");
-      const paymentResult = await mockPayment();
+      // Step 1: Payment via selected provider (modular)
+      console.log("💳 Processing payment with:", selectedPayment);
+      const provider = getPaymentProviderByKey(selectedPayment);
+      if (!provider) throw new Error('Invalid payment provider');
+      const amount = Number(getCartTotal().toFixed(2));
+      const paymentResult = await provider.pay({
+        amount,
+        currency: 'EUR',
+        cartItems,
+        shippingAddress,
+      });
       console.log("✅ Payment successful:", paymentResult);
 
       if (!paymentResult.success) {
@@ -404,6 +414,18 @@ const Checkout = () => {
             </div>
 
             {/* Order Items */}
+            <div className="bg-white rounded-lg border p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-gray-900">Payment Method</h2>
+              </div>
+              <div>
+                <PaymentMethodSelector
+                  selectedKey={selectedPayment}
+                  onChange={setSelectedPayment}
+                />
+              </div>
+            </div>
+
             <div className="bg-white rounded-lg border p-4 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Order Items</h2>
               <div className="space-y-3">
