@@ -125,6 +125,58 @@ export const useEditorStore = create((set, get) => ({
   },
 
   /**
+   * Header settings
+   */
+  updateHeader: (data) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        header: { ...state.config.header, ...data },
+      },
+      isDirty: true,
+    }));
+  },
+
+  /**
+   * Buttons settings
+   */
+  updateButtons: (data) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        buttons: { ...state.config.buttons, ...data },
+      },
+      isDirty: true,
+    }));
+  },
+
+  /**
+   * Layout settings
+   */
+  updateLayout: (data) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        layout: { ...state.config.layout, ...data },
+      },
+      isDirty: true,
+    }));
+  },
+
+  /**
+   * Product cards settings
+   */
+  updateProductCards: (data) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        productCards: { ...state.config.productCards, ...data },
+      },
+      isDirty: true,
+    }));
+  },
+
+  /**
    * Save configuration to localStorage
    */
   save: () => {
@@ -144,6 +196,19 @@ export const useEditorStore = create((set, get) => ({
       set({ isSaving: false });
       return false;
     }
+  },
+
+  /**
+   * Toggle whether config applies to the live site
+   */
+  setApplyToSite: (value) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        applyToSite: !!value,
+      },
+      isDirty: true,
+    }));
   },
 
   /**
@@ -186,6 +251,28 @@ export const useEditorStore = create((set, get) => ({
     return config.colors.schemes.find(
       s => s.id === config.colors.activeSchemeId
     );
+  },
+
+  /**
+   * Toggle applyToSite and persist immediately so non-preview tabs react via storage event
+   */
+  setApplyToSiteAndSave: (value) => {
+    // Update state first
+    set((state) => ({
+      config: {
+        ...state.config,
+        applyToSite: !!value,
+      },
+      isDirty: true,
+    }));
+
+    // Save immediately
+    const { config } = get();
+    const ok = saveConfig(config);
+    if (ok) {
+      set({ isDirty: false, lastSaved: new Date().toISOString() });
+    }
+    return ok;
   },
 }));
 

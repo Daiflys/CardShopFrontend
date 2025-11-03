@@ -67,19 +67,19 @@ const PreviewFrame = ({ viewport = 'desktop' }) => {
   : {};
 
   return (
-    <div className="preview-frame flex-1 bg-gray-100 p-6 overflow-hidden">
+    <div className="preview-frame flex-1 bg-gray-100 p-6 overflow-auto">
       <div
-        className="preview-container h-full bg-white rounded-lg shadow-xl overflow-hidden transition-all duration-300"
+        className={`${viewport === 'mobile' ? '' : ''}`}
         style={viewportStyles}
       >
-        <div className="relative h-full">
+        <div className="relative">
           <iframe
             ref={iframeRef}
             src="/?preview=true"
             title="Store Preview"
             onLoad={handleIframeLoad}
-            className="w-full h-full border-0"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+            className="w-full h-[75vh] border border-gray-200 bg-white"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
           />
         </div>
       </div>

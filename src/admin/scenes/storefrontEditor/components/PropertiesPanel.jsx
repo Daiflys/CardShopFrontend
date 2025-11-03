@@ -3,6 +3,10 @@ import { useEditorStore } from '../store/editorStore';
 import LogoProperties from './properties/LogoProperties';
 import ColorsProperties from './properties/ColorsProperties';
 import TypographyProperties from './properties/TypographyProperties';
+import HeaderProperties from './properties/HeaderProperties';
+import ButtonsProperties from './properties/ButtonsProperties';
+import LayoutProperties from './properties/LayoutProperties';
+import ProductCardProperties from './properties/ProductCardProperties';
 
 const PropertiesPanel = () => {
   const { selectedSection } = useEditorStore();
@@ -15,6 +19,14 @@ const PropertiesPanel = () => {
         return <ColorsProperties />;
       case 'typography':
         return <TypographyProperties />;
+      case 'header':
+        return <HeaderProperties />;
+      case 'buttons':
+        return <ButtonsProperties />;
+      case 'layout':
+        return <LayoutProperties />;
+      case 'productCards':
+        return <ProductCardProperties />;
       default:
         return (
           <div className="p-6 text-center text-gray-500">

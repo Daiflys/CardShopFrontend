@@ -16,12 +16,12 @@ import Profile from "./pages/account/Profile";
 import Transactions from "./pages/account/Transactions";
 import Settings from "./pages/account/Settings";
 import Addresses from "./pages/account/Addresses";
-import BulkSell from "./pages/BulkSell";
 import AdvancedSearch from "./pages/AdvancedSearch";
 import RequireAuth from "./pages/RequireAuth";
 import AdminLayout from "./admin/components/AdminLayout";
 import Dashboard from "./admin/scenes/dashboard";
 import BulkUpload from "./admin/scenes/bulkUpload";
+import BulkSell from "./admin/scenes/bulkSell";
 import Users from "./admin/scenes/users";
 import AuditLogs from "./admin/scenes/auditLogs";
 import BulkPriceChange from "./admin/scenes/bulkPrice";
@@ -54,6 +54,7 @@ function App() {
           <Route path="/admin/*" element={<RequireAuth><AdminLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
             <Route path="bulk-upload" element={<BulkUpload />} />
+            <Route path="bulk-sell" element={<BulkSell />} />
             <Route path="users" element={<Users />} />
             <Route path="pending-orders" element={<PendingOrders />} />
             <Route path="audit-logs" element={<AuditLogs />} />
@@ -87,7 +88,6 @@ function App() {
             <Route path="/advanced-search" element={<AdvancedSearch />} />
             <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Checkout /></main>} />
-            <Route path="/bulk-sell" element={<RequireAuth><BulkSell /></RequireAuth>} />
 
             <Route
               path="/account/*"

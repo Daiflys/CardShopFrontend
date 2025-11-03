@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { MTG_SETS } from '../data/sets';
-import { searchCardsBulk } from '../api/search';
-import { bulkSellCards } from '../api/bulkSell';
-import { languageOptions as centralizedLanguageOptions } from '../utils/languageFlags.jsx';
-import { conditionOptions } from '../utils/cardConditions';
-import { rarityOptions } from '../utils/rarityOptions';
-import RarityCircle from '../components/RarityCircle';
-import Pagination from '../components/Pagination';
-import CollectionSelector from '../components/CollectionSelector';
-import usePaginationStore from '../store/paginationStore';
+import { MTG_SETS } from '../../../data/sets';
+import { searchCardsBulk } from '../../../api/search';
+import { bulkSellCards } from '../../api/bulkSell';
+import { languageOptions as centralizedLanguageOptions } from '../../../utils/languageFlags.jsx';
+import { conditionOptions } from '../../../utils/cardConditions';
+import { rarityOptions } from '../../../utils/rarityOptions';
+import RarityCircle from '../../../components/RarityCircle';
+import Pagination from '../../../components/Pagination';
+import CollectionSelector from '../../../components/CollectionSelector';
+import usePaginationStore from '../../../store/paginationStore';
 
 const BulkSell = () => {
   const [selectedExpansion, setSelectedExpansion] = useState('');
@@ -189,22 +189,22 @@ const BulkSell = () => {
   }, [openLanguageSelector]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="mb-6">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-            <span className="text-blue-600">Stock</span>
+          <nav className="flex items-center space-x-2 text-sm text-gray-400 mb-4">
+            <span className="text-blue-400">Stock</span>
             <span>/</span>
-            <span className="text-blue-600">Listing Methods</span>
+            <span className="text-blue-400">Listing Methods</span>
             <span>/</span>
             <span>Bulk List Cards</span>
           </nav>
-          <h1 className="text-3xl font-bold text-gray-900">Bulk List Cards</h1>
+          <h1 className="text-3xl font-bold text-white">Bulk List Cards</h1>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             {/* Expansion */}
             <CollectionSelector
@@ -216,9 +216,9 @@ const BulkSell = () => {
 
             {/* Rarity */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Rarity</label>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Rarity</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={selectedRarity}
                 onChange={(e) => setSelectedRarity(e.target.value)}
               >
@@ -230,9 +230,9 @@ const BulkSell = () => {
 
             {/* Sort by */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Sort by</label>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Sort by</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={selectedSorting}
                 onChange={(e) => setSortBy(e.target.value)}
               >
@@ -247,7 +247,7 @@ const BulkSell = () => {
               <button
                 onClick={() => handleFilter(0)}
                 disabled={loading}
-                className="w-full bg-blue-700 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'FILTERING...' : 'FILTER'}
               </button>
@@ -271,12 +271,12 @@ const BulkSell = () => {
 
         {/* Results */}
         {filteredCards.length > 0 && (
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-gray-800 rounded-lg shadow">
             {/* Bulk Modification Toggle */}
-            <div className="border-b p-4">
+            <div className="border-b border-gray-700 p-4">
               <button
                 onClick={() => setShowBulkModification(!showBulkModification)}
-                className="flex items-center text-blue-700 font-semibold hover:text-blue-800"
+                className="flex items-center text-blue-400 font-semibold hover:text-blue-300"
               >
                 <span className={`mr-2 transition-transform ${showBulkModification ? 'rotate-90' : ''}`}>▶</span>
                 Bulk modification
@@ -284,8 +284,8 @@ const BulkSell = () => {
             </div>
 
             {/* Results count and pagination */}
-            <div className="flex justify-between items-center p-4 border-b">
-              <div className="text-sm text-gray-600">
+            <div className="flex justify-between items-center p-4 border-b border-gray-700">
+              <div className="text-sm text-gray-300">
                 {(() => {
                   const { start, end, total } = getPaginationRange();
                   return total === 0 ? 'No cards found' : `${start}-${end} of ${total} Total Cards`;
@@ -296,7 +296,7 @@ const BulkSell = () => {
             {/* Cards Table */}
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-blue-700 text-white">
+                <thead className="bg-blue-600 text-white">
                   <tr>
                     <th className="p-3 text-left">
                       <input
@@ -328,7 +328,7 @@ const BulkSell = () => {
                   {currentCards.map((card, index) => {
                     const cardKey = card.reactKey || card.id; // Use reactKey if available, otherwise use id
                     return (
-                    <tr key={cardKey} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <tr key={cardKey} className={index % 2 === 0 ? 'bg-gray-700' : 'bg-gray-750'}>
                       <td className="p-3">
                         <input
                           type="checkbox"
@@ -370,8 +370,8 @@ const BulkSell = () => {
 
                           {/* Large image tooltip on hover - Fixed positioning */}
                           {hoveredCard && hoveredCard.id === cardKey && (card.imageUrl) && (
-                            <div 
-                              className="fixed z-[9999] bg-white border rounded-lg shadow-2xl p-2 pointer-events-none"
+                            <div
+                              className="fixed z-[9999] bg-gray-900 border border-gray-700 rounded-lg shadow-2xl p-2 pointer-events-none"
                               style={{
                                 left: hoveredCard.rect ? hoveredCard.rect.left - 320 - 8 : '100px',
                                 top: hoveredCard.rect ? hoveredCard.rect.bottom - 400 : '100px',
@@ -380,8 +380,8 @@ const BulkSell = () => {
                                 overflow: 'hidden'
                               }}
                             >
-                              <img 
-                                src={card.imageUrl} 
+                              <img
+                                src={card.imageUrl}
                                 alt={card.cardName}
                                 className="w-full h-auto rounded max-h-full object-contain"
                                 onError={(e) => {
@@ -390,7 +390,7 @@ const BulkSell = () => {
                               />
                             </div>
                           )}
-                          <span className="text-blue-600 hover:underline">{card.cardName}</span>
+                          <span className="text-blue-400 hover:underline">{card.cardName}</span>
                         </div>
                       </td>
                       <td className="p-3 text-center">
@@ -399,7 +399,7 @@ const BulkSell = () => {
                       <td className="p-3">
                         <div className="relative language-selector">
                           <button
-                            className="flex items-center space-x-2 border rounded px-2 py-1 bg-white hover:bg-gray-50 min-w-[120px]"
+                            className="flex items-center space-x-2 border border-gray-600 rounded px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white min-w-[120px]"
                             onClick={() => setOpenLanguageSelector(openLanguageSelector === cardKey ? null : cardKey)}
                           >
                             {(() => {
@@ -408,20 +408,20 @@ const BulkSell = () => {
                                 <>
                                   {selectedLang?.flag}
                                   <span className="text-sm">{selectedLang?.name}</span>
-                                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                   </svg>
                                 </>
                               );
                             })()}
                           </button>
-                          
+
                           {openLanguageSelector === cardKey && (
-                            <div className="absolute z-10 mt-1 w-40 bg-white border rounded-md shadow-lg">
+                            <div className="absolute z-10 mt-1 w-40 bg-gray-700 border border-gray-600 rounded-md shadow-lg">
                               {languageOptions.map(lang => (
                                 <button
                                   key={lang.key}
-                                  className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 w-full text-left"
+                                  className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-600 w-full text-left text-white"
                                   onClick={() => {
                                     updateCardData(cardKey, 'language', lang.key);
                                     setOpenLanguageSelector(null);
@@ -437,7 +437,7 @@ const BulkSell = () => {
                       </td>
                       <td className="p-3">
                         <select
-                          className="border rounded px-2 py-1"
+                          className="bg-gray-600 text-white border border-gray-600 rounded px-2 py-1"
                           value={cardData[cardKey]?.condition || 'NM'}
                           onChange={(e) => updateCardData(cardKey, 'condition', e.target.value)}
                         >
@@ -448,12 +448,12 @@ const BulkSell = () => {
                           ))}
                         </select>
                       </td>
-                      <td className="p-3">★</td>
+                      <td className="p-3 text-white">★</td>
                       <td className="p-3">
                         <input
                           type="number"
                           min="0"
-                          className="border rounded px-2 py-1 w-16"
+                          className="bg-gray-600 text-white border border-gray-600 rounded px-2 py-1 w-16"
                           value={cardData[cardKey]?.quantity || 0}
                           onChange={(e) => updateCardData(cardKey, 'quantity', parseInt(e.target.value) || 0)}
                         />
@@ -463,29 +463,29 @@ const BulkSell = () => {
                           type="number"
                           min="0"
                           step="0.01"
-                          className="border rounded px-2 py-1 w-20"
+                          className="bg-gray-600 text-white border border-gray-600 rounded px-2 py-1 w-20"
                           value={cardData[cardKey]?.price || ''}
                           onChange={(e) => updateCardData(cardKey, 'price', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                         />
-                        <span className="ml-1">€</span>
+                        <span className="ml-1 text-white">€</span>
                       </td>
                       <td className="p-3">
                         <button
                           onClick={() => copyCard(card)}
-                          className="p-1 hover:bg-gray-100 rounded transition-colors"
+                          className="p-1 hover:bg-gray-600 rounded transition-colors"
                           title="Copy this card"
                         >
-                          <svg 
-                            className="w-4 h-4 text-gray-600 hover:text-gray-800" 
-                            fill="none" 
-                            stroke="currentColor" 
+                          <svg
+                            className="w-4 h-4 text-gray-300 hover:text-white"
+                            fill="none"
+                            stroke="currentColor"
                             viewBox="0 0 24 24"
                           >
-                            <path 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round" 
-                              strokeWidth={2} 
-                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" 
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                             />
                           </svg>
                         </button>
@@ -498,18 +498,18 @@ const BulkSell = () => {
             </div>
 
             {/* Pagination */}
-            <div className="p-4 border-t">
+            <div className="p-4 border-t border-gray-700">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={(page) => handlePageChange(page, (validPage) => handleFilter(validPage))}
               />
 
-              <div className="mt-4 text-sm text-gray-500">
+              <div className="mt-4 text-sm text-gray-400">
                 Note: By changing page all input on the form will be lost if unsubmitted.
               </div>
 
-              <div className="mt-4 text-sm text-gray-500">
+              <div className="mt-4 text-sm text-gray-400">
                 Trying to upload more than 100 different articles might result in certain items not being listed. Please upload no more than 100 individual articles. Having multiple of the same article does not affect this restriction.
               </div>
 
@@ -518,7 +518,7 @@ const BulkSell = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={submitting || selectedCount === 0}
-                  className="w-full bg-blue-700 text-white py-3 px-6 rounded font-semibold hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'SUBMITTING...' : `PUT CARD(S) ON SALE (${selectedCount} selected)`}
                 </button>
@@ -529,8 +529,8 @@ const BulkSell = () => {
 
         {/* Empty state */}
         {!loading && filteredCards.length === 0 && !error && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-gray-500 text-lg">
+          <div className="bg-gray-800 rounded-lg shadow p-12 text-center">
+            <div className="text-gray-400 text-lg">
               Use the filters above to search for products.
             </div>
           </div>

@@ -1,6 +1,6 @@
-// src/api/bulkSell.ts
-import Card from '../models/Card.js';
-import { BulkSellResponse } from './types.js';
+// src/admin/api/bulkSell.ts
+import Card from '../../models/Card.js';
+import { BulkSellResponse } from '../../api/types.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
