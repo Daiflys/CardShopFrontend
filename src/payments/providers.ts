@@ -7,6 +7,7 @@ export interface PaymentProvider {
   label: string;
   logoUrl?: string;
   isTest?: boolean;
+  behavior?: 'local' | 'redirect';
   pay: (params: PaymentInitParams) => Promise<PaymentResult>;
 }
 
