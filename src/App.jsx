@@ -27,15 +27,30 @@ import SkinEditor from "./admin/scenes/skinEditor";
 import AuditLogs from "./admin/scenes/auditLogs";
 import BulkPriceChange from "./admin/scenes/bulkPrice";
 import PendingOrders from "./admin/scenes/pendingOrders";
+import StorefrontEditor from "./admin/scenes/storefrontEditor";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
+import StorefrontConfigListener from "./components/StorefrontConfigListener";
+import SkinConfigListener from "./components/SkinConfigListener";
 import "./App.css";
 
 function App() {
   return (
     <CartInitializer>
       <BrowserRouter>
+        <StorefrontConfigListener />
+        <SkinConfigListener />
         <Routes>
+          {/* Storefront Editor - Full Page (No Admin Layout) */}
+          <Route
+            path="/storefront-editor"
+            element={
+              <RequireAuth>
+                <StorefrontEditor />
+              </RequireAuth>
+            }
+          />
+
           {/* Admin Routes - No Header/Footer */}
           <Route path="/admin/*" element={<RequireAuth><AdminLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
