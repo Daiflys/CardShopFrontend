@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { MTG_SETS } from '../data/sets';
-import { searchCardsBulk } from '../api/search';
-import { bulkSellCards } from '../api/bulkSell';
-import { languageOptions as centralizedLanguageOptions } from '../utils/languageFlags.jsx';
-import { conditionOptions } from '../utils/cardConditions';
-import { rarityOptions } from '../utils/rarityOptions';
-import RarityCircle from '../components/RarityCircle';
-import Pagination from '../components/Pagination';
-import CollectionSelector from '../components/CollectionSelector';
-import usePaginationStore from '../store/paginationStore';
+import { MTG_SETS } from '../../../data/sets';
+import { searchCardsBulk } from '../../../api/search';
+import { bulkSellCards } from '../../api/bulkSell';
+import { languageOptions as centralizedLanguageOptions } from '../../../utils/languageFlags.jsx';
+import { conditionOptions } from '../../../utils/cardConditions';
+import { rarityOptions } from '../../../utils/rarityOptions';
+import RarityCircle from '../../../components/RarityCircle';
+import Pagination from '../../../components/Pagination';
+import CollectionSelector from '../../../components/CollectionSelector';
+import usePaginationStore from '../../../store/paginationStore';
 
 const BulkSell = () => {
   const [selectedExpansion, setSelectedExpansion] = useState('');
@@ -189,18 +189,18 @@ const BulkSell = () => {
   }, [openLanguageSelector]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="mb-6">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-            <span className="text-blue-600">Stock</span>
+          <nav className="flex items-center space-x-2 text-sm text-gray-400 mb-4">
+            <span className="text-blue-400">Stock</span>
             <span>/</span>
-            <span className="text-blue-600">Listing Methods</span>
+            <span className="text-blue-400">Listing Methods</span>
             <span>/</span>
             <span>Bulk List Cards</span>
           </nav>
-          <h1 className="text-3xl font-bold text-gray-900">Bulk List Cards</h1>
+          <h1 className="text-3xl font-bold text-white">Bulk List Cards</h1>
         </div>
 
         {/* Filters */}

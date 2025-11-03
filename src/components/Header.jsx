@@ -358,15 +358,6 @@ const Header = () => {
         <button
           className={theme.components.header.userDropdownItem}
           onClick={() => {
-            navigate('/bulk-sell');
-            setMobileMenuOpen(false);
-          }}
-        >
-          Bulk Sell
-        </button>
-        <button
-          className={theme.components.header.userDropdownItem}
-          onClick={() => {
             navigate('/admin');
             setMobileMenuOpen(false);
           }}
@@ -409,9 +400,6 @@ const Header = () => {
             </li>
             <li className="border-t border-sky-100">
               <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/account/settings')}>{t('account.settings')}</button>
-            </li>
-            <li className="border-t border-sky-100">
-              <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/bulk-sell')}>Bulk Sell</button>
             </li>
             <li className="border-t border-sky-100">
               <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/admin')}>Admin Panel</button>

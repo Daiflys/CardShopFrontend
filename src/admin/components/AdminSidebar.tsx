@@ -146,6 +146,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = () => {
             </MenuItem>
 
             <MenuItem
+              icon={<SellOutlinedIcon />}
+              component={<Link to="/admin/bulk-sell" />}
+              style={{ color: colors.grey[100] }}
+            >
+              Bulk Sell
+            </MenuItem>
+
+            <MenuItem
               icon={<PriceChangeOutlinedIcon />}
               component={<Link to="/admin/bulk-price" />}
               style={{ color: colors.grey[100] }}
