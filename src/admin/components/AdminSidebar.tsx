@@ -11,6 +11,7 @@ import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import PriceChangeOutlinedIcon from "@mui/icons-material/PriceChangeOutlined";
@@ -209,6 +210,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = () => {
             >
               {!isCollapsed && "Customization"}
             </Typography>
+
+            <MenuItem
+              icon={<StorefrontOutlinedIcon />}
+              component={<Link to="/storefront-editor" />}
+              style={{ color: colors.grey[100] }}
+            >
+              Storefront Editor
+            </MenuItem>
 
             <MenuItem
               icon={<PaletteOutlinedIcon />}

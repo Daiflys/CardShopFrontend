@@ -45,7 +45,7 @@ export const getUserThemes = async (): Promise<ThemeConfig[]> => {
     return Promise.resolve(mockThemes);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/theme-configs`, {
+  const response = await fetch(`${API_BASE_URL}/theme-configs`, {
     headers: getAuthHeaders(),
   });
 
@@ -66,7 +66,7 @@ export const getActiveTheme = async (): Promise<ThemeConfig> => {
     return Promise.resolve(activeTheme);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/theme-configs/active`, {
+  const response = await fetch(`${API_BASE_URL}/theme-configs/active`, {
     headers: getAuthHeaders(),
   });
 
@@ -87,7 +87,7 @@ export const getThemeById = async (id: number): Promise<ThemeConfig> => {
     return Promise.resolve(theme);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/theme-configs/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/theme-configs/${id}`, {
     headers: getAuthHeaders(),
   });
 
@@ -113,7 +113,7 @@ export const createTheme = async (request: CreateThemeRequest): Promise<ThemeCon
     return Promise.resolve(newTheme);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/theme-configs`, {
+  const response = await fetch(`${API_BASE_URL}/theme-configs`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(request),
@@ -144,7 +144,7 @@ export const updateTheme = async (
     return Promise.resolve(mockThemes[themeIndex]);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/theme-configs/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/theme-configs/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(request),
@@ -167,7 +167,7 @@ export const deleteTheme = async (id: number): Promise<void> => {
     return Promise.resolve();
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/theme-configs/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/theme-configs/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
@@ -192,7 +192,7 @@ export const activateTheme = async (id: number): Promise<ThemeConfig> => {
     return Promise.resolve(theme);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/theme-configs/${id}/activate`, {
+  const response = await fetch(`${API_BASE_URL}/theme-configs/${id}/activate`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });

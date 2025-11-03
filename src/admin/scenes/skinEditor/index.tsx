@@ -611,17 +611,23 @@ const SkinEditor: React.FC = () => {
                 variant="contained"
                 fullWidth
                 onClick={() => {
-                  const updatedTheme = {
-                    ...appTheme,
-                    components: {
-                      ...appTheme.components,
-                      header: {
-                        ...appTheme.components.header,
-                      }
-                    }
+                  // Save configuration to localStorage for SkinConfigListener
+                  const skinConfig = {
+                    header: {
+                      elements: headerElements,
+                      styles: headerStyles,
+                    },
+                    timestamp: new Date().toISOString(),
                   };
-                  updateTheme(updatedTheme);
-                  alert('Header styles saved to localStorage!');
+
+                  localStorage.setItem('skinEditorConfig', JSON.stringify(skinConfig));
+
+                  // Dispatch custom event for same-window updates
+                  window.dispatchEvent(new CustomEvent('skinConfigUpdate'));
+
+                  setSnackbarMessage('Header styles saved successfully!');
+                  setSnackbarSeverity('success');
+                  setSnackbarOpen(true);
                 }}
                 sx={{
                   mt: 3,
