@@ -7,6 +7,7 @@ import HeaderProperties from './properties/HeaderProperties';
 import ButtonsProperties from './properties/ButtonsProperties';
 import LayoutProperties from './properties/LayoutProperties';
 import ProductCardProperties from './properties/ProductCardProperties';
+import PageSectionsProperties from './properties/PageSectionsProperties';
 
 const PropertiesPanel = () => {
   const { selectedSection } = useEditorStore();
@@ -19,6 +20,8 @@ const PropertiesPanel = () => {
         return <ColorsProperties />;
       case 'typography':
         return <TypographyProperties />;
+      case 'page':
+        return <PageSectionsProperties />;
       case 'header':
         return <HeaderProperties />;
       case 'buttons':

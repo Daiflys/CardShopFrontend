@@ -10,6 +10,8 @@ import { useLocation } from 'react-router-dom';
 const StorefrontConfigListener = () => {
   const location = useLocation();
   const isPreviewMode = new URLSearchParams(location.search).get('preview') === 'true';
+  const pathname = location.pathname || '/';
+  const inAdmin = pathname.startsWith('/admin') || pathname.startsWith('/storefront-editor');
 
   useEffect(() => {
     if (!isPreviewMode) return;
@@ -46,7 +48,7 @@ const StorefrontConfigListener = () => {
 
   // Apply saved config in non-preview mode so shops see their theme
   useEffect(() => {
-    if (isPreviewMode) return;
+    if (isPreviewMode || inAdmin) return;
     try {
       const raw = localStorage.getItem('STOREFRONT_EDITOR_CONFIG');
       if (raw) {
@@ -65,11 +67,11 @@ const StorefrontConfigListener = () => {
     } catch (e) {
       console.warn('Failed to load storefront config from localStorage:', e);
     }
-  }, [isPreviewMode]);
+  }, [isPreviewMode, inAdmin]);
 
   // React to config changes from other tabs (editor saves to localStorage)
   useEffect(() => {
-    if (isPreviewMode) return;
+    if (isPreviewMode || inAdmin) return;
     const onStorage = (e) => {
       if (e.key !== 'STOREFRONT_EDITOR_CONFIG') return;
       try {
@@ -88,7 +90,27 @@ const StorefrontConfigListener = () => {
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, [isPreviewMode]);
+  }, [isPreviewMode, inAdmin]);
+
+  // Re-apply on route changes (e.g., returning to home page)
+  useEffect(() => {
+    if (isPreviewMode || inAdmin) return;
+    try {
+      const raw = localStorage.getItem('STOREFRONT_EDITOR_CONFIG');
+      if (!raw) { clearAppliedStyles(); return; }
+      const parsed = JSON.parse(raw);
+      if (parsed?.applyToSite === false) { clearAppliedStyles(); return; }
+      applyConfiguration(parsed);
+      applyExtendedConfiguration(parsed);
+    } catch {}
+  }, [pathname, isPreviewMode, inAdmin]);
+
+  // Ensure admin routes never inherit storefront styles
+  useEffect(() => {
+    if (!isPreviewMode && inAdmin) {
+      clearAppliedStyles();
+    }
+  }, [pathname, isPreviewMode, inAdmin]);
 
   // In preview, also listen and apply extended settings (header/buttons/layout/cards)
   useEffect(() => {
@@ -300,23 +322,7 @@ const applyColors = (colorsConfig) => {
       border-color: ${colors.border} !important;
     }
 
-    /* Footer */
-    footer,
-    footer[class],
-    footer > div {
-      background-color: ${colors.text} !important;
-      color: ${colors.background} !important;
-    }
-
-    footer a,
-    footer span,
-    footer p {
-      color: ${colors.background} !important;
-    }
-
-    footer a:hover {
-      color: ${colors.accent1} !important;
-    }
+    /* Footer overrides removed to avoid clobbering site footer styles */
   `;
 
   styleElement.textContent = css;
@@ -435,6 +441,7 @@ const applyExtendedConfiguration = (config) => {
   if (config.buttons) applyButtons(config.buttons);
   if (config.layout) applyLayout(config.layout);
   if (config.productCards) applyProductCards(config.productCards);
+  if (config.pages) applyPageSections(config.pages);
 };
 
 /**
@@ -455,6 +462,132 @@ const clearAppliedStyles = () => {
   });
   const bar = document.getElementById('storefront-announcement-bar');
   if (bar) bar.remove();
+};
+
+/**
+ * Render page-level sections (starting with Home)
+ */
+const applyPageSections = (pages) => {
+  // Home page container must exist
+  const container = document.getElementById('storefront-sections-home');
+  if (!container) return;
+
+  // Clear previous rendered content
+  container.innerHTML = '';
+
+  const home = pages?.home;
+  if (!home || !Array.isArray(home.sections)) return;
+
+  home.sections.forEach((section) => {
+    if (!section?.enabled) return;
+    if (section.type === 'miniBanner') {
+      const s = section.settings || {};
+      const wrapper = document.createElement('section');
+      wrapper.className = 'storefront-section-minibanner my-4';
+      wrapper.setAttribute('data-section-id', section.id);
+      wrapper.style.background = s.background || '#f3f4f6';
+      if (s.backgroundImage) {
+        // Overlay support via layered background
+        const hex = (s.overlayColor || '#000000').replace('#', '');
+        const r = parseInt(hex.substring(0,2), 16) || 0;
+        const g = parseInt(hex.substring(2,4), 16) || 0;
+        const b = parseInt(hex.substring(4,6), 16) || 0;
+        const op = Math.max(0, Math.min(1, (s.overlayOpacity ?? 35) / 100));
+        const overlay = s.overlayEnabled ? `linear-gradient(rgba(${r},${g},${b},${op}), rgba(${r},${g},${b},${op})), ` : '';
+        wrapper.style.backgroundImage = `${overlay}url(${s.backgroundImage})`;
+        wrapper.style.backgroundSize = 'cover';
+        wrapper.style.backgroundPosition = 'center';
+      } else {
+        wrapper.style.backgroundImage = '';
+      }
+      wrapper.style.color = s.textColor || '#111827';
+      wrapper.style.minHeight = (s.height || 160) + 'px';
+      wrapper.style.display = 'flex';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.justifyContent = s.align === 'left' ? 'flex-start' : s.align === 'right' ? 'flex-end' : 'center';
+      wrapper.style.padding = '12px';
+      wrapper.style.borderRadius = (s.borderRadius ?? 8) + 'px';
+
+      const content = document.createElement('div');
+      content.className = 'text-sm sm:text-base font-medium';
+      content.style.display = 'flex';
+      content.style.flexDirection = 'column';
+      content.style.gap = '8px';
+      if (s.showText !== false) {
+        if (s.linkUrl) {
+          const a = document.createElement('a');
+          a.href = s.linkUrl;
+          a.textContent = s.text || '';
+          a.style.color = 'inherit';
+          a.style.textDecoration = 'none';
+          a.onmouseenter = () => (a.style.textDecoration = 'underline');
+          a.onmouseleave = () => (a.style.textDecoration = 'none');
+          content.appendChild(a);
+        } else {
+          content.textContent = s.text || '';
+        }
+      }
+
+      // CTA button
+      if (s.showButton && s.buttonLabel && s.buttonUrl) {
+        const btn = document.createElement('a');
+        btn.href = s.buttonUrl;
+        btn.textContent = s.buttonLabel;
+        btn.className = 'inline-block px-4 py-2 rounded-md';
+        btn.style.background = s.buttonBg || '#0284c7';
+        btn.style.color = s.buttonTextColor || '#ffffff';
+        btn.style.textDecoration = 'none';
+        btn.onmouseenter = () => (btn.style.opacity = '0.9');
+        btn.onmouseleave = () => (btn.style.opacity = '1');
+        content.appendChild(btn);
+      }
+
+      wrapper.appendChild(content);
+      container.appendChild(wrapper);
+    }
+    if (section.type === 'richText') {
+      const s = section.settings || {};
+      const wrapper = document.createElement('section');
+      wrapper.className = 'storefront-section-richtext my-6';
+      wrapper.setAttribute('data-section-id', section.id);
+      wrapper.style.background = s.background || '#ffffff';
+      wrapper.style.color = s.textColor || '#111827';
+      wrapper.style.padding = ((s.padding ?? 24)) + 'px';
+      wrapper.style.borderRadius = '8px';
+
+      const inner = document.createElement('div');
+      inner.style.maxWidth = '100%';
+      inner.style.textAlign = s.align || 'center';
+
+      if (s.title) {
+        const h = document.createElement('h2');
+        h.className = 'text-xl sm:text-2xl font-semibold mb-2';
+        h.textContent = s.title;
+        inner.appendChild(h);
+      }
+      if (s.body) {
+        const p = document.createElement('p');
+        p.className = 'text-sm sm:text-base text-gray-700 mb-3';
+        p.style.color = 'inherit';
+        p.textContent = s.body;
+        inner.appendChild(p);
+      }
+      if (s.buttonLabel && s.buttonUrl) {
+        const a = document.createElement('a');
+        a.href = s.buttonUrl;
+        a.textContent = s.buttonLabel;
+        a.className = 'inline-block px-4 py-2 rounded-md text-white';
+        a.style.background = 'var(--storefront-accent1, #0284c7)';
+        a.style.textDecoration = 'none';
+        a.onmouseenter = () => (a.style.opacity = '0.9');
+        a.onmouseleave = () => (a.style.opacity = '1');
+        inner.appendChild(a);
+      }
+
+      wrapper.appendChild(inner);
+      container.appendChild(wrapper);
+    }
+  });
 };
 
 /**

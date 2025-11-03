@@ -77,6 +77,8 @@ function App() {
                   containerClassName="py-6 lg:py-8"
                 >
                   <BannerNew />
+                  {/* Dynamic sections container for Storefront Editor page elements */}
+                  <div id="storefront-sections-home" />
                   <Trends />
                   <RecentlyViewed />
                 </PageLayout>

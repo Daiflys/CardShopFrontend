@@ -128,6 +128,16 @@ const DEFAULT_CONFIG = {
     showCondition: true,
     showSet: true,
     showSeller: false
+  },
+
+  // Page-level customizable sections (start with Home page)
+  pages: {
+    home: {
+      sections: [
+        // Example section structure
+        // { id: 'sec_1', type: 'miniBanner', enabled: true, settings: { imageUrl: '', linkUrl: '', height: 160, background: '#f3f4f6', text: '', align: 'center' } }
+      ]
+    }
   }
 };
 
