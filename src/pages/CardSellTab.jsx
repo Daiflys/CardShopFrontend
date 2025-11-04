@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { setCardToSell } from "../api/postCardToSell";
 import { conditionOptions } from "../utils/cardConditions";
+import Button from '../design/components/Button';
 
 const CardSellTab = ({ card }) => {
   const [quantity, setQuantity] = useState(1);
@@ -133,9 +134,9 @@ const CardSellTab = ({ card }) => {
         <label className="block font-semibold mb-1">Price</label>
         <input type="number" min="0" step="0.01" className="border rounded px-3 py-2 w-full" value={price} onChange={e => setPrice(e.target.value)} />
       </div>
-      <button type="submit" className="bg-blue-700 text-white px-4 py-2 rounded font-bold w-full">
+      <Button type="submit" variant="primary" className="w-full">
         PUT FOR SALE
-      </button>
+      </Button>
     </form>
   );
 };

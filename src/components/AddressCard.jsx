@@ -1,5 +1,6 @@
 // src/components/AddressCard.jsx
 import React, { useState } from 'react';
+import Button from '../design/components/Button';
 
 const AddressCard = ({ address, onEdit, onDelete, onSetPrimary, isDeleting, isSettingPrimary }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -53,44 +54,51 @@ const AddressCard = ({ address, onEdit, onDelete, onSetPrimary, isDeleting, isSe
         <div className="bg-red-50 border border-red-200 rounded p-3 mb-3">
           <p className="text-sm text-red-800 mb-2">Are you sure you want to delete this address?</p>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="danger"
+              size="sm"
               onClick={confirmDelete}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
             >
               {isDeleting ? 'Deleting...' : 'Yes, delete'}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={cancelDelete}
               disabled={isDeleting}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm disabled:opacity-50"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onEdit(address)}
-            className="text-blue-700 hover:text-blue-800 border border-blue-700 hover:border-blue-800 px-3 py-1.5 rounded text-sm font-medium transition-colors"
+            className="text-blue-700 hover:text-blue-800 border-blue-700 hover:border-blue-800"
           >
             Edit
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleDelete}
-            className="text-red-600 hover:text-red-700 border border-red-600 hover:border-red-700 px-3 py-1.5 rounded text-sm font-medium transition-colors"
+            className="text-red-600 hover:text-red-700 border-red-600 hover:border-red-700"
           >
             Delete
-          </button>
+          </Button>
           {!address.isPrimary && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onSetPrimary(address.id)}
               disabled={isSettingPrimary}
-              className="text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-3 py-1.5 rounded text-sm font-medium transition-colors disabled:opacity-50"
             >
               {isSettingPrimary ? 'Setting...' : 'Set as Primary'}
-            </button>
+            </Button>
           )}
         </div>
       )}

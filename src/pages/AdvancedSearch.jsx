@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdvancedSearchComponent from '../components/AdvancedSearch';
 import PageLayout from '../components/PageLayout';
 import { buildSearchUrl } from '../utils/searchUtils';
+import Button from '../design/components/Button';
 
 const AdvancedSearchPage = () => {
   const navigate = useNavigate();
@@ -24,15 +25,16 @@ const AdvancedSearchPage = () => {
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
           <div className="mb-6">
-            <button
+            <Button
+              variant="link"
               onClick={() => navigate(-1)}
-              className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+              className="flex items-center"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back
-            </button>
+            </Button>
           </div>
 
           {/* Search Form */}

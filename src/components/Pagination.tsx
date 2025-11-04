@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../design/components/Button';
 
 export interface PaginationProps {
   currentPage: number;
@@ -71,76 +72,72 @@ const Pagination: React.FC<PaginationProps> = ({
       {/* Desktop Pagination */}
       <div className="hidden sm:flex flex-wrap items-center justify-center gap-1">
         {/* Previous button with arrow */}
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => handlePageChange(validCurrentPage - 1)}
           disabled={validCurrentPage === 0}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${validCurrentPage === 0
-            ? 'text-gray-400 cursor-not-allowed bg-gray-100'
-            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-            }`}
+          className="flex items-center gap-1"
         >
           <span>←</span>
           Previous
-        </button>
+        </Button>
 
         {/* First page */}
         {showFirstEllipsisDesktop && (
           <>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              active={validCurrentPage === 0}
               onClick={() => handlePageChange(0)}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${validCurrentPage === 0
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-                }`}
             >
               1
-            </button>
+            </Button>
             <span className="px-2 py-2 text-gray-500">...</span>
           </>
         )}
 
         {/* Visible page numbers */}
         {visiblePagesDesktop.map((page) => (
-          <button
+          <Button
             key={page}
+            variant="outline"
+            size="sm"
+            active={validCurrentPage === page}
             onClick={() => handlePageChange(page)}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors min-w-[40px] ${validCurrentPage === page
-              ? 'bg-blue-600 text-white shadow-md'
-              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-              }`}
+            className="min-w-[40px]"
           >
             {page + 1}
-          </button>
+          </Button>
         ))}
 
         {/* Last page */}
         {showLastEllipsisDesktop && (
           <>
             <span className="px-2 py-2 text-gray-500">...</span>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              active={validCurrentPage === validTotalPages - 1}
               onClick={() => handlePageChange(validTotalPages - 1)}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${validCurrentPage === validTotalPages - 1
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-                }`}
             >
               {validTotalPages}
-            </button>
+            </Button>
           </>
         )}
 
         {/* Next button with arrow */}
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => handlePageChange(validCurrentPage + 1)}
           disabled={validCurrentPage === validTotalPages - 1}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${validCurrentPage === validTotalPages - 1
-            ? 'text-gray-400 cursor-not-allowed bg-gray-100'
-            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-            }`}
+          className="flex items-center gap-1"
         >
           Next
           <span>→</span>
-        </button>
+        </Button>
 
         {/* Page info */}
         <div className="ml-4 text-sm text-gray-600">
@@ -157,29 +154,27 @@ const Pagination: React.FC<PaginationProps> = ({
 
         {/* Navigation buttons */}
         <div className="flex items-center justify-between gap-3 mb-3">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handlePageChange(validCurrentPage - 1)}
             disabled={validCurrentPage === 0}
-            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1 ${validCurrentPage === 0
-              ? 'text-gray-400 cursor-not-allowed bg-gray-100'
-              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-              }`}
+            className="flex-1 flex items-center justify-center gap-1"
           >
             <span>←</span>
             <span className="hidden xs:inline">Previous</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handlePageChange(validCurrentPage + 1)}
             disabled={validCurrentPage === validTotalPages - 1}
-            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1 ${validCurrentPage === validTotalPages - 1
-              ? 'text-gray-400 cursor-not-allowed bg-gray-100'
-              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-              }`}
+            className="flex-1 flex items-center justify-center gap-1"
           >
             <span className="hidden xs:inline">Next</span>
             <span>→</span>
-          </button>
+          </Button>
         </div>
 
         {/* Page numbers - compact mobile view */}
@@ -187,46 +182,46 @@ const Pagination: React.FC<PaginationProps> = ({
           {/* First page on mobile */}
           {showFirstEllipsisMobile && (
             <>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
+                active={validCurrentPage === 0}
                 onClick={() => handlePageChange(0)}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors min-w-[28px] ${validCurrentPage === 0
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-                  }`}
+                className="px-2 py-1 text-xs min-w-[28px]"
               >
                 1
-              </button>
+              </Button>
               <span className="px-1 text-gray-500 text-xs">...</span>
             </>
           )}
 
           {/* Visible page numbers on mobile */}
           {visiblePagesMobile.map((page) => (
-            <button
+            <Button
               key={page}
+              variant="outline"
+              size="sm"
+              active={validCurrentPage === page}
               onClick={() => handlePageChange(page)}
-              className={`px-2 py-1 rounded text-xs font-medium transition-colors min-w-[28px] ${validCurrentPage === page
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-                }`}
+              className="px-2 py-1 text-xs min-w-[28px]"
             >
               {page + 1}
-            </button>
+            </Button>
           ))}
 
           {/* Last page on mobile */}
           {showLastEllipsisMobile && (
             <>
               <span className="px-1 text-gray-500 text-xs">...</span>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
+                active={validCurrentPage === validTotalPages - 1}
                 onClick={() => handlePageChange(validTotalPages - 1)}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors min-w-[28px] ${validCurrentPage === validTotalPages - 1
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900 bg-white border border-gray-300'
-                  }`}
+                className="px-2 py-1 text-xs min-w-[28px]"
               >
                 {validTotalPages}
-              </button>
+              </Button>
             </>
           )}
         </div>

@@ -8,6 +8,7 @@ import PaymentMethodSelector from "../components/PaymentMethodSelector";
 import ConditionIcon from "../components/ConditionIcon";
 import AddressSelector from "../components/AddressSelector";
 import CheckoutAddressForm from "../components/CheckoutAddressForm";
+import Button from "../design/components/Button";
 
 const Checkout = () => {
   const {
@@ -250,18 +251,18 @@ const Checkout = () => {
             The seller will review your order and confirm it shortly. You will receive a notification once confirmed.
           </p>
           <div className="flex gap-3">
-            <button
-              className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
+            <Button
+              variant="primary"
               onClick={() => navigate('/')}
             >
               Continue shopping
-            </button>
-            <button
-              className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => navigate('/account/transactions')}
             >
               View my orders
-            </button>
+            </Button>
           </div>
         </div>
       ) : checkoutError && step === "review" ? (
@@ -269,12 +270,12 @@ const Checkout = () => {
           <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
             {checkoutError}
           </div>
-          <button
-            className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
+          <Button
+            variant="primary"
             onClick={() => setCheckoutError("")}
           >
             Try again
-          </button>
+          </Button>
         </div>
       ) : cartItems.length === 0 ? (
         <div className="text-center text-gray-600 py-16">
@@ -335,13 +336,15 @@ const Checkout = () => {
               <span>Shipping</span>
               <span>Calculated at next step</span>
             </div>
-            <button
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded font-semibold disabled:opacity-50"
+            <Button
+              variant="primary"
+              size="md"
+              className="w-full"
               disabled={cartLoading}
               onClick={handleProceedToShipping}
             >
               Proceed to shipping
-            </button>
+            </Button>
           </aside>
         </div>
       ) : step === "shipping" ? (
@@ -378,13 +381,13 @@ const Checkout = () => {
                   >
                     Back to cart
                   </button>
-                  <button
-                    className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded font-semibold disabled:opacity-50"
+                  <Button
+                    variant="primary"
                     onClick={handleContinueToReview}
                     disabled={!selectedAddressId && !newAddressData}
                   >
                     Continue to review
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -497,13 +500,14 @@ const Checkout = () => {
               >
                 Back to shipping
               </button>
-              <button
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded font-semibold disabled:opacity-50"
+              <Button
+                variant="success"
+                loading={placing}
                 onClick={handlePlaceOrder}
                 disabled={placing}
               >
                 {placing ? 'Placing order...' : 'Place order'}
-              </button>
+              </Button>
             </div>
           </div>
 

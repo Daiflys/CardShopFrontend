@@ -9,6 +9,7 @@ import RarityCircle from '../../../components/RarityCircle';
 import Pagination from '../../../components/Pagination';
 import CollectionSelector from '../../../components/CollectionSelector';
 import usePaginationStore from '../../../store/paginationStore';
+import Button from '../../../design/components/Button';
 
 const BulkSell = () => {
   const [selectedExpansion, setSelectedExpansion] = useState('');
@@ -244,13 +245,15 @@ const BulkSell = () => {
 
             {/* Filter Button */}
             <div>
-              <button
+              <Button
+                variant="primary"
                 onClick={() => handleFilter(0)}
                 disabled={loading}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={loading}
+                className="w-full"
               >
                 {loading ? 'FILTERING...' : 'FILTER'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -515,13 +518,15 @@ const BulkSell = () => {
 
               {/* Submit Button */}
               <div className="mt-6">
-                <button
+                <Button
+                  variant="primary"
                   onClick={handleSubmit}
                   disabled={submitting || selectedCount === 0}
-                  className="w-full bg-blue-600 text-white py-3 px-6 rounded font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  loading={submitting}
+                  className="w-full"
                 >
                   {submitting ? 'SUBMITTING...' : `PUT CARD(S) ON SALE (${selectedCount} selected)`}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

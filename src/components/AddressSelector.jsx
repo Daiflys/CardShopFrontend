@@ -1,6 +1,7 @@
 // src/components/AddressSelector.jsx
 import React, { useEffect } from 'react';
 import useAddressStore from '../store/addressStore';
+import Button from '../design/components/Button';
 
 const AddressSelector = ({ selectedAddressId, onSelectAddress, onAddNew }) => {
   const { addresses, loading, error, loadAddresses } = useAddressStore();
@@ -44,12 +45,12 @@ const AddressSelector = ({ selectedAddressId, onSelectAddress, onAddNew }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <p className="text-gray-700 mb-3">No saved addresses found</p>
-        <button
+        <Button
+          variant="link"
           onClick={onAddNew}
-          className="text-blue-700 hover:text-blue-800 font-medium text-sm"
         >
           Add a new address
-        </button>
+        </Button>
       </div>
     );
   }
@@ -98,15 +99,16 @@ const AddressSelector = ({ selectedAddressId, onSelectAddress, onAddNew }) => {
         </label>
       ))}
 
-      <button
+      <Button
+        variant="outline"
         onClick={onAddNew}
-        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 hover:border-blue-600 hover:text-blue-700 transition-colors"
+        className="w-full flex items-center justify-center gap-2 border-2 border-dashed hover:border-blue-600 hover:text-blue-700"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
         Use a different address
-      </button>
+      </Button>
     </div>
   );
 };
