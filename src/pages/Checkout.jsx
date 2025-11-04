@@ -30,6 +30,8 @@ const Checkout = () => {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [selectedPayment, setSelectedPayment] = useState('redsys');
+  const [paymentStatus, setPaymentStatus] = useState('');
+  const [paymentOrderId, setPaymentOrderId] = useState('');
 
   // Address state
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -121,13 +123,31 @@ const Checkout = () => {
       const provider = getPaymentProviderByKey(selectedPayment);
       if (!provider) throw new Error('Invalid payment provider');
       const amount = Number(getCartTotal().toFixed(2));
+      // Prepare orderId for traceability (4–12 alphanumeric)
+      const tsPart = Date.now().toString().slice(-8);
+      const orderId = `ORD${tsPart}`;
+      setPaymentOrderId(orderId);
+
+      if (provider.behavior === 'redirect') {
+        setPaymentStatus(`Redirecting to ${provider.label} (order ${orderId})...`);
+        console.log('➡️ Redirect flow starting for provider:', provider.label, 'order:', orderId);
+      } else {
+        setPaymentStatus('Processing payment...');
+      }
       const paymentResult = await provider.pay({
         amount,
         currency: 'EUR',
         cartItems,
         shippingAddress,
+        orderId,
       });
       console.log("✅ Payment successful:", paymentResult);
+
+      // If provider performs redirect, do not continue (navigation already triggered)
+      if (provider.behavior === 'redirect') {
+        // We navigated away; keep status visible until navigation or user action
+        return;
+      }
 
       if (!paymentResult.success) {
         throw new Error("Payment failed");
@@ -193,8 +213,14 @@ const Checkout = () => {
     } catch (e) {
       console.error("❌ Checkout exception:", e);
       setCheckoutError(e.message || "Error processing your order");
+      setPaymentStatus('');
     } finally {
-      setPlacing(false);
+      // In redirect mode, the page navigates away; guard not to overwrite UI mid-navigation
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        setPlacing(false);
+        // Clear status for non-redirect flows
+        setPaymentStatus(prev => (prev && prev.startsWith('Processing') ? '' : prev));
+      }
     }
   };
 
@@ -413,7 +439,7 @@ const Checkout = () => {
               })()}
             </div>
 
-            {/* Order Items */}
+            {/* Payment Method */}
             <div className="bg-white rounded-lg border p-4 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold text-gray-900">Payment Method</h2>
@@ -458,6 +484,11 @@ const Checkout = () => {
               </div>
             </div>
 
+            {paymentStatus && (
+              <div className="mb-3 p-3 rounded border border-blue-200 bg-blue-50 text-blue-800 text-sm">
+                {paymentStatus}
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <button
                 className="text-gray-700 hover:text-gray-900"

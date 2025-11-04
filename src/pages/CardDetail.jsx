@@ -4,6 +4,8 @@ import CardInfoTab from "./CardInfoTab";
 import CardSellTab from "./CardSellTab";
 import PageLayout from "../components/PageLayout";
 import { getCardDetail } from "../api/card";
+import { decodeJWTToken } from "../utils/oauth";
+import { isAdmin } from "../utils/userRoles";
 
 const CardDetail = () => {
   const { cardId } = useParams();
@@ -11,6 +13,23 @@ const CardDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("info");
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
+
+  // Check if user is admin
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token && token.split(".").length === 3) {
+      try {
+        const payload = decodeJWTToken(token);
+        if (payload && payload.role) {
+          setUserIsAdmin(isAdmin(payload.role));
+        }
+      } catch {
+        // ignore decoding errors
+        setUserIsAdmin(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -23,8 +42,8 @@ const CardDetail = () => {
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <PageLayout>
-          <div className="bg-white rounded-xl shadow p-4 lg:p-6">
+        <PageLayout containerClassName="px-0 py-4 sm:px-4" maxWidth="max-w-6xl">
+          <div className="sm:bg-white sm:rounded-xl sm:shadow p-4 sm:p-6">
             <div className="animate-pulse">
               {/* Loading skeleton for tabs */}
               <div className="flex border-b mb-4">
@@ -68,8 +87,8 @@ const CardDetail = () => {
   if (error) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <PageLayout>
-          <div className="bg-white rounded-xl shadow p-4 lg:p-6">
+        <PageLayout containerClassName="px-0 py-4 sm:px-4" maxWidth="max-w-6xl">
+          <div className="sm:bg-white sm:rounded-xl sm:shadow p-4 sm:p-6">
             <div className="text-center py-12">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
                 <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -94,28 +113,38 @@ const CardDetail = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <PageLayout>
-        <div className="bg-white rounded-xl shadow p-4 lg:p-6">
+      <PageLayout containerClassName="px-0 py-4 sm:px-4" maxWidth="max-w-6xl">
+        <div className="sm:bg-white sm:rounded-xl sm:shadow p-4 sm:p-6">
           <div className="flex border-b mb-4">
             <button
-              className={`px-4 py-2 ${activeTab === "info" ? "border-b-2 border-blue-700 font-bold" : ""}`}
+              className={`px-4 py-2 -mb-px border-b-2 text-sm sm:text-base font-medium transition-colors ${
+                activeTab === "info"
+                  ? "border-sky-600 text-sky-700"
+                  : "border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300"
+              }`}
               onClick={() => setActiveTab("info")}
             >
-              Info.
+              Info
             </button>
-            <button
-              className={`px-4 py-2 ${activeTab === "sell" ? "border-b-2 border-blue-700 font-bold" : ""}`}
-              onClick={() => setActiveTab("sell")}
-            >
-              Sell
-            </button>
+            {userIsAdmin && (
+              <button
+                className={`px-4 py-2 -mb-px border-b-2 text-sm sm:text-base font-medium transition-colors ${
+                  activeTab === "sell"
+                    ? "border-sky-600 text-sky-700"
+                    : "border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300"
+                }`}
+                onClick={() => setActiveTab("sell")}
+              >
+                Sell
+              </button>
+            )}
           </div>
           {activeTab === "info" && <CardInfoTab card={card} />}
-          {activeTab === "sell" && <CardSellTab card={card} />}
+          {activeTab === "sell" && userIsAdmin && <CardSellTab card={card} />}
         </div>
       </PageLayout>
     </div>
   );
 };
 
-export default CardDetail; 
+export default CardDetail;

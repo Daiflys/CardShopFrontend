@@ -89,7 +89,7 @@ function App() {
             <Route path="/register" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Register /></main>} />
             <Route path="/search" element={<main className="max-w-7xl mx-auto"><Search /></main>} />
             <Route path="/advanced-search" element={<AdvancedSearch />} />
-            <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><CardDetail /></main>} />
+            <Route path="/card/:cardId" element={<main className="max-w-6xl mx-auto px-0 sm:px-6 lg:px-8"><CardDetail /></main>} />
             <Route path="/checkout" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><Checkout /></main>} />
             <Route path="/payment/return" element={<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><PaymentReturn /></main>} />
 

@@ -22,7 +22,7 @@ const RecentlyViewed = () => {
       </div>
 
       <div className="p-4">
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {recentlyViewed.map((card, index) => (
             <div
               key={`${card.cardId}-${index}`}
