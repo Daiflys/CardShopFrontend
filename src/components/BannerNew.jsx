@@ -67,9 +67,17 @@ const BannerNew = () => {
   // Original sliding animation logic
   const goTo = (idx, direction = "right") => {
     if (isAnimating || idx === current) return;
+
+    // If page is hidden or carousel DOM not ready, switch instantly without animation
+    const container = document.querySelector('.carousel-container');
+    if (document.visibilityState !== 'visible' || !container) {
+      setCurrent(idx);
+      setIsAnimating(false);
+      return;
+    }
+
     setIsAnimating(true);
     
-    const container = document.querySelector('.carousel-container');
     const currentSlide = container.querySelector('.current-slide');
     const nextSlide = container.querySelector('.next-slide');
     
@@ -109,26 +117,42 @@ const BannerNew = () => {
       nextSlide.style.transform = 'translateX(0)';
     });
     
-    setTimeout(() => {
+    // Use a transitionend listener with a timeout fallback to be robust when tab visibility changes
+    const finalize = () => {
+      // Keep the next slide visible while we swap the React content, to avoid flicker
       setIsAnimating(false);
-      // Disable transitions temporarily to avoid visual jumps
+
+      // Freeze positions (no transitions) while we switch content
       currentSlide.style.transition = 'none';
       nextSlide.style.transition = 'none';
-      
-      // Update the current slide content immediately
+
+      // 1) Update React state to the new banner
       setCurrent(idx);
-      
-      // Reset positions instantly without transitions
-      currentSlide.style.transform = 'translateX(0)';
-      nextSlide.innerHTML = '';
-      nextSlide.style.transform = direction === "right" ? 'translateX(100%)' : 'translateX(-100%)';
-      
-      // Re-enable transitions after a brief delay
-      setTimeout(() => {
-        currentSlide.style.transition = '';
-        nextSlide.style.transition = '';
-      }, 50);
-    }, 500);
+
+      // 2) On next frames, switch visibility back to currentSlide, then reset nextSlide
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // Bring current slide to viewport
+          currentSlide.style.transform = 'translateX(0)';
+          // Move next slide offscreen and clear its content buffer
+          nextSlide.innerHTML = '';
+          nextSlide.style.transform = direction === "right" ? 'translateX(100%)' : 'translateX(-100%)';
+
+          // Re-enable transitions after a brief delay
+          setTimeout(() => {
+            currentSlide.style.transition = '';
+            nextSlide.style.transition = '';
+          }, 50);
+        });
+      });
+
+      nextSlide.removeEventListener('transitionend', onEnd);
+    };
+
+    const onEnd = () => finalize();
+    nextSlide.addEventListener('transitionend', onEnd, { once: true });
+    // Fallback in case transitionend doesn't fire (background tab, etc.)
+    setTimeout(finalize, 700);
     
     clearTimeout(timeoutRef.current);
   };

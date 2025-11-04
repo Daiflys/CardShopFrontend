@@ -4,7 +4,7 @@ import RarityIndicator from "./RarityIndicator";
 import { useComponent } from "../hooks/useComponent.js";
 import { useTheme } from "../hooks/useTheme";
 
-const ProductCard = ({ id, card_name, image_url, name, price, set, rarity }) => {
+const ProductCard = ({ id, cardName, imageUrl, name, price, set, rarity }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
 
@@ -31,12 +31,12 @@ const ProductCard = ({ id, card_name, image_url, name, price, set, rarity }) => 
 
   // Prepare sections for the skin
   const imageSection = (
-    <img src={image_url} alt={card_name} className="object-contain h-full w-full" />
+    <img src={imageUrl} alt={cardName} className="object-contain h-full w-full" />
   );
 
   const titleSection = (
     <span className="text-lg font-bold text-blue-800 mb-1">
-      {card_name}
+      {cardName}
     </span>
   );
 

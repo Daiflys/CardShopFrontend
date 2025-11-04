@@ -17,11 +17,11 @@ const OtherVersions = ({ card, currentCardId }) => {
   const { handlePaginatedResponse } = usePaginationStore();
 
   useEffect(() => {
-    if (!card?.oracleId && !card?.oracle_id) {
+    if (!card?.oracleId) {
       return;
     }
 
-    const oracleId = card.oracleId || card.oracle_id;
+    const oracleId = card.oracleId;
 
     const fetchOtherVersions = async () => {
       try {
@@ -43,7 +43,7 @@ const OtherVersions = ({ card, currentCardId }) => {
 
         // Filter out the current card from results
         const filteredVersions = cards.filter(version => {
-          return version.id !== currentCardId && version.name && version.id;
+          return version.id !== currentCardId && version.cardName && version.id;
         });
 
         console.log('Other versions found after filtering:', filteredVersions);
@@ -57,10 +57,10 @@ const OtherVersions = ({ card, currentCardId }) => {
     };
 
     fetchOtherVersions();
-  }, [card?.oracleId, card?.oracle_id, currentCardId]);
+  }, [card?.oracleId, currentCardId]);
 
   // Don't render if no oracle ID available
-  if (!card?.oracleId && !card?.oracle_id) {
+  if (!card?.oracleId) {
     return null;
   }
 
@@ -74,8 +74,8 @@ const OtherVersions = ({ card, currentCardId }) => {
   };
 
   const fetchOtherVersionsRetry = () => {
-    if (card?.oracleId || card?.oracle_id) {
-      const oracleId = card.oracleId || card.oracle_id;
+    if (card?.oracleId) {
+      const oracleId = card.oracleId;
       const fetchOtherVersions = async () => {
         try {
           setLoading(true);
@@ -96,7 +96,7 @@ const OtherVersions = ({ card, currentCardId }) => {
 
           // Filter out the current card from results
           const filteredVersions = cards.filter(version => {
-            return version.id !== currentCardId && version.name && version.id;
+            return version.id !== currentCardId && version.cardName && version.id;
           });
 
           console.log('Other versions found after filtering:', filteredVersions);

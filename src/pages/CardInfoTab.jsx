@@ -11,6 +11,12 @@ import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
 import RecentlyViewed from "../components/RecentlyViewed.jsx";
 import OtherVersions from "../components/OtherVersions.jsx";
 import { getLanguageFlag } from "../utils/languageFlags.jsx";
+import {
+  filterDisplayedLegalities,
+  formatLegalityFormat,
+  formatLegalityStatus,
+  getLegalityStatusColor
+} from '../utils/cardLegalities';
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
@@ -39,21 +45,21 @@ const CardInfoTab = ({ card }) => {
   }, []);
 
   useEffect(() => {
-    if (card?.name) {
-      fetchCardsToSell(card.name, card.id);
+    if (card?.cardName) {
+      fetchCardsToSell(card.cardName, card.id);
     }
-  }, [card?.name, card?.id, fetchCardsToSell]);
+  }, [card?.cardName, card?.id, fetchCardsToSell]);
 
   // Add card to recently viewed when component mounts
   useEffect(() => {
-    if (card && card.id && card.name) {
+    if (card && card.id && card.cardName) {
       addRecentlyViewed(card);
     }
   }, [card, addRecentlyViewed]);
 
   const handleExpansionClick = (e) => {
     e.preventDefault();
-    const setCode = card.set || card.setCode || card.set_code;
+    const setCode = card.set || card.setCode;
     if (setCode) {
       navigate(`/search?set=${encodeURIComponent(setCode)}`);
     }
@@ -63,15 +69,15 @@ const CardInfoTab = ({ card }) => {
 
 
   return (
-    <div className="max-w-6xl mx-auto p-4 space-y-8">
+    <div className="max-w-6xl mx-auto px-0 py-4 sm:px-4 space-y-8">
       {/* Section 1: Card Image + Cards to Sell */}
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Card Image with Zoom */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 mx-auto sm:mx-0">
           <div className="relative">
             <img
               src={card.imageUrl ?? card.image ?? ""}
-              alt={card.name ?? ""}
+              alt={card.cardName ?? ""}
               className="w-80 h-auto rounded-lg shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
               onClick={() => setShowZoomModal(true)}
             />
@@ -83,7 +89,7 @@ const CardInfoTab = ({ card }) => {
 
         {/* Cards to Sell Table */}
         <div className="flex-1">
-          <div className="mb-4">
+          <div className="mb-4 pl-6 sm:pl-0">
             <div className="flex items-center gap-3 mb-2">
               {/* Language Flag */}
               <div className="transform scale-150">
@@ -94,12 +100,12 @@ const CardInfoTab = ({ card }) => {
                   return getLanguageFlag(normalizedLanguage, 'normal');
                 })()}
               </div>
-              <h1 className="text-2xl font-bold text-gray-700 mb-0">
-                {card.name ?? "Unknown"}
+              <h1 className="text-2xl font-bold text-gray-700 mb-0 truncate whitespace-nowrap">
+                {card.cardName ?? "Unknown"}
               </h1>
             </div>
-            <div className="text-sm text-gray-600 mb-4">
-              Home &gt; {card.set_name ?? card.setName ?? "Unknown"} &gt; {card.rarity ?? "Unknown"}
+            <div className="text-sm text-gray-600 mb-4 pl-1 sm:pl-0">
+              Home &gt; {card.setName ?? "Unknown"} &gt; {card.rarity ?? "Unknown"}
             </div>
           </div>
 
@@ -111,14 +117,14 @@ const CardInfoTab = ({ card }) => {
             <div className="text-center py-8">
               <div className="text-red-600 mb-2">Error: {error}</div>
               <button
-                onClick={() => fetchCardsToSell(card.name, card.id)}
+                onClick={() => fetchCardsToSell(card.cardName, card.id)}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Retry
               </button>
             </div>
           ) : cardsToSell.length === 0 ? (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
                 <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
                   <div>Condition</div>
@@ -142,7 +148,7 @@ const CardInfoTab = ({ card }) => {
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          className="px-3 py-1 bg-gray-300 text-gray-500 border border-gray-400 rounded text-sm cursor-not-allowed"
+                          className="px-3 py-1 bg-gray-300 text-gray-500 border border-gray-400 rounded text-sm cursor-not-allowed whitespace-nowrap overflow-hidden text-ellipsis"
                           disabled
                           title="No stock available"
                         >
@@ -155,7 +161,7 @@ const CardInfoTab = ({ card }) => {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
                 <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
                   <div>Condition</div>
@@ -169,11 +175,13 @@ const CardInfoTab = ({ card }) => {
                   const listingId = cardToSell.id ?? `listing-${i}`;
                   const selectedQty = selectedQuantities[listingId] || 1;
 
+                  console.log(`📋 Card to sell #${i}:`, cardToSell);
+
                   const cardForCart = {
                     id: listingId,
-                    card_name: card.name,
-                    image_url: card.imageUrl || card.image,
-                    name: card.name,
+                    cardToSellId: cardToSell.id, // The actual ID needed for checkout
+                    cardName: card.cardName,
+                    imageUrl: card.imageUrl || card.image,
                     price: cardToSell.cardPrice,
                     set: cardToSell.setName,
                     sellerId: cardToSell.userId,
@@ -181,6 +189,8 @@ const CardInfoTab = ({ card }) => {
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
                   };
+
+                  console.log(`🛒 CardForCart #${i}:`, cardForCart);
 
                   return (
                     <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
@@ -211,11 +221,11 @@ const CardInfoTab = ({ card }) => {
                               </select>
                               <AddToCartButton
                                 card={cardForCart}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded"
+                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded whitespace-nowrap overflow-hidden text-ellipsis"
                               />
                             </>
                           ) : (
-                            <button className="bg-gray-300 text-gray-500 px-3 py-1 text-sm rounded cursor-not-allowed">
+                            <button className="bg-gray-300 text-gray-500 px-3 py-1 text-sm rounded cursor-not-allowed whitespace-nowrap overflow-hidden text-ellipsis">
                               Want Notice
                             </button>
                           )}
@@ -230,10 +240,10 @@ const CardInfoTab = ({ card }) => {
 
           {/* Action Buttons */}
           <div className="mt-6 space-y-3">
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium">
+            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">
               📍 See other versions
             </button>
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded font-medium">
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded font-medium whitespace-nowrap overflow-hidden text-ellipsis">
               ⓘ About Condition Info
             </button>
           </div>
@@ -241,16 +251,131 @@ const CardInfoTab = ({ card }) => {
       </div>
 
       {/* Section 2: Card Description */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
         <div className="bg-gray-600 text-white px-4 py-2">
           <h2 className="font-semibold">■ Card Description</h2>
         </div>
-        <div className="overflow-x-auto">
+        {/* Mobile grid version */}
+        <div className="block sm:hidden">
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Name</div>
+            <div className="px-4 py-3 bg-white">{card.cardName || "Unknown"}</div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Color</div>
+            <div className="px-4 py-3 bg-white">
+              <div className="flex items-center gap-2">
+                {card.cardColors && card.cardColors.length > 0 ? (
+                  getColorSymbols(card.cardColors).map((colorData, index) => (
+                    <div key={index} className="flex items-center gap-1">
+                      <img src={colorData.svg_uri} alt={colorData.name} className="w-4 h-4" title={colorData.name} />
+                      <span className="text-sm">{colorData.name}</span>
+                    </div>
+                  ))
+                ) : (
+                  <span>Colorless</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Cost</div>
+            <div className="px-4 py-3 bg-white">
+              <div className="flex items-center gap-1">
+                {card.manaCost ? (
+                  parseManaCost(card.manaCost).map((manaSymbol, index) => (
+                    <img key={index} src={manaSymbol.svg_uri} alt={manaSymbol.symbol} className="w-5 h-5" title={`{${manaSymbol.symbol}}`} />
+                  ))
+                ) : "-"}
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Cardtype</div>
+            <div className="px-4 py-3 bg-white">{card.typeLine || "Sorcery"}</div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Subtype</div>
+            <div className="px-4 py-3 bg-white">-</div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Rarity</div>
+            <div className="px-4 py-3 bg-white">
+              <div className="flex items-center gap-2">
+                <RarityCircle rarity={card.rarity} size="large" />
+                <span className="capitalize">{card.rarity || "Rare"}</span>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Oracle</div>
+            <div className="px-4 py-3 bg-white">
+              {card.oracleText ? (
+                parseOracleText(card.oracleText)
+              ) : (
+                parseOracleText("Return all enchantment cards from your graveyard to the battlefield. (Auras with nothing to enchant remain in your graveyard.)")
+              )}
+            </div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Flavor Text</div>
+            <div className="px-4 py-3 bg-white italic">{card.flavorText || "-"}</div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Expansion</div>
+            <div className="px-4 py-3 bg-white">
+              <div className="flex items-center gap-1">
+                {(() => {
+                  const setCode = card.set || card.setCode;
+                  const setIconUrl = getSetIcon(setCode);
+                  return setIconUrl ? (
+                    <img src={setIconUrl} alt={`${card.setName || "Urza's Destiny"} icon`} className="w-4 h-4" />
+                  ) : null;
+                })()}
+                <button onClick={handleExpansionClick} className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer">
+                  {card.setName || "Urza's Destiny"}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Illustrator</div>
+            <div className="px-4 py-3 bg-white">{card.artistName || "Jim Nelson"}</div>
+          </div>
+          <div className="border-t border-b border-gray-200">
+            <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Legalities</div>
+            <div className="px-4 py-3 bg-white">
+              {(() => {
+                const displayedLegalities = filterDisplayedLegalities(card.legalities);
+                const entries = Object.entries(displayedLegalities);
+                if (entries.length === 0) {
+                  return <span className="text-gray-500">No legality information available</span>;
+                }
+                return (
+                  <div className="flex flex-wrap gap-1">
+                    {entries
+                      .sort((a, b) => {
+                        const order = { legal: 0, restricted: 1, banned: 2, not_legal: 3 };
+                        return (order[a[1]] || 4) - (order[b[1]] || 4);
+                      })
+                      .map(([format, status]) => (
+                        <div key={format} className={`px-2 py-0.5 rounded text-[11px] font-medium border ${getLegalityStatusColor(status)}`}>
+                          {formatLegalityFormat(format)}
+                        </div>
+                      ))}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+        {/* Desktop/tablet table version */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <tbody className="divide-y divide-gray-200">
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100 w-32">Name</td>
-                <td className="px-4 py-3 bg-white">{card.name || "Unknown"}</td>
+                <td className="px-4 py-3 bg-white">{card.cardName || "Unknown"}</td>
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Color</td>
@@ -330,12 +455,12 @@ const CardInfoTab = ({ card }) => {
                 <td className="px-4 py-3 bg-white">
                   <div className="flex items-center gap-1">
                     {(() => {
-                      const setCode = card.set || card.setCode || card.set_code;
+                      const setCode = card.set || card.setCode;
                       const setIconUrl = getSetIcon(setCode);
                       return setIconUrl ? (
                         <img
                           src={setIconUrl}
-                          alt={`${card.set_name || card.setName || "Urza's Destiny"} icon`}
+                          alt={`${card.setName || "Urza's Destiny"} icon`}
                           className="w-4 h-4"
                         />
                       ) : null;
@@ -344,7 +469,7 @@ const CardInfoTab = ({ card }) => {
                       onClick={handleExpansionClick}
                       className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
                     >
-                      {card.set_name || card.setName || "Urza's Destiny"}
+                      {card.setName || "Urza's Destiny"}
                     </button>
                   </div>
                 </td>
@@ -353,6 +478,41 @@ const CardInfoTab = ({ card }) => {
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Illustrator</td>
                 <td className="px-4 py-3 bg-gray-200">
                   {card.artistName || "Jim Nelson"}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Legalities</td>
+                <td className="px-4 py-3 bg-white">
+                  {(() => {
+                    const displayedLegalities = filterDisplayedLegalities(card.legalities);
+                    const entries = Object.entries(displayedLegalities);
+
+                    if (entries.length === 0) {
+                      return <span className="text-gray-500">No legality information available</span>;
+                    }
+
+                    return (
+                      <div className="flex flex-wrap gap-2">
+                        {entries
+                          .sort((a, b) => {
+                            // Sort order: legal first, then restricted, then banned/not_legal
+                            const order = { legal: 0, restricted: 1, banned: 2, not_legal: 3 };
+                            return (order[a[1]] || 4) - (order[b[1]] || 4);
+                          })
+                          .map(([format, status]) => (
+                            <div
+                              key={format}
+                              className={`px-3 py-1.5 rounded-md text-xs font-medium border ${getLegalityStatusColor(status)}`}
+                            >
+                              <span className="font-semibold">{formatLegalityFormat(format)}</span>
+                              <span className="mx-1">•</span>
+                              <span>{formatLegalityStatus(status)}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    );
+                  })()}
                 </td>
               </tr>
             </tbody>
@@ -373,7 +533,7 @@ const CardInfoTab = ({ card }) => {
           <div className="max-w-2xl max-h-full p-4">
             <img
               src={card.imageUrl ?? card.image ?? ""}
-              alt={card.name ?? ""}
+              alt={card.cardName ?? ""}
               className="max-w-full max-h-full object-contain rounded-lg"
             />
           </div>

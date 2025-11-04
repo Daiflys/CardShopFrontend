@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { searchCards } from "../api/search";
+import { advancedSearchCards } from "../api/search";
 import { validateToken } from "../api/auth";
 import { decodeJWTToken } from "../utils/oauth";
 import CartIcon from "./CartIcon";
@@ -12,7 +12,7 @@ import { useComponent } from "../hooks/useComponent.js";
 import { useTheme } from "../hooks/useTheme.js";
 import "../registry/skinLoader.js";
 
-const Header = ({ onThemeSettingsClick }) => {
+const Header = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -102,7 +102,7 @@ const Header = ({ onThemeSettingsClick }) => {
       // Debounce search by 300ms
       searchTimeoutRef.current = setTimeout(async () => {
         try {
-          const res = await searchCards(value, {}, 0, 21); // First page, 21 results
+          const res = await advancedSearchCards({ name: value }, 0, 21); // First page, 21 results
 
           // Handle paginated response - now formatted by API layer
           const searchResults = res.content ? res.content : res;
@@ -111,9 +111,9 @@ const Header = ({ onThemeSettingsClick }) => {
           if (currentSearchId === currentSearchRef.current) {
             // Remove duplicates by card name (prioritizing exact matches and lower IDs)
             const uniqueResults = searchResults.filter((card, index, self) => {
-              const cardName = card.name || card.card_name;
+              const cardName = card.cardName;
               return index === self.findIndex(c => {
-                const cName = c.name || c.card_name;
+                const cName = c.cardName;
                 return cName && cardName && cName.toLowerCase() === cardName.toLowerCase();
               });
             });
@@ -149,9 +149,9 @@ const Header = ({ onThemeSettingsClick }) => {
   };
 
   const handleResultClick = (card) => {
-    setSearch(card.name);
+    setSearch(card.cardName);
     setShowDropdown(false);
-    navigate(`/search?q=${encodeURIComponent(card.name)}`);
+    navigate(`/search?q=${encodeURIComponent(card.cardName)}`);
   };
 
   // Hide dropdown if clicked outside
@@ -164,6 +164,17 @@ const Header = ({ onThemeSettingsClick }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Hide dropdown when scrolling
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setShowDropdown(false);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -287,14 +298,14 @@ const Header = ({ onThemeSettingsClick }) => {
                 aria-selected={false}
               >
                 <div className="flex items-center gap-2">
-                  {card.set_code && getSetIcon(card.set_code) && (
+                  {card.setCode && getSetIcon(card.setCode) && (
                     <img
-                      src={getSetIcon(card.set_code)}
-                      alt={card.set_code}
+                      src={getSetIcon(card.setCode)}
+                      alt={card.setCode}
                       className="w-4 h-4 flex-shrink-0"
                     />
                   )}
-                  <div className="font-medium text-gray-900">{card.name}</div>
+                  <div className="font-medium text-gray-900">{card.cardName}</div>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   {card.price && <span className="text-green-600 font-semibold">${card.price}</span>}
@@ -347,15 +358,6 @@ const Header = ({ onThemeSettingsClick }) => {
         <button
           className={theme.components.header.userDropdownItem}
           onClick={() => {
-            navigate('/bulk-sell');
-            setMobileMenuOpen(false);
-          }}
-        >
-          Bulk Sell
-        </button>
-        <button
-          className={theme.components.header.userDropdownItem}
-          onClick={() => {
             navigate('/admin');
             setMobileMenuOpen(false);
           }}
@@ -398,9 +400,6 @@ const Header = ({ onThemeSettingsClick }) => {
             </li>
             <li className="border-t border-sky-100">
               <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/account/settings')}>{t('account.settings')}</button>
-            </li>
-            <li className="border-t border-sky-100">
-              <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/bulk-sell')}>Bulk Sell</button>
             </li>
             <li className="border-t border-sky-100">
               <button className={theme.components.header.userDropdownItem} onClick={() => navigate('/admin')}>Admin Panel</button>
@@ -468,22 +467,6 @@ const Header = ({ onThemeSettingsClick }) => {
       userMenu={(
         <>
           <CartIcon />
-          {(userEmail || userName) && onThemeSettingsClick && (
-            <button
-              onClick={onThemeSettingsClick}
-              className={theme.components.header.themeButton}
-              title="Theme Settings"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-                />
-              </svg>
-            </button>
-          )}
           {userMenuComponent}
         </>
       )}

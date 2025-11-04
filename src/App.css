@@ -50,9 +50,8 @@
   box-sizing: border-box;
 }
 
-/* Prevent horizontal scroll issues */
+/* Prevent horizontal scroll issues - DO NOT use overflow-x: hidden as it breaks position: sticky */
 html, body {
-  overflow-x: hidden;
   max-width: 100%;
 }
 

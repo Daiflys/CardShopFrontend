@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mana Icons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .icon-test {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .icon-test img {
+            width: 64px;
+            height: 64px;
+            background: #ddd;
+            border: 2px solid #333;
+            border-radius: 50%;
+            padding: 8px;
+        }
+        .icon-test p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mana Symbol Icon Test</h1>
+    <p>Testing if SVG icons load correctly from /assets/mana-symbols/</p>
+
+    <div>
+        <div class="icon-test">
+            <img src="/assets/mana-symbols/W.svg" alt="White" onerror="console.error('Failed to load W.svg'); this.style.background='red';" onload="console.log('W.svg loaded')">
+            <p>White (W)</p>
+        </div>
+
+        <div class="icon-test">
+            <img src="/assets/mana-symbols/U.svg" alt="Blue" onerror="console.error('Failed to load U.svg'); this.style.background='red';" onload="console.log('U.svg loaded')">
+            <p>Blue (U)</p>
+        </div>
+
+        <div class="icon-test">
+            <img src="/assets/mana-symbols/B.svg" alt="Black" onerror="console.error('Failed to load B.svg'); this.style.background='red';" onload="console.log('B.svg loaded')">
+            <p>Black (B)</p>
+        </div>
+
+        <div class="icon-test">
+            <img src="/assets/mana-symbols/R.svg" alt="Red" onerror="console.error('Failed to load R.svg'); this.style.background='red';" onload="console.log('R.svg loaded')">
+            <p>Red (R)</p>
+        </div>
+
+        <div class="icon-test">
+            <img src="/assets/mana-symbols/G.svg" alt="Green" onerror="console.error('Failed to load G.svg'); this.style.background='red';" onload="console.log('G.svg loaded')">
+            <p>Green (G)</p>
+        </div>
+
+        <div class="icon-test">
+            <img src="/assets/mana-symbols/C.svg" alt="Colorless" onerror="console.error('Failed to load C.svg'); this.style.background='red';" onload="console.log('C.svg loaded')">
+            <p>Colorless (C)</p>
+        </div>
+    </div>
+
+    <hr>
+    <h2>Console Output</h2>
+    <p>Open browser DevTools (F12) and check the Console tab for load/error messages.</p>
+</body>
+</html>
