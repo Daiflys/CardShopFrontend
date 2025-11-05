@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { languageOptions } from '../utils/languageFlags.jsx';
 import useSearchFiltersStore from '../store/searchFiltersStore.js';
 import CollectionSelector from './CollectionSelector.jsx';
+import Button from '../design/components/Button';
 
 const SearchFilters = ({ initialQuery = '', onSearch }) => {
   const { t } = useTranslation();
@@ -143,12 +144,13 @@ const SearchFilters = ({ initialQuery = '', onSearch }) => {
       </div>
 
       {/* Search Button */}
-      <button
+      <Button
+        variant="primary"
         onClick={handleSearch}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+        className="w-full"
       >
         Search
-      </button>
+      </Button>
     </div>
   );
 };

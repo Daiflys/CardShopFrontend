@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SearchGridCard from './SearchGridCard';
 import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
+import Button from '../design/components/Button';
 
 const SearchResultsGrid = ({
   cards = [],
@@ -101,12 +102,12 @@ const SearchResultsGrid = ({
           <h3 className="text-lg font-medium text-red-900 mb-2">Error Loading Cards</h3>
           <p className="text-red-700 mb-4">{error}</p>
           {onRetry && (
-            <button
+            <Button
+              variant="danger"
               onClick={onRetry}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
             >
               Try Again
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -149,19 +150,20 @@ const SearchResultsGrid = ({
       {hasMoreCards && (
         <div className="text-center mt-6">
           {!isExpanded ? (
-            <button
+            <Button
+              variant="primary"
+              size="lg"
               onClick={() => setIsExpanded(true)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               {expandText} ({cards.length - maxDisplayed} more)
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
+              variant="link"
               onClick={() => setIsExpanded(false)}
-              className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
             >
               {collapseText}
-            </button>
+            </Button>
           )}
         </div>
       )}

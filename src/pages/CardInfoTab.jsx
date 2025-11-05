@@ -17,6 +17,7 @@ import {
   formatLegalityStatus,
   getLegalityStatusColor
 } from '../utils/cardLegalities';
+import Button from '../design/components/Button';
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
@@ -116,12 +117,12 @@ const CardInfoTab = ({ card }) => {
           ) : error ? (
             <div className="text-center py-8">
               <div className="text-red-600 mb-2">Error: {error}</div>
-              <button
+              <Button
+                variant="primary"
                 onClick={() => fetchCardsToSell(card.cardName, card.id)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Retry
-              </button>
+              </Button>
             </div>
           ) : cardsToSell.length === 0 ? (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
@@ -147,13 +148,15 @@ const CardInfoTab = ({ card }) => {
                         0
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
-                          className="px-3 py-1 bg-gray-300 text-gray-500 border border-gray-400 rounded text-sm cursor-not-allowed whitespace-nowrap overflow-hidden text-ellipsis"
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           disabled
                           title="No stock available"
+                          className="whitespace-nowrap overflow-hidden text-ellipsis"
                         >
                           Add to Cart
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -225,9 +228,14 @@ const CardInfoTab = ({ card }) => {
                               />
                             </>
                           ) : (
-                            <button className="bg-gray-300 text-gray-500 px-3 py-1 text-sm rounded cursor-not-allowed whitespace-nowrap overflow-hidden text-ellipsis">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              disabled
+                              className="whitespace-nowrap overflow-hidden text-ellipsis"
+                            >
                               Want Notice
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -240,12 +248,18 @@ const CardInfoTab = ({ card }) => {
 
           {/* Action Buttons */}
           <div className="mt-6 space-y-3">
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+            <Button
+              variant="info"
+              className="w-full whitespace-nowrap overflow-hidden text-ellipsis py-3"
+            >
               📍 See other versions
-            </button>
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+            </Button>
+            <Button
+              variant="warning"
+              className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
+            >
               ⓘ About Condition Info
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -332,9 +346,9 @@ const CardInfoTab = ({ card }) => {
                     <img src={setIconUrl} alt={`${card.setName || "Urza's Destiny"} icon`} className="w-4 h-4" />
                   ) : null;
                 })()}
-                <button onClick={handleExpansionClick} className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer">
+                <Button variant="link" onClick={handleExpansionClick}>
                   {card.setName || "Urza's Destiny"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -465,12 +479,9 @@ const CardInfoTab = ({ card }) => {
                         />
                       ) : null;
                     })()}
-                    <button
-                      onClick={handleExpansionClick}
-                      className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
-                    >
+                    <Button variant="link" onClick={handleExpansionClick}>
                       {card.setName || "Urza's Destiny"}
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>

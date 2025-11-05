@@ -5,6 +5,7 @@ import { useTheme } from '../hooks/useTheme';
 import { LEGALITY_FORMATS, LEGALITY_STATUSES } from '../utils/cardLegalities';
 import CollectionSelector from './CollectionSelector.jsx';
 import ColorSelector from './ColorSelector.jsx';
+import Button from '../design/components/Button';
 
 const AdvancedSearch = ({ onSearch, onReset }) => {
   const { t } = useTranslation();
@@ -376,19 +377,20 @@ const AdvancedSearch = ({ onSearch, onReset }) => {
 
         {/* Action Buttons */}
         <div className="flex gap-4 pt-4 border-t border-gray-200">
-          <button
+          <Button
             type="submit"
-            className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+            variant="primary"
+            className="flex-1"
           >
             Search Cards
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={handleReset}
-            className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
           >
             Reset
-          </button>
+          </Button>
         </div>
       </form>
     </div>
