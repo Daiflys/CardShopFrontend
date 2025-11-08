@@ -14,6 +14,8 @@ export interface PaymentInitParams {
   cartItems: any[];
   shippingAddress?: any;
   orderId?: string;
+  // payment intent: 'preauth' (default) or 'sale'
+  intent?: 'preauth' | 'sale';
 }
 
 export interface PaymentResult {
@@ -60,11 +62,18 @@ export const redsysProviderFromEnv = (): RedsysProvider => {
     behavior: 'redirect' as const,
     async pay(params: PaymentInitParams) {
       const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || '/api';
-      const RETURN_URL = (import.meta.env.VITE_REDSYS_RETURN_URL as string) || `${window.location.origin}/payment/return?provider=redsys`;
+      const BASE_RETURN_URL = (import.meta.env.VITE_REDSYS_RETURN_URL as string) || `${window.location.origin}/payment/return?provider=redsys`;
 
       // Use provided orderId or generate one (backend may override/validate)
       const orderId = params.orderId || `ORD${Date.now().toString().slice(-8)}`; // 4-12 chars
       console.log('[Redsys] Using orderId:', orderId);
+
+      // Default to preauthorization intent for delayed capture
+      const intent = params.intent || 'preauth';
+      // Ensure return URL carries provider and intent for better UX messaging
+      const returnUrl = BASE_RETURN_URL.includes('intent=')
+        ? BASE_RETURN_URL
+        : `${BASE_RETURN_URL}${BASE_RETURN_URL.includes('?') ? '&' : '?'}intent=${encodeURIComponent(intent)}`;
 
     const token = localStorage.getItem('authToken');
       console.log('[Redsys] Init request →', `${API_BASE_URL}/payments/redsys/init`);
@@ -78,7 +87,8 @@ export const redsysProviderFromEnv = (): RedsysProvider => {
           amount: params.amount,
           currency: params.currency || 'EUR',
           orderId,
-          returnUrl: RETURN_URL,
+          returnUrl,
+          intent, // let backend set DS_MERCHANT_TRANSACTIONTYPE accordingly
         }),
       });
 

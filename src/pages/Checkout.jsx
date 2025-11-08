@@ -130,7 +130,7 @@ const Checkout = () => {
       setPaymentOrderId(orderId);
 
       if (provider.behavior === 'redirect') {
-        setPaymentStatus(`Redirecting to ${provider.label} (order ${orderId})...`);
+        setPaymentStatus(`Redirecting to ${provider.label} for preauthorization (order ${orderId})...`);
         console.log('➡️ Redirect flow starting for provider:', provider.label, 'order:', orderId);
       } else {
         setPaymentStatus('Processing payment...');
@@ -141,6 +141,7 @@ const Checkout = () => {
         cartItems,
         shippingAddress,
         orderId,
+        intent: 'preauth',
       });
       console.log("✅ Payment successful:", paymentResult);
 
