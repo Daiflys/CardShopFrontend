@@ -125,8 +125,8 @@ const Checkout = () => {
       if (!provider) throw new Error('Invalid payment provider');
       const amount = Number(getCartTotal().toFixed(2));
       // Prepare orderId for traceability (4–12 alphanumeric)
-      const tsPart = Date.now().toString().slice(-8);
-      const orderId = `ORD${tsPart}`;
+      const tsPart = Date.now().toString().slice(-12);
+      const orderId = `${tsPart}`;
       setPaymentOrderId(orderId);
 
       if (provider.behavior === 'redirect') {
