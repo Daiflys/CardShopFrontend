@@ -116,16 +116,16 @@ const CardDetail = () => {
     <div className="bg-gray-50 min-h-screen">
       <PageLayout containerClassName="px-0 py-4 sm:px-4" maxWidth="max-w-6xl">
         <div className="sm:bg-white sm:rounded-xl sm:shadow p-4 sm:p-6">
-          <div className="flex border-b mb-4">
-            <Button
-              variant="tab"
-              active={activeTab === "info"}
-              onClick={() => setActiveTab("info")}
-              className="px-4 py-2 -mb-px text-sm sm:text-base rounded-none"
-            >
-              Info
-            </Button>
-            {userIsAdmin && (
+          {userIsAdmin && (
+            <div className="flex border-b mb-4">
+              <Button
+                variant="tab"
+                active={activeTab === "info"}
+                onClick={() => setActiveTab("info")}
+                className="px-4 py-2 -mb-px text-sm sm:text-base rounded-none"
+              >
+                Info
+              </Button>
               <Button
                 variant="tab"
                 active={activeTab === "sell"}
@@ -134,10 +134,16 @@ const CardDetail = () => {
               >
                 Sell
               </Button>
-            )}
-          </div>
-          {activeTab === "info" && <CardInfoTab card={card} />}
-          {activeTab === "sell" && userIsAdmin && <CardSellTab card={card} />}
+            </div>
+          )}
+          {userIsAdmin ? (
+            <>
+              {activeTab === "info" && <CardInfoTab card={card} />}
+              {activeTab === "sell" && <CardSellTab card={card} />}
+            </>
+          ) : (
+            <CardInfoTab card={card} />
+          )}
         </div>
       </PageLayout>
     </div>
