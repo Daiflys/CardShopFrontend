@@ -42,7 +42,7 @@ const SetsSidebar = () => {
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-pressed={isCollapsed}
           aria-label={isCollapsed ? 'Expand new sets panel' : 'Collapse new sets panel'}
-          className="p-1 text-gray-600"
+          className="p-1 text-gray-600 md:hidden"
         >
           {isCollapsed ? '→' : '←'}
         </Button>
@@ -76,10 +76,10 @@ const SetsSidebar = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800 truncate font-medium">
+                  <p className="text-collection-set-code">
                     {set.name}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-collection-set-code-subtitle">
                     {set.code.toUpperCase()}
                   </p>
                 </div>

@@ -224,7 +224,6 @@ const CardInfoTab = ({ card }) => {
                               </select>
                               <AddToCartButton
                                 card={cardForCart}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded whitespace-nowrap overflow-hidden text-ellipsis"
                               />
                             </>
                           ) : (
@@ -287,7 +286,7 @@ const CardInfoTab = ({ card }) => {
                     </div>
                   ))
                 ) : (
-                  <span>Colorless</span>
+                  <span>-</span>
                 )}
               </div>
             </div>
@@ -354,7 +353,7 @@ const CardInfoTab = ({ card }) => {
           </div>
           <div className="border-t border-gray-200">
             <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Illustrator</div>
-            <div className="px-4 py-3 bg-white">{card.artistName || "Jim Nelson"}</div>
+            <div className="px-4 py-3 bg-white">{card.artistName || "-"}</div>
           </div>
           <div className="border-t border-b border-gray-200">
             <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Legalities</div>
@@ -408,7 +407,7 @@ const CardInfoTab = ({ card }) => {
                         </div>
                       ))
                     ) : (
-                      <span>Colorless</span>
+                      <span>-</span>
                     )}
                   </div>
                 </td>
@@ -488,7 +487,7 @@ const CardInfoTab = ({ card }) => {
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Illustrator</td>
                 <td className="px-4 py-3 bg-gray-200">
-                  {card.artistName || "Jim Nelson"}
+                  {card.artistName || "-"}
                 </td>
               </tr>
               <tr>
