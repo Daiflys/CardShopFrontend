@@ -215,117 +215,17 @@ const applyColors = (colorsConfig) => {
 
   const colors = activeScheme.colors;
 
-  // Ultra-aggressive CSS with maximum specificity
-  const css = `
-    /* CSS Custom Properties */
-    :root {
-      --storefront-bg: ${colors.background};
-      --storefront-text: ${colors.text};
-      --storefront-accent1: ${colors.accent1};
-      --storefront-accent2: ${colors.accent2};
-      --storefront-border: ${colors.border};
-    }
+  // Build CSS conditionally to avoid injecting invalid values
+  const cssParts = [];
+  cssParts.push(`:root {${colors.background ? `--storefront-bg:${colors.background};` : ''}${colors.text ? `--storefront-text:${colors.text};` : ''}${colors.accent1 ? `--storefront-accent1:${colors.accent1};` : ''}${colors.accent2 ? `--storefront-accent2:${colors.accent2};` : ''}${colors.border ? `--storefront-border:${colors.border};` : ''}}`);
+  if (colors.background || colors.text) {
+    cssParts.push(`html body,html body#root,body[class],body[class][class],div#root,div#root>div{${colors.background ? `background-color:${colors.background} !important;` : ''}${colors.text ? `color:${colors.text} !important;` : ''}}`);
+  }
+  // Avoid overriding header/footer and buttons from here; dedicated handlers manage them
+  if (colors.text) cssParts.push(`h1,h2,h3,h4,h5,h6,h1[class],h2[class],h3[class],p[class],span[class],div[class]{color:${colors.text} !important;}`);
+  if (colors.border) cssParts.push(`*[class*="border-"]{border-color:${colors.border} !important;}`);
 
-    /* BODY - Highest priority */
-    html body,
-    html body#root,
-    body[class],
-    body[class][class],
-    div#root,
-    div#root > div {
-      background-color: ${colors.background} !important;
-      color: ${colors.text} !important;
-    }
-
-    /* HEADER - Ultra specific */
-    header,
-    header[class],
-    header[class*="bg-"],
-    header.sticky,
-    header > div,
-    header > div[class*="bg-"] {
-      background: ${colors.background} !important;
-      background-color: ${colors.background} !important;
-      border-color: ${colors.border} !important;
-      color: ${colors.text} !important;
-    }
-
-    /* Header links and navigation */
-    header a,
-    header nav a,
-    header a[class],
-    header nav a[class],
-    header button:not([class*="bg-blue"]):not([class*="bg-sky"]),
-    header button[class*="text-"],
-    header span,
-    header div > a {
-      color: ${colors.text} !important;
-    }
-
-    header a:hover,
-    header nav a:hover {
-      color: ${colors.accent1} !important;
-    }
-
-    /* Primary buttons (signup, register, etc) */
-    button[class*="bg-blue"],
-    button[class*="bg-sky"],
-    button[class*="signup"],
-    a[class*="bg-blue"],
-    a[class*="bg-sky"],
-    .btn-primary,
-    button[class*="from-sky"] {
-      background: ${colors.accent1} !important;
-      background-color: ${colors.accent1} !important;
-      border-color: ${colors.accent1} !important;
-    }
-
-    button[class*="bg-blue"]:hover,
-    button[class*="bg-sky"]:hover,
-    button[class*="signup"]:hover,
-    a[class*="bg-blue"]:hover,
-    a[class*="bg-sky"]:hover,
-    button[class*="from-sky"]:hover {
-      background: ${colors.accent2} !important;
-      background-color: ${colors.accent2} !important;
-      border-color: ${colors.accent2} !important;
-    }
-
-    /* Cards and containers */
-    div[class*="bg-white"],
-    div[class*="bg-gray-50"],
-    section[class*="bg-white"] {
-      background-color: ${colors.background} !important;
-      border-color: ${colors.border} !important;
-    }
-
-    /* Text elements */
-    h1, h2, h3, h4, h5, h6,
-    h1[class], h2[class], h3[class],
-    p[class], span[class], div[class] {
-      color: ${colors.text} !important;
-    }
-
-    /* Links */
-    a[class*="text-"],
-    a:not([class*="bg-"]) {
-      color: ${colors.accent1} !important;
-    }
-
-    a[class*="text-"]:hover,
-    a:not([class*="bg-"]):hover {
-      color: ${colors.accent2} !important;
-    }
-
-    /* Borders everywhere */
-    *[class*="border-"] {
-      border-color: ${colors.border} !important;
-    }
-
-    /* Footer overrides removed to avoid clobbering site footer styles */
-  `;
-
-  styleElement.textContent = css;
+  styleElement.textContent = cssParts.join('\n');
   console.log(`✅ Applied color scheme: ${activeScheme.name}`, colors);
 };
 
@@ -615,12 +515,15 @@ const applyHeader = (header) => {
     styleElement.id = styleId;
     document.head.appendChild(styleElement);
   }
-  const css = `
-    header, header[class], header > div { background:${header.headerBg} !important; border-color:${header.headerBorder} !important; color:${header.headerText} !important; }
-    header a, header span, header button { color:${header.headerText} !important; }
-    ${header.stickyHeader ? 'header { position: sticky !important; top: 0; }' : ''}
-  `;
-  styleElement.textContent = css;
+  const parts = [];
+  const props = [];
+  if (header.headerBg) props.push(`background:${header.headerBg} !important;background-color:${header.headerBg} !important`);
+  if (header.headerBorder) props.push(`border-color:${header.headerBorder} !important`);
+  if (header.headerText) props.push(`color:${header.headerText} !important`);
+  if (props.length) parts.push(`header, header[class], header > div { ${props.join('; ')} }`);
+  if (header.headerText) parts.push(`header a, header span, header button { color:${header.headerText} !important; }`);
+  if (header.stickyHeader) parts.push('header { position: sticky !important; top: 0; }');
+  styleElement.textContent = parts.join('\n');
 };
 
 /**
@@ -634,12 +537,15 @@ const applyButtons = (buttons) => {
     styleElement.id = styleId;
     document.head.appendChild(styleElement);
   }
-  const css = `
-    button, a.button, .btn, .btn-primary, button[class], a[class*="bg-blue"], a[class*="bg-sky"], button[class*="bg-"] { border-radius: ${buttons.radius} !important; text-transform: ${buttons.uppercase ? 'uppercase' : 'none'} !important; font-weight: ${buttons.fontWeight || 600} !important; }
-    .btn-primary, a[class*="bg-blue"], a[class*="bg-sky"], button[class*="bg-blue"], button[class*="bg-sky"] { background: ${buttons.primaryBg} !important; color: ${buttons.primaryText} !important; border-color: ${buttons.primaryBg} !important; }
-    .btn-primary:hover, a[class*="bg-blue"]:hover, a[class*="bg-sky"]:hover, button[class*="bg-blue"]:hover, button[class*="bg-sky"]:hover { background: ${buttons.primaryBgHover} !important; border-color: ${buttons.primaryBgHover} !important; }
-  `;
-  styleElement.textContent = css;
+  const btnCss = [];
+  btnCss.push(`button, a.button, .btn, .btn-primary, button[class], a[class*="bg-blue"], a[class*="bg-sky"], button[class*="bg-"] { border-radius: ${buttons.radius} !important; text-transform: ${buttons.uppercase ? 'uppercase' : 'none'} !important; font-weight: ${buttons.fontWeight || 600} !important; }`);
+  if (buttons.primaryBg || buttons.primaryText) {
+    btnCss.push(`.btn-primary, a[class*="bg-blue"], a[class*="bg-sky"], button[class*="bg-blue"], button[class*="bg-sky"] { ${buttons.primaryBg ? `background: ${buttons.primaryBg} !important; border-color: ${buttons.primaryBg} !important;` : ''} ${buttons.primaryText ? `color: ${buttons.primaryText} !important;` : ''} }`);
+  }
+  if (buttons.primaryBgHover) {
+    btnCss.push(`.btn-primary:hover, a[class*="bg-blue"]:hover, a[class*="bg-sky"]:hover, button[class*="bg-blue"]:hover, button[class*="bg-sky"]:hover { background: ${buttons.primaryBgHover} !important; border-color: ${buttons.primaryBgHover} !important; }`);
+  }
+  styleElement.textContent = btnCss.join('\n');
 };
 
 /**
