@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languageOptions } from '../utils/languageFlags.jsx';
-import { useTheme } from '../hooks/useTheme';
 import { LEGALITY_FORMATS, LEGALITY_STATUSES } from '../utils/cardLegalities';
 import CollectionSelector from './CollectionSelector.jsx';
 import ColorSelector from './ColorSelector.jsx';
@@ -9,7 +8,6 @@ import Button from '../design/components/Button';
 
 const AdvancedSearch = ({ onSearch, onReset }) => {
   const { t } = useTranslation();
-  const { theme } = useTheme();
 
   const [formData, setFormData] = useState({
     name: '',
