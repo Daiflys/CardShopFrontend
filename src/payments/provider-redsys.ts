@@ -1,27 +1,12 @@
 // Redsys Test Payment Provider (simulated)
 // This provider simulates a successful Redsys card payment in development.
 
+import type { PaymentInitParams, PaymentResult } from './types';
+
 export interface RedsysConfig {
   merchantCode?: string;
   terminal?: string;
   currency?: string; // e.g. '978' for EUR per Redsys, but we use display ISO like 'EUR' for app
-  testMode?: boolean;
-}
-
-export interface PaymentInitParams {
-  amount: number;
-  currency: string;
-  cartItems: any[];
-  shippingAddress?: any;
-  orderId?: string;
-  // payment intent: 'preauth' (default) or 'sale'
-  intent?: 'preauth' | 'sale';
-}
-
-export interface PaymentResult {
-  success: boolean;
-  transactionId: string;
-  provider: string;
   testMode?: boolean;
 }
 
