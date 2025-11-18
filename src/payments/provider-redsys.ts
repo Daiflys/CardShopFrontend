@@ -116,6 +116,12 @@ export const redsysProviderFromEnv = (): RedsysProvider => {
       form.method = data.method || 'POST';
       form.action = data.url;
 
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('🌐🌐🌐 URL DE REDIRECCIÓN A REDSYS 🌐🌐🌐');
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('🔴 NAVEGANDO A:', data.url);
+      console.log('🔴 METHOD:', data.method || 'POST');
+      console.log('═══════════════════════════════════════════════════════');
       console.log('🔶 [FORM BUILD] Creating form');
       console.log('🔶 [FORM BUILD] Action URL:', data.url);
       console.log('🔶 [FORM BUILD] Method:', data.method || 'POST');
@@ -205,6 +211,8 @@ export const redsysProviderFromEnv = (): RedsysProvider => {
       console.log('═══════════════════════════════════════════════════════');
 
       console.log('[Redsys] Submitting redirect form with fields:', Object.keys(data.params));
+      console.log('🌐 NAVEGANDO A:', form.action);
+      console.log('🌐 URL COMPLETA DE REDIRECCIÓN:', form.action);
       form.submit();
 
       // Return a never-resolving promise to prevent caller from continuing

@@ -187,7 +187,6 @@ const CardInfoTab = ({ card }) => {
                     imageUrl: card.imageUrl || card.image,
                     price: cardToSell.cardPrice,
                     set: cardToSell.setName,
-                    sellerId: cardToSell.userId,
                     quantity: selectedQty,
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
