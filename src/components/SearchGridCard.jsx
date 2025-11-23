@@ -82,8 +82,7 @@ const SearchGridCard = ({ card, onClick, formatPrice, getAvailableCount }) => {
         set: card.setName,
         quantity: quantity,
         condition: 'NM',
-        available: cheapestNMCard.quantity, // Available stock for this specific listing
-        sellerId: cheapestNMCard.userId // Include seller info
+        available: cheapestNMCard.quantity // Available stock for this specific listing
       };
 
       const result = await addItemToCart(cardToAdd);

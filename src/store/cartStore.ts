@@ -11,7 +11,6 @@ export interface CartItem {
   imageUrl?: string;
   set?: string;
   condition?: string;
-  sellerId?: string;
   available?: number;
 }
 
@@ -99,7 +98,6 @@ const useCartStore = create<CartStore>((set, get) => ({
           imageUrl: card.imageUrl,
           set: card.setName || card.set,
           condition: card.condition,
-          sellerId: card.userId?.toString(),
           available: card.quantity
         };
         console.log("   Created new cart item:", JSON.stringify(newItem, null, 2));
