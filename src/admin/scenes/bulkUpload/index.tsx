@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import * as XLSX from 'xlsx';
-import { csvCardSearch, bulkSellFromCSV } from '../../../api/admin';
+import { csvCardSearch } from '../../api/csvSearch';
+import { bulkSellFromCSV } from '../../api/bulkSell';
 import { conditionOptions } from '../../../utils/cardConditions';
 import RarityCircle from '../../../components/RarityCircle';
 

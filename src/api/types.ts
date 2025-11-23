@@ -50,7 +50,6 @@ export interface CartItem {
   quantity: number;
   condition: string;
   setName?: string;
-  userId?: number;
   available?: number;
 }
 
@@ -68,7 +67,6 @@ export interface CardToSell {
   condition: string;
   quantity: number;
   language: string;
-  userId?: number;
   comments?: string | null;
 }
 

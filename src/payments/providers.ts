@@ -18,8 +18,8 @@ export interface PaymentProvider {
  * Providers can be easily enabled/disabled by commenting out the lines below
  */
 const providers: PaymentProvider[] = [
-  //redsysProviderFromEnv(),  // Redsys payment provider
-  stripeProviderFromEnv(),  // Stripe payment provider
+  redsysProviderFromEnv(),  // Redsys payment provider
+  //stripeProviderFromEnv(),  // Stripe payment provider
   // Future: add paypal, mercadopago, etc.
 ];
 
