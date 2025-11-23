@@ -10,7 +10,7 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || '/api';
  * Payment Status enum matching backend
  */
 export type PaymentStatus =
-  | 'PENDING'      // PaymentIntent created, awaiting confirmation
+  | 'PENDING'      // PaymentIntent created, awaiting confirmation (Stripe-specific status)
   | 'AUTHORIZED'   // Payment preauthorized, ready to capture
   | 'CAPTURED'     // Payment captured successfully
   | 'FAILED'       // Payment rejected/failed

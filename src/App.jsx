@@ -26,7 +26,8 @@ import BulkSell from "./admin/scenes/bulkSell";
 import Users from "./admin/scenes/users";
 import AuditLogs from "./admin/scenes/auditLogs";
 import BulkPriceChange from "./admin/scenes/bulkPrice";
-import PendingOrders from "./admin/scenes/pendingOrders";
+import OrderManagement from "./admin/scenes/pendingOrders";
+import PendingOrdersManagement from "./admin/scenes/pendingOrdersManagement";
 import StorefrontEditor from "./admin/scenes/storefrontEditor";
 import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
@@ -57,7 +58,8 @@ function App() {
             <Route path="bulk-upload" element={<BulkUpload />} />
             <Route path="bulk-sell" element={<BulkSell />} />
             <Route path="users" element={<Users />} />
-            <Route path="pending-orders" element={<PendingOrders />} />
+            <Route path="orders" element={<OrderManagement />} />
+            <Route path="pending-orders" element={<PendingOrdersManagement />} />
             <Route path="audit-logs" element={<AuditLogs />} />
             <Route path="bulk-price" element={<BulkPriceChange />} />
           </Route>
