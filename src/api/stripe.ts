@@ -31,6 +31,7 @@ export interface CreatePaymentIntentRequest {
   orderId?: string;         // OPTIONAL - Order ID (backend generates if not provided)
   description?: string;     // OPTIONAL - Payment description
   customerId?: string;      // OPTIONAL - Customer ID for tracking
+  transactionId?: string;   // OPTIONAL - Transaction ID from purchases/checkout
 }
 
 /**
