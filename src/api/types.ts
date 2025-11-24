@@ -236,7 +236,15 @@ export interface AddressUpdateRequest {
 }
 
 // Purchase types
-export type PurchaseStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
+export type PurchaseStatus =
+  | "AWAITING_VENDOR_CONFIRMATION"
+  | "CONFIRMED"
+  | "CANCELLED"
+  | "AUTHORIZED"
+  | "FAILED"
+  | "REFUNDED"
+  | "CREATED"
+  | "EXPIRED";
 
 export interface PurchaseResponse {
   id: number;

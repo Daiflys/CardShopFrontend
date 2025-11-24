@@ -62,6 +62,7 @@ export const redsysProviderFromEnv = (): RedsysProvider => {
 
     const token = localStorage.getItem('authToken');
       console.log('[Redsys] Init request →', `${API_BASE_URL}/payments/redsys/init`);
+      console.log('[Redsys] Transaction ID:', params.transactionId || 'NOT PROVIDED');
       const initRes = await fetch(`${API_BASE_URL}/payments/redsys/init`, {
         method: 'POST',
         headers: {
@@ -74,6 +75,7 @@ export const redsysProviderFromEnv = (): RedsysProvider => {
           orderId,
           returnUrl,
           intent, // let backend set DS_MERCHANT_TRANSACTIONTYPE accordingly
+          transactionId: params.transactionId, // transaction ID from purchases/checkout
         }),
       });
 

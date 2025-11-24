@@ -16,6 +16,8 @@ export interface PaymentInitParams {
   orderId?: string;
   // payment intent: 'preauth' (default) or 'sale'
   intent?: 'preauth' | 'sale';
+  // transaction ID from the purchases/checkout call
+  transactionId?: string;
 }
 
 /**

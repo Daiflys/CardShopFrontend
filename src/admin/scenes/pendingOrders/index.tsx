@@ -3,36 +3,27 @@ import {
   Box,
   Typography,
   useTheme,
-  Button,
   Chip,
-  CircularProgress,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   IconButton,
   Grid,
   Paper,
-  Card,
-  CardContent,
-  CardActions
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import {
-  getPendingPurchases,
-  confirmPurchase,
-  cancelPurchase
+  getPurchasesByStatus
 } from "../../../api/purchases";
-import type { PurchaseResponse } from "../../../api/types";
+import type { PurchaseResponse, PurchaseStatus } from "../../../api/types";
 
-const PendingOrders: React.FC = () => {
+const OrderManagement: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -40,26 +31,20 @@ const PendingOrders: React.FC = () => {
   const [orders, setOrders] = useState<PurchaseResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<PurchaseStatus>("AWAITING_VENDOR_CONFIRMATION");
 
   // Pagination
   const [page, setPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalOrders, setTotalOrders] = useState<number>(0);
 
-  // Confirmation dialog
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
-  const [cancelDialogOpen, setCancelDialogOpen] = useState<boolean>(false);
-  const [selectedOrder, setSelectedOrder] = useState<PurchaseResponse | null>(null);
-  const [actionLoading, setActionLoading] = useState<boolean>(false);
-
-  // Load pending orders
+  // Load orders by status
   const loadOrders = async (): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await getPendingPurchases(page, pageSize);
+      const response = await getPurchasesByStatus(selectedStatus, page, pageSize);
 
       // Handle PageResponse structure
       if (response.content) {
@@ -71,77 +56,18 @@ const PendingOrders: React.FC = () => {
         setTotalOrders(Array.isArray(response) ? response.length : 0);
       }
     } catch (err) {
-      console.error("Error loading pending orders:", err);
-      setError((err as Error).message || "Failed to load pending orders");
+      console.error("Error loading orders:", err);
+      setError((err as Error).message || `Failed to load ${selectedStatus.toLowerCase()} orders`);
       setOrders([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Load data on mount and when page changes
+  // Load data on mount and when page, pageSize, or selectedStatus changes
   useEffect(() => {
     loadOrders();
-  }, [page, pageSize]);
-
-  // Handle confirm order
-  const handleConfirmOrder = async (): Promise<void> => {
-    if (!selectedOrder) return;
-
-    setActionLoading(true);
-    try {
-      await confirmPurchase(selectedOrder.id);
-      setSuccessMessage(`Order #${selectedOrder.id} confirmed successfully`);
-      setConfirmDialogOpen(false);
-      setSelectedOrder(null);
-
-      // Reload orders
-      await loadOrders();
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      console.error("Error confirming order:", err);
-      setError((err as Error).message || "Failed to confirm order");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Handle cancel order
-  const handleCancelOrder = async (): Promise<void> => {
-    if (!selectedOrder) return;
-
-    setActionLoading(true);
-    try {
-      await cancelPurchase(selectedOrder.id);
-      setSuccessMessage(`Order #${selectedOrder.id} cancelled. Stock has been restored.`);
-      setCancelDialogOpen(false);
-      setSelectedOrder(null);
-
-      // Reload orders
-      await loadOrders();
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      console.error("Error cancelling order:", err);
-      setError((err as Error).message || "Failed to cancel order");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Open confirmation dialogs
-  const openConfirmDialog = (order: PurchaseResponse): void => {
-    setSelectedOrder(order);
-    setConfirmDialogOpen(true);
-  };
-
-  const openCancelDialog = (order: PurchaseResponse): void => {
-    setSelectedOrder(order);
-    setCancelDialogOpen(true);
-  };
+  }, [page, pageSize, selectedStatus]);
 
   // DataGrid columns
   const columns: GridColDef[] = [
@@ -239,44 +165,35 @@ const PendingOrders: React.FC = () => {
       )
     },
     {
-      field: "actions",
-      headerName: "Actions",
-      width: 200,
-      sortable: false,
-      renderCell: (params: GridRenderCellParams) => (
-        <Box display="flex" gap={1}>
-          <Button
-            variant="contained"
+      field: "status",
+      headerName: "Status",
+      width: 120,
+      renderCell: (params: GridRenderCellParams) => {
+        const status = params.value as PurchaseStatus;
+        // Color mapping for different statuses
+        const statusColors: Record<PurchaseStatus, string> = {
+          AWAITING_VENDOR_CONFIRMATION: colors.blueAccent[500],
+          AUTHORIZED: colors.blueAccent[300],
+          CONFIRMED: colors.greenAccent[500],
+          CREATED: colors.grey[500],
+          CANCELLED: colors.redAccent[500],
+          FAILED: colors.redAccent[700],
+          REFUNDED: colors.redAccent[300],
+          EXPIRED: colors.grey[700]
+        };
+
+        return (
+          <Chip
+            label={status}
             size="small"
-            startIcon={<CheckCircleOutlineIcon />}
-            onClick={() => openConfirmDialog(params.row as PurchaseResponse)}
             sx={{
-              backgroundColor: colors.greenAccent[600],
-              "&:hover": {
-                backgroundColor: colors.greenAccent[700]
-              }
+              backgroundColor: statusColors[status] || colors.grey[500],
+              color: colors.grey[100],
+              fontWeight: "bold"
             }}
-          >
-            Confirm
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<CancelOutlinedIcon />}
-            onClick={() => openCancelDialog(params.row as PurchaseResponse)}
-            sx={{
-              borderColor: colors.redAccent[400],
-              color: colors.redAccent[400],
-              "&:hover": {
-                borderColor: colors.redAccent[500],
-                backgroundColor: colors.redAccent[900]
-              }
-            }}
-          >
-            Cancel
-          </Button>
-        </Box>
-      )
+          />
+        );
+      }
     }
   ];
 
@@ -284,10 +201,41 @@ const PendingOrders: React.FC = () => {
     <Box m="20px">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Header
-          title="PENDING ORDERS"
-          subtitle="Review and manage pending customer orders"
+          title="ORDER MANAGEMENT"
+          subtitle="Review and manage customer orders by status"
         />
-        <Box>
+        <Box display="flex" gap={2} alignItems="center">
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="status-select-label">Order Status</InputLabel>
+            <Select
+              labelId="status-select-label"
+              id="status-select"
+              value={selectedStatus}
+              label="Order Status"
+              onChange={(e) => {
+                setSelectedStatus(e.target.value as PurchaseStatus);
+                setPage(0); // Reset to first page when status changes
+              }}
+              sx={{
+                backgroundColor: colors.primary[400],
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: colors.grey[700]
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: colors.blueAccent[500]
+                }
+              }}
+            >
+              <MenuItem value="AWAITING_VENDOR_CONFIRMATION">Awaiting Vendor Confirmation</MenuItem>
+              <MenuItem value="AUTHORIZED">Authorized</MenuItem>
+              <MenuItem value="CONFIRMED">Confirmed</MenuItem>
+              <MenuItem value="CREATED">Created</MenuItem>
+              <MenuItem value="CANCELLED">Cancelled</MenuItem>
+              <MenuItem value="FAILED">Failed</MenuItem>
+              <MenuItem value="REFUNDED">Refunded</MenuItem>
+              <MenuItem value="EXPIRED">Expired</MenuItem>
+            </Select>
+          </FormControl>
           <IconButton onClick={loadOrders} disabled={loading}>
             <RefreshIcon />
           </IconButton>
@@ -313,7 +261,7 @@ const PendingOrders: React.FC = () => {
                 {totalOrders}
               </Typography>
               <Typography variant="body2" color={colors.grey[100]}>
-                Pending Orders
+                {selectedStatus.charAt(0) + selectedStatus.slice(1).toLowerCase()} Orders
               </Typography>
             </Box>
           </Paper>
@@ -324,12 +272,6 @@ const PendingOrders: React.FC = () => {
       {error && (
         <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
           {error}
-        </Alert>
-      )}
-
-      {successMessage && (
-        <Alert severity="success" onClose={() => setSuccessMessage("")} sx={{ mb: 2 }}>
-          {successMessage}
         </Alert>
       )}
 
@@ -371,82 +313,8 @@ const PendingOrders: React.FC = () => {
           disableSelectionOnClick
         />
       </Box>
-
-      {/* Confirm Order Dialog */}
-      <Dialog open={confirmDialogOpen} onClose={() => !actionLoading && setConfirmDialogOpen(false)}>
-        <DialogTitle>Confirm Order</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to confirm order <strong>#{selectedOrder?.id}</strong>?
-          </Typography>
-          {selectedOrder && (
-            <Box mt={2}>
-              <Typography variant="body2" color="text.secondary">
-                Card: {selectedOrder.cardName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Quantity: {selectedOrder.quantity}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Total: €{(selectedOrder.price * selectedOrder.quantity).toFixed(2)}
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmDialogOpen(false)} disabled={actionLoading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmOrder}
-            variant="contained"
-            color="success"
-            disabled={actionLoading}
-            startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircleOutlineIcon />}
-          >
-            Confirm Order
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Cancel Order Dialog */}
-      <Dialog open={cancelDialogOpen} onClose={() => !actionLoading && setCancelDialogOpen(false)}>
-        <DialogTitle>Cancel Order</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to cancel order <strong>#{selectedOrder?.id}</strong>?
-          </Typography>
-          <Typography variant="body2" color="warning.main" mt={1}>
-            Stock will be restored automatically.
-          </Typography>
-          {selectedOrder && (
-            <Box mt={2}>
-              <Typography variant="body2" color="text.secondary">
-                Card: {selectedOrder.cardName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Quantity: {selectedOrder.quantity}
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCancelDialogOpen(false)} disabled={actionLoading}>
-            Keep Order
-          </Button>
-          <Button
-            onClick={handleCancelOrder}
-            variant="contained"
-            color="error"
-            disabled={actionLoading}
-            startIcon={actionLoading ? <CircularProgress size={20} /> : <CancelOutlinedIcon />}
-          >
-            Cancel Order
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
 
-export default PendingOrders;
+export default OrderManagement;

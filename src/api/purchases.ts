@@ -1,5 +1,5 @@
 // src/api/purchases.ts
-import type { PurchaseResponse, PageResponse } from './types';
+import type { PurchaseResponse, PageResponse, PurchaseStatus } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -99,16 +99,16 @@ export const getPendingPurchases = async (
 };
 
 /**
- * Confirm a pending purchase
+ * Confirm a pending purchase (admin endpoint)
  * @param purchaseId ID of the purchase to confirm
  */
-export const confirmPurchase = async (purchaseId: number): Promise<PurchaseResponse> => {
+export const confirmPurchaseAdmin = async (purchaseId: number): Promise<PurchaseResponse> => {
   const token = localStorage.getItem("authToken");
   if (!token) {
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/purchases/${purchaseId}/confirm`, {
+  const response = await fetch(`${API_BASE_URL}/purchases/${purchaseId}/confirm-admin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -148,4 +148,61 @@ export const cancelPurchase = async (purchaseId: number): Promise<PurchaseRespon
   }
 
   return response.json() as Promise<PurchaseResponse>;
+};
+
+// ============================================
+// ADMIN FLOW - Manage all orders by status
+// ============================================
+
+/**
+ * Get purchases filtered by status (admin only)
+ * @param status Purchase status to filter by
+ * @param page Page number (0-indexed)
+ * @param size Items per page
+ * @param sortBy Field to sort by (optional)
+ * @param sortDirection Sort direction: "asc" or "desc" (optional)
+ */
+export const getPurchasesByStatus = async (
+  status: PurchaseStatus,
+  page: number = 0,
+  size: number = 20,
+  sortBy?: string,
+  sortDirection?: "asc" | "desc"
+): Promise<PageResponse<PurchaseResponse>> => {
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    throw new Error("User not authenticated");
+  }
+
+  // Build query parameters
+  const params = new URLSearchParams({
+    status,
+    page: page.toString(),
+    size: size.toString()
+  });
+
+  if (sortBy) {
+    params.append("sortBy", sortBy);
+  }
+
+  if (sortDirection) {
+    params.append("sortDirection", sortDirection);
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/purchases/by-status?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error fetching purchases by status: ${response.status} - ${errorText}`);
+  }
+
+  return response.json() as Promise<PageResponse<PurchaseResponse>>;
 };

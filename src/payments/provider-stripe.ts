@@ -56,12 +56,14 @@ export const stripeProductionProvider = {
     try {
       // Step 1: Create PaymentIntent on backend
       console.log('[Stripe] Creating PaymentIntent on backend...');
+      console.log('[Stripe] Transaction ID:', params.transactionId || 'NOT PROVIDED');
       const paymentIntent = await createPaymentIntent({
         amount: params.amount,
         currency: params.currency || 'EUR',
         orderId: params.orderId,
         description: 'MTG Card Purchase',
         customerId: undefined, // Could be added if user management is enhanced
+        transactionId: params.transactionId, // Transaction ID from purchases/checkout
       });
 
       console.log('[Stripe] PaymentIntent created:', {
