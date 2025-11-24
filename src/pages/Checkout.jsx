@@ -160,7 +160,6 @@ const Checkout = () => {
 
       const checkoutRequest = {
         items: items,
-        paymentProviderId: "",  // Empty for now, will be updated when payment completes
         paymentProvider: selectedPayment.toUpperCase()
       };
 
