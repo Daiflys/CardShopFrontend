@@ -6,7 +6,8 @@
     "cart": "Cart",
     "login": "Login",
     "register": "Register",
-    "logout": "Logout"
+    "logout": "Logout",
+    "advancedSearch": "Advanced Search"
   },
   "auth": {
     "loginTitle": "Login to your account",
