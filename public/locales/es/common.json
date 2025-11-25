@@ -6,7 +6,8 @@
     "cart": "Carrito",
     "login": "Iniciar Sesión",
     "register": "Registrarse",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "advancedSearch": "Búsqueda avanzada"
   },
   "auth": {
     "loginTitle": "Iniciar sesión en tu cuenta",

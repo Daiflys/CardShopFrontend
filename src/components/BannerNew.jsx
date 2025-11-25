@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import Button from "../design/components/Button";
 
 const getBanners = (t) => [
   {
@@ -209,12 +210,14 @@ const BannerNew = () => {
                   <p className="text-lg md:text-xl text-white mb-6 drop-shadow-lg">
                     {currentBanner.subtitle}
                   </p>
-                  <button 
+                  <Button
+                    variant="sky"
+                    size="lg"
                     onClick={() => handleBannerClick(currentBanner.setCode)}
-                    className="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white font-bold px-6 py-3 md:px-8 md:py-4 rounded transition-all duration-300 shadow-lg hover:shadow-xl"
+                    className="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 shadow-lg hover:shadow-xl"
                   >
                     {currentBanner.cta}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

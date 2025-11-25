@@ -6,6 +6,7 @@ import PageLayout from "../components/PageLayout";
 import { getCardDetail } from "../api/card";
 import { decodeJWTToken } from "../utils/oauth";
 import { isAdmin } from "../utils/userRoles";
+import Button from "../design/components/Button";
 
 const CardDetail = () => {
   const { cardId } = useParams();
@@ -97,12 +98,12 @@ const CardDetail = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Card</h3>
               <p className="text-gray-600 mb-4">{error}</p>
-              <button
+              <Button
+                variant="danger"
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 Try Again
-              </button>
+              </Button>
             </div>
           </div>
         </PageLayout>
@@ -115,32 +116,34 @@ const CardDetail = () => {
     <div className="bg-gray-50 min-h-screen">
       <PageLayout containerClassName="px-0 py-4 sm:px-4" maxWidth="max-w-6xl">
         <div className="sm:bg-white sm:rounded-xl sm:shadow p-4 sm:p-6">
-          <div className="flex border-b mb-4">
-            <button
-              className={`px-4 py-2 -mb-px border-b-2 text-sm sm:text-base font-medium transition-colors ${
-                activeTab === "info"
-                  ? "border-sky-600 text-sky-700"
-                  : "border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300"
-              }`}
-              onClick={() => setActiveTab("info")}
-            >
-              Info
-            </button>
-            {userIsAdmin && (
-              <button
-                className={`px-4 py-2 -mb-px border-b-2 text-sm sm:text-base font-medium transition-colors ${
-                  activeTab === "sell"
-                    ? "border-sky-600 text-sky-700"
-                    : "border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300"
-                }`}
+          {userIsAdmin && (
+            <div className="flex border-b mb-4">
+              <Button
+                variant="tab"
+                active={activeTab === "info"}
+                onClick={() => setActiveTab("info")}
+                className="px-4 py-2 -mb-px text-sm sm:text-base rounded-none"
+              >
+                Info
+              </Button>
+              <Button
+                variant="tab"
+                active={activeTab === "sell"}
                 onClick={() => setActiveTab("sell")}
+                className="px-4 py-2 -mb-px text-sm sm:text-base rounded-none"
               >
                 Sell
-              </button>
-            )}
-          </div>
-          {activeTab === "info" && <CardInfoTab card={card} />}
-          {activeTab === "sell" && userIsAdmin && <CardSellTab card={card} />}
+              </Button>
+            </div>
+          )}
+          {userIsAdmin ? (
+            <>
+              {activeTab === "info" && <CardInfoTab card={card} />}
+              {activeTab === "sell" && <CardSellTab card={card} />}
+            </>
+          ) : (
+            <CardInfoTab card={card} />
+          )}
         </div>
       </PageLayout>
     </div>

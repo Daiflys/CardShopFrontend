@@ -8,6 +8,7 @@ import PaymentMethodSelector from "../components/PaymentMethodSelector";
 import ConditionIcon from "../components/ConditionIcon";
 import AddressSelector from "../components/AddressSelector";
 import CheckoutAddressForm from "../components/CheckoutAddressForm";
+import Button from "../design/components/Button";
 
 const Checkout = () => {
   const {
@@ -118,43 +119,8 @@ const Checkout = () => {
 
       console.log("📋 Shipping address:", shippingAddress);
 
-      // Step 1: Payment via selected provider (modular)
-      console.log("💳 Processing payment with:", selectedPayment);
-      const provider = getPaymentProviderByKey(selectedPayment);
-      if (!provider) throw new Error('Invalid payment provider');
-      const amount = Number(getCartTotal().toFixed(2));
-      // Prepare orderId for traceability (4–12 alphanumeric)
-      const tsPart = Date.now().toString().slice(-8);
-      const orderId = `ORD${tsPart}`;
-      setPaymentOrderId(orderId);
-
-      if (provider.behavior === 'redirect') {
-        setPaymentStatus(`Redirecting to ${provider.label} (order ${orderId})...`);
-        console.log('➡️ Redirect flow starting for provider:', provider.label, 'order:', orderId);
-      } else {
-        setPaymentStatus('Processing payment...');
-      }
-      const paymentResult = await provider.pay({
-        amount,
-        currency: 'EUR',
-        cartItems,
-        shippingAddress,
-        orderId,
-      });
-      console.log("✅ Payment successful:", paymentResult);
-
-      // If provider performs redirect, do not continue (navigation already triggered)
-      if (provider.behavior === 'redirect') {
-        // We navigated away; keep status visible until navigation or user action
-        return;
-      }
-
-      if (!paymentResult.success) {
-        throw new Error("Payment failed");
-      }
-
-      // Step 2: Prepare batch checkout request
-      console.log("📦 Preparing batch checkout...");
+      // Step 1: Create purchases FIRST (before payment)
+      console.log("📦 Step 1: Creating purchase orders (status CREATED)...");
       console.log("🛒 Cart items full data:", JSON.stringify(cartItems, null, 2));
 
       // Debug localStorage
@@ -186,30 +152,76 @@ const Checkout = () => {
         };
       });
 
+      // Validate items before calling checkout
+      const invalidItems = items.filter(item => !item.cardToSellId || isNaN(item.cardToSellId));
+      if (invalidItems.length > 0) {
+        throw new Error(`Invalid items in cart: ${invalidItems.length} items have invalid cardToSellId`);
+      }
+
       const checkoutRequest = {
         items: items,
-        paymentProviderId: paymentResult.transactionId,
-        paymentProvider: paymentResult.provider
+        paymentProvider: selectedPayment.toUpperCase()
       };
 
       console.log("📦 Batch checkout request:", JSON.stringify(checkoutRequest, null, 2));
 
-      // Make single batch checkout call
-      const result = await batchCheckout(checkoutRequest);
+      // Make batch checkout call to create purchases and get transactionId
+      const checkoutResult = await batchCheckout(checkoutRequest);
 
-      console.log("📊 Batch checkout result:", result);
+      console.log("📊 Batch checkout result:", checkoutResult);
 
-      if (result.success && result.purchases && result.purchases.length > 0) {
-        // Clear cart after successful checkout
-        console.log("🧹 Clearing cart...");
-        clearCart();
-        setOrderSuccess(true);
-        console.log(`✅ Successfully created ${result.purchases.length} purchases with transaction ID: ${result.transactionId}`);
-      } else {
-        // Handle failure
-        console.warn("⚠️ Checkout failed:", result.message);
-        setCheckoutError(result.message || "Checkout failed");
+      if (!checkoutResult.success || !checkoutResult.transactionId) {
+        throw new Error(checkoutResult.message || "Failed to create purchase orders");
       }
+
+      const transactionId = checkoutResult.transactionId;
+      console.log(`✅ Purchases created with transaction ID: ${transactionId}`);
+
+      // Step 2: Initialize payment with transactionId
+      console.log("💳 Step 2: Processing payment with:", selectedPayment);
+      const provider = getPaymentProviderByKey(selectedPayment);
+      if (!provider) throw new Error('Invalid payment provider');
+      const amount = Number(getCartTotal().toFixed(2));
+      // Prepare orderId for traceability (4–12 alphanumeric)
+      const tsPart = Date.now().toString().slice(-12);
+      const orderId = `${tsPart}`;
+      setPaymentOrderId(orderId);
+
+      if (provider.behavior === 'redirect') {
+        setPaymentStatus(`Redirecting to ${provider.label} for preauthorization (order ${orderId})...`);
+        console.log('➡️ Redirect flow starting for provider:', provider.label, 'order:', orderId);
+      } else {
+        setPaymentStatus('Processing payment...');
+      }
+
+      const paymentResult = await provider.pay({
+        amount,
+        currency: 'EUR',
+        cartItems,
+        shippingAddress,
+        orderId,
+        intent: 'preauth',
+        transactionId: transactionId,  // Pass the transactionId from checkout
+      });
+      console.log("✅ Payment initiated:", paymentResult);
+
+      // If provider performs redirect, do not continue (navigation already triggered)
+      if (provider.behavior === 'redirect') {
+        // We navigated away; keep status visible until navigation or user action
+        // Purchases are already created, payment will complete on return
+        return;
+      }
+
+      if (!paymentResult.success) {
+        throw new Error("Payment failed");
+      }
+
+      // For non-redirect flows (local test), clear cart after successful payment
+      console.log("🧹 Clearing cart...");
+      clearCart();
+      setOrderSuccess(true);
+      console.log(`✅ Order completed successfully with transaction ID: ${transactionId}`);
+
     } catch (e) {
       console.error("❌ Checkout exception:", e);
       setCheckoutError(e.message || "Error processing your order");
@@ -250,18 +262,18 @@ const Checkout = () => {
             The seller will review your order and confirm it shortly. You will receive a notification once confirmed.
           </p>
           <div className="flex gap-3">
-            <button
-              className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
+            <Button
+              variant="primary"
               onClick={() => navigate('/')}
             >
               Continue shopping
-            </button>
-            <button
-              className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => navigate('/account/transactions')}
             >
               View my orders
-            </button>
+            </Button>
           </div>
         </div>
       ) : checkoutError && step === "review" ? (
@@ -269,12 +281,12 @@ const Checkout = () => {
           <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
             {checkoutError}
           </div>
-          <button
-            className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
+          <Button
+            variant="primary"
             onClick={() => setCheckoutError("")}
           >
             Try again
-          </button>
+          </Button>
         </div>
       ) : cartItems.length === 0 ? (
         <div className="text-center text-gray-600 py-16">
@@ -335,13 +347,15 @@ const Checkout = () => {
               <span>Shipping</span>
               <span>Calculated at next step</span>
             </div>
-            <button
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded font-semibold disabled:opacity-50"
+            <Button
+              variant="primary"
+              size="md"
+              className="w-full"
               disabled={cartLoading}
               onClick={handleProceedToShipping}
             >
               Proceed to shipping
-            </button>
+            </Button>
           </aside>
         </div>
       ) : step === "shipping" ? (
@@ -378,13 +392,13 @@ const Checkout = () => {
                   >
                     Back to cart
                   </button>
-                  <button
-                    className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded font-semibold disabled:opacity-50"
+                  <Button
+                    variant="primary"
                     onClick={handleContinueToReview}
                     disabled={!selectedAddressId && !newAddressData}
                   >
                     Continue to review
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -497,13 +511,14 @@ const Checkout = () => {
               >
                 Back to shipping
               </button>
-              <button
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded font-semibold disabled:opacity-50"
+              <Button
+                variant="success"
+                loading={placing}
                 onClick={handlePlaceOrder}
                 disabled={placing}
               >
                 {placing ? 'Placing order...' : 'Place order'}
-              </button>
+              </Button>
             </div>
           </div>
 

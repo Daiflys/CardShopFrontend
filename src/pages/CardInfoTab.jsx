@@ -17,6 +17,7 @@ import {
   formatLegalityStatus,
   getLegalityStatusColor
 } from '../utils/cardLegalities';
+import Button from '../design/components/Button';
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
@@ -116,12 +117,12 @@ const CardInfoTab = ({ card }) => {
           ) : error ? (
             <div className="text-center py-8">
               <div className="text-red-600 mb-2">Error: {error}</div>
-              <button
+              <Button
+                variant="primary"
                 onClick={() => fetchCardsToSell(card.cardName, card.id)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Retry
-              </button>
+              </Button>
             </div>
           ) : cardsToSell.length === 0 ? (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
@@ -147,13 +148,15 @@ const CardInfoTab = ({ card }) => {
                         0
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
-                          className="px-3 py-1 bg-gray-300 text-gray-500 border border-gray-400 rounded text-sm cursor-not-allowed whitespace-nowrap overflow-hidden text-ellipsis"
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           disabled
                           title="No stock available"
+                          className="whitespace-nowrap overflow-hidden text-ellipsis"
                         >
                           Add to Cart
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -184,7 +187,6 @@ const CardInfoTab = ({ card }) => {
                     imageUrl: card.imageUrl || card.image,
                     price: cardToSell.cardPrice,
                     set: cardToSell.setName,
-                    sellerId: cardToSell.userId,
                     quantity: selectedQty,
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
@@ -221,13 +223,17 @@ const CardInfoTab = ({ card }) => {
                               </select>
                               <AddToCartButton
                                 card={cardForCart}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded whitespace-nowrap overflow-hidden text-ellipsis"
                               />
                             </>
                           ) : (
-                            <button className="bg-gray-300 text-gray-500 px-3 py-1 text-sm rounded cursor-not-allowed whitespace-nowrap overflow-hidden text-ellipsis">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              disabled
+                              className="whitespace-nowrap overflow-hidden text-ellipsis"
+                            >
                               Want Notice
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -240,12 +246,18 @@ const CardInfoTab = ({ card }) => {
 
           {/* Action Buttons */}
           <div className="mt-6 space-y-3">
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+            <Button
+              variant="info"
+              className="w-full whitespace-nowrap overflow-hidden text-ellipsis py-3"
+            >
               📍 See other versions
-            </button>
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+            </Button>
+            <Button
+              variant="warning"
+              className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
+            >
               ⓘ About Condition Info
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -273,7 +285,7 @@ const CardInfoTab = ({ card }) => {
                     </div>
                   ))
                 ) : (
-                  <span>Colorless</span>
+                  <span>-</span>
                 )}
               </div>
             </div>
@@ -332,15 +344,15 @@ const CardInfoTab = ({ card }) => {
                     <img src={setIconUrl} alt={`${card.setName || "Urza's Destiny"} icon`} className="w-4 h-4" />
                   ) : null;
                 })()}
-                <button onClick={handleExpansionClick} className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer">
+                <Button variant="link" onClick={handleExpansionClick}>
                   {card.setName || "Urza's Destiny"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
           <div className="border-t border-gray-200">
             <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Illustrator</div>
-            <div className="px-4 py-3 bg-white">{card.artistName || "Jim Nelson"}</div>
+            <div className="px-4 py-3 bg-white">{card.artistName || "-"}</div>
           </div>
           <div className="border-t border-b border-gray-200">
             <div className="px-4 py-2 bg-gray-50 text-xs font-medium text-gray-600">Legalities</div>
@@ -394,7 +406,7 @@ const CardInfoTab = ({ card }) => {
                         </div>
                       ))
                     ) : (
-                      <span>Colorless</span>
+                      <span>-</span>
                     )}
                   </div>
                 </td>
@@ -465,19 +477,16 @@ const CardInfoTab = ({ card }) => {
                         />
                       ) : null;
                     })()}
-                    <button
-                      onClick={handleExpansionClick}
-                      className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer"
-                    >
+                    <Button variant="link" onClick={handleExpansionClick}>
                       {card.setName || "Urza's Destiny"}
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
               <tr>
                 <td className="px-4 py-3 font-medium text-gray-700 bg-gray-100">Illustrator</td>
                 <td className="px-4 py-3 bg-gray-200">
-                  {card.artistName || "Jim Nelson"}
+                  {card.artistName || "-"}
                 </td>
               </tr>
               <tr>

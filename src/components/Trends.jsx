@@ -33,19 +33,19 @@ const Trends = () => {
         <h2 className="text-3xl font-bold text-blue-900">{t('trends.title')}</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="bg-white rounded-xl shadow-lg p-11">
+        <div className="bg-white rounded-xl p-11">
           <h3 className="text-xl font-semibold mb-9 text-blue-800">{t('trends.bestSellers')}</h3>
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-3 gap-4">
             {bestSellers.map((item) => (
-              <ProductCard key={item.id} {...item} />
+              <ProductCard key={item.id} {...item} className="min-w-0 max-w-full" />
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-lg p-11">
+        <div className="bg-white rounded-xl p-11">
           <h3 className="text-xl font-semibold mb-9 text-blue-800">{t('trends.bestBargains')}</h3>
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-3 gap-4">
             {bestBargains.map((item) => (
-              <ProductCard key={item.id} {...item} />
+              <ProductCard key={item.id} {...item} className="min-w-0 max-w-full" />
             ))}
           </div>
         </div>

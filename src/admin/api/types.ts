@@ -101,7 +101,6 @@ export interface CardToSellDTO {
   condition: string;
   quantity: number;
   language: string;
-  userId: number;
   comments: string | null;
   // For DataGrid compatibility
   id?: number;

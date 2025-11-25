@@ -11,6 +11,7 @@ import usePaginationStore from '../store/paginationStore';
 import RecentlyViewed from '../components/RecentlyViewed';
 import { createFormatPrice, getAvailableCount } from '../utils/cardPricing';
 import { buildSearchUrl, convertFiltersToCriteria } from '../utils/searchUtils';
+import Button from '../design/components/Button';
 
 const Search = () => {
   const { t } = useTranslation();
@@ -217,15 +218,16 @@ const Search = () => {
       <div className="lg:flex gap-6">
         {/* Mobile Filter Button */}
         <div className="lg:hidden mb-4">
-          <button
+          <Button
+            variant="sky"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors"
+            className="w-full"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             Filters & Search
-          </button>
+          </Button>
         </div>
 
         {/* Sidebar Overlay for Mobile */}
@@ -244,14 +246,15 @@ const Search = () => {
             {/* Mobile close button */}
             <div className="lg:hidden flex justify-between items-center p-4 border-b">
               <h2 className="text-lg font-semibold text-gray-900">Filters & Search</h2>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setSidebarOpen(false)}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </Button>
             </div>
 
             <div className="p-4 lg:p-0">
@@ -306,26 +309,24 @@ const Search = () => {
 
               {/* View toggle buttons */}
               <div className="flex gap-2">
-                <button
+                <Button
+                  variant="outline"
+                  size="md"
+                  active={viewMode === 'list'}
                   onClick={() => setViewMode('list')}
-                  className={`flex-1 sm:flex-none px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium border transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
+                  className="flex-1 sm:flex-none text-xs lg:text-sm"
                 >
                   📋 LIST
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
+                  size="md"
+                  active={viewMode === 'grid'}
                   onClick={() => setViewMode('grid')}
-                  className={`flex-1 sm:flex-none px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium border transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
+                  className="flex-1 sm:flex-none text-xs lg:text-sm"
                 >
                   ⚏ GRID
-                </button>
+                </Button>
               </div>
             </div>
           </div>

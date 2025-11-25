@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import useAddressStore from '../../store/addressStore';
 import AddressCard from '../../components/AddressCard';
 import AddressFormModal from '../../components/AddressFormModal';
+import Button from '../../design/components/Button';
 
 const Addresses = () => {
   const {
@@ -69,16 +70,17 @@ const Addresses = () => {
             Manage your shipping addresses ({getAddressCount()}/5)
           </p>
         </div>
-        <button
+        <Button
+          variant="primary"
           onClick={handleAddNew}
           disabled={!canAddMoreAddresses() || loading}
-          className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Add Address
-        </button>
+        </Button>
       </div>
 
       {!canAddMoreAddresses() && (
@@ -108,15 +110,16 @@ const Addresses = () => {
           </svg>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No addresses yet</h3>
           <p className="text-gray-600 mb-4">Add your first shipping address to get started</p>
-          <button
+          <Button
+            variant="primary"
             onClick={handleAddNew}
-            className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded font-medium inline-flex items-center gap-2"
+            className="inline-flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Add Your First Address
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

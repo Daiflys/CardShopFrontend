@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getUserPurchases } from "../../api/accountInfo";
 import ConditionIcon from "../../components/ConditionIcon";
 import PurchaseStatusBadge from "../../components/PurchaseStatusBadge";
+import Button from "../../design/components/Button";
 
 const Transactions = () => {
   const [purchases, setPurchases] = useState([]);
@@ -210,33 +211,33 @@ const Transactions = () => {
           Showing {((pagination.currentPage - 1) * itemsPerPage) + 1} to {Math.min(pagination.currentPage * itemsPerPage, pagination.totalItems)} of {pagination.totalItems} purchases
         </div>
         <div className="flex items-center space-x-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handlePageChange(pagination.currentPage - 1)}
             disabled={!pagination.hasPrev}
-            className="px-3 py-2 text-sm bg-white border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
-          </button>
+          </Button>
           {pages.map(page => (
-            <button
+            <Button
               key={page}
+              variant="outline"
+              size="sm"
+              active={page === pagination.currentPage}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-2 text-sm rounded ${
-                page === pagination.currentPage
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border hover:bg-gray-50'
-              }`}
             >
               {page}
-            </button>
+            </Button>
           ))}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handlePageChange(pagination.currentPage + 1)}
             disabled={!pagination.hasNext}
-            className="px-3 py-2 text-sm bg-white border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -282,9 +283,9 @@ const Transactions = () => {
             <input type="date" className="w-full border rounded px-3 py-2" />
           </div>
         </div>
-        <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+        <Button variant="primary" className="mt-4">
           Apply Filters
-        </button>
+        </Button>
       </div>
     </div>
   );

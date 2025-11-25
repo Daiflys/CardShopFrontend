@@ -50,7 +50,6 @@ export interface CartItem {
   quantity: number;
   condition: string;
   setName?: string;
-  userId?: number;
   available?: number;
 }
 
@@ -68,7 +67,6 @@ export interface CardToSell {
   condition: string;
   quantity: number;
   language: string;
-  userId?: number;
   comments?: string | null;
 }
 
@@ -238,7 +236,15 @@ export interface AddressUpdateRequest {
 }
 
 // Purchase types
-export type PurchaseStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
+export type PurchaseStatus =
+  | "AWAITING_VENDOR_CONFIRMATION"
+  | "CONFIRMED"
+  | "CANCELLED"
+  | "AUTHORIZED"
+  | "FAILED"
+  | "REFUNDED"
+  | "CREATED"
+  | "EXPIRED";
 
 export interface PurchaseResponse {
   id: number;

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import Button from '../design/components/Button';
 import { useNavigate } from 'react-router-dom';
 import { getAllSets, getSetIcon } from '../data/sets';
 
@@ -35,12 +36,16 @@ const SetsSidebar = () => {
         <h3 className={`font-semibold text-gray-800 ${isCollapsed ? 'hidden' : 'block'}`}>
           New Sets
         </h3>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1 hover:bg-gray-100 rounded text-gray-600"
+          aria-pressed={isCollapsed}
+          aria-label={isCollapsed ? 'Expand new sets panel' : 'Collapse new sets panel'}
+          className="p-1 text-gray-600 md:hidden"
         >
           {isCollapsed ? '→' : '←'}
-        </button>
+        </Button>
       </div>
       
       <div className={`${isCollapsed ? 'hidden' : 'block'}`}>
@@ -71,10 +76,10 @@ const SetsSidebar = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800 truncate font-medium">
+                  <p className="text-collection-set-code">
                     {set.name}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-collection-set-code-subtitle">
                     {set.code.toUpperCase()}
                   </p>
                 </div>

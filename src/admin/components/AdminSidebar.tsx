@@ -14,6 +14,7 @@ import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import PriceChangeOutlinedIcon from "@mui/icons-material/PriceChangeOutlined";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
 
 interface AdminSidebarProps {
@@ -127,6 +128,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = () => {
               style={{ color: colors.grey[100] }}
             >
               Pending Orders
+            </MenuItem>
+
+            <MenuItem
+              icon={<ShoppingCartOutlinedIcon />}
+              component={<Link to="/admin/orders" />}
+              style={{ color: colors.grey[100] }}
+            >
+              Order Management
             </MenuItem>
 
             <Typography

@@ -2,6 +2,7 @@
 import React from 'react';
 import AddressForm from './AddressForm';
 import useAddressStore from '../store/addressStore';
+import Button from '../design/components/Button';
 
 const AddressFormModal = ({ isOpen, mode, address, onClose }) => {
   const { addAddress, editAddress, loading } = useAddressStore();
@@ -28,15 +29,16 @@ const AddressFormModal = ({ isOpen, mode, address, onClose }) => {
           <h2 className="text-xl font-semibold text-gray-900">
             {mode === 'edit' ? 'Edit Address' : 'Add New Address'}
           </h2>
-          <button
+          <Button
+            variant="ghost"
             onClick={onClose}
             disabled={loading}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            className="text-gray-400 hover:text-gray-600"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         <div className="px-6 py-4">

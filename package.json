@@ -21,6 +21,8 @@
     "@nivo/geo": "^0.99.0",
     "@nivo/line": "^0.99.0",
     "@nivo/pie": "^0.99.0",
+    "@stripe/react-stripe-js": "^5.3.0",
+    "@stripe/stripe-js": "^8.4.0",
     "@tailwindcss/postcss": "^4.1.13",
     "i18next": "^25.4.2",
     "i18next-browser-languagedetector": "^8.2.0",
