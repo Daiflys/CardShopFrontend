@@ -6,7 +6,8 @@
     "cart": "カート",
     "login": "ログイン",
     "register": "登録",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "advancedSearch": "詳細検索"
   },
   "auth": {
     "loginTitle": "アカウントにログイン",

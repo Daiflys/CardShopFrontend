@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import RarityIndicator from "./RarityIndicator";
 
-const ProductCard = ({ id, cardName, imageUrl, name, price, set, rarity }) => {
+const ProductCard = ({ id, cardName, imageUrl, name, price, set, rarity, className = '' }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -11,7 +11,7 @@ const ProductCard = ({ id, cardName, imageUrl, name, price, set, rarity }) => {
 
   return (
     <div
-      className="bg-white rounded-lg shadow p-3 flex flex-col items-center min-w-[140px] max-w-[160px] hover:shadow-lg transition-shadow cursor-pointer relative overflow-hidden"
+      className={`bg-white rounded-lg shadow p-3 flex flex-col items-center min-w-[140px] max-w-[160px] hover:shadow-lg transition-shadow cursor-pointer relative overflow-hidden ${className}`}
       onClick={handleCardClick}
     >
       <div className="w-24 h-32 flex items-center justify-center mb-2">
