@@ -193,7 +193,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-[100] w-full bg-gradient-to-r from-sky-50 to-blue-50 shadow-md border-b border-sky-200 font-sans">
       {/* Desktop Header */}
-      <div className="hidden lg:flex items-center justify-between py-4 w-full max-w-none gap-6">
+      <div className="hidden lg:flex items-center justify-center py-4 w-full max-w-none gap-6 px-4 lg:px-16">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 pl-8 lg:pl-16 pr-6">
           <div
@@ -209,12 +209,12 @@ const Header = () => {
             role="button"
             aria-label="Go to homepage"
           >
-            <Logo className="w-10 h-10" />
+            <Logo className="w-12 h-12" />
           </div>
         </div>
 
         {/* Search */}
-        <div className="flex-1 max-w-2xl mx-6 relative" ref={inputRef}>
+        <div className="flex-1 max-w-xl mx-10 relative" ref={inputRef}>
           <form onSubmit={handleSearch}>
             <input
               type="text"
@@ -319,7 +319,9 @@ const Header = () => {
           {userEmail || userName ? (
             <div className="relative" ref={userMenuRef}>
               <button
-                className="flex items-center gap-2 cursor-pointer select-none"
+                // antes className="flex items-center gap-2 cursor-pointer select-none !bg-transparent !p-0 !border-0 !shadow-none hover:!bg-transparent active:!bg-transparent focus:!bg-transparent focus:!outline-none focus:!ring-0"
+                className=" bg-transparent border-0 p-0" type="button"
+
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600 text-white">
@@ -327,9 +329,6 @@ const Header = () => {
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </span>
-                <svg className={`h-4 w-4 text-gray-500 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-                </svg>
               </button>
               {userMenuOpen && (
                 <ul className="absolute right-0 mt-2 w-52 bg-white border rounded-md shadow-lg overflow-hidden z-30">
@@ -365,7 +364,8 @@ const Header = () => {
           ) : (
             <div className="relative" ref={userMenuRef}>
               <button
-                className="flex items-center gap-2 cursor-pointer select-none"
+                className=" bg-transparent border-0 p-0" type="button"
+
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-400 text-white">
@@ -373,9 +373,6 @@ const Header = () => {
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </span>
-                <svg className={`h-4 w-4 text-gray-500 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-                </svg>
               </button>
               {userMenuOpen && (
                 <ul className="absolute right-0 mt-2 w-52 bg-white border rounded-md shadow-lg overflow-hidden z-30">

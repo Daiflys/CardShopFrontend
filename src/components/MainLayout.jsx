@@ -5,9 +5,9 @@ import Footer from "./Footer";
 
 const MainLayout = () => {
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f0f9ff)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f0f9ff)' }}>
       <Header />
-      <Outlet />
+      <main className="flex-1"> <Outlet /></main>
       <Footer />
     </div>
   );
