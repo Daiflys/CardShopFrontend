@@ -17,6 +17,7 @@ interface Translations {
     login: string;
     register: string;
     logout: string;
+    advancedSearch: string;
   };
   auth: {
     loginTitle: string;
@@ -105,7 +106,8 @@ const resources: Record<string, { common: Translations }> = {
         cart: "Cart",
         login: "Login",
         register: "Register",
-        logout: "Logout"
+        logout: "Logout",
+        advancedSearch: "Advanced Search"
       },
       auth: {
         loginTitle: "Login to your account",
@@ -205,7 +207,8 @@ const resources: Record<string, { common: Translations }> = {
         cart: "Carrito",
         login: "Iniciar Sesión",
         register: "Registrarse",
-        logout: "Cerrar Sesión"
+        logout: "Cerrar Sesión",
+        advancedSearch: "Búsqueda avanzada"
       },
       auth: {
         loginTitle: "Iniciar sesión en tu cuenta",
@@ -305,7 +308,8 @@ const resources: Record<string, { common: Translations }> = {
         cart: "カート",
         login: "ログイン",
         register: "登録",
-        logout: "ログアウト"
+        logout: "ログアウト",
+        advancedSearch: "詳細検索"
       },
       auth: {
         loginTitle: "アカウントにログイン",

@@ -149,6 +149,7 @@ const realAdvancedSearchCards = async (
   const response = await fetch(finalUrl);
   if (!response.ok) throw new Error("Advanced search failed");
   const data = await response.json();
+  console.log('RETURN data',data );
 
   return formatPaginatedCardsResponse(data);
 };

@@ -306,7 +306,7 @@ const Header = () => {
                     navigate('/advanced-search');
                   }}
                 >
-                  {t(navigation.advancedSearch) || 'Búsqueda avanzada'}
+                  {t('navigation.advancedSearch') || 'Búsqueda avanzada'}
                 </button>
               </div>
             </div>
