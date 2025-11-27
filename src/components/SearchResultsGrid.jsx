@@ -39,13 +39,10 @@ const SearchResultsGrid = ({
 
   if (gridCols) {
     // Use advanced gridCols configuration if provided
+    // Only provide minimal defaults, let gridCols override
     finalGridCols = {
-      default: 'grid-cols-1',
-      sm: 'sm:grid-cols-2',
+      default: 'grid-cols-2',
       md: 'md:grid-cols-3',
-      lg: 'lg:grid-cols-3',
-      xl: 'xl:grid-cols-4',
-      '2xl': '2xl:grid-cols-5',
       ...gridCols
     };
   } else if (columnsConfig) {
@@ -59,14 +56,10 @@ const SearchResultsGrid = ({
       '2xl': large ? `2xl:grid-cols-${large}` : `2xl:grid-cols-${desktop}`
     };
   } else {
-    // Default configuration
+    // Default configuration: 2 columns on mobile, 3 on desktop
     finalGridCols = {
       default: 'grid-cols-2',
-      sm: 'sm:grid-cols-2',
-      md: 'md:grid-cols-3',
-      lg: 'lg:grid-cols-3',
-      xl: 'xl:grid-cols-4',
-      '2xl': '2xl:grid-cols-5'
+      md: 'md:grid-cols-3'
     };
   }
 
@@ -74,7 +67,7 @@ const SearchResultsGrid = ({
     'grid',
     finalGridCols.default,
     finalGridCols.sm,
-    finalGridCols.md || '',
+    finalGridCols.md,
     finalGridCols.lg,
     finalGridCols.xl,
     finalGridCols['2xl'],

@@ -35,6 +35,7 @@ export interface CardData {
   block?: string;
   available?: number;
   cardsToSell?: CardToSell[];
+  otherLanguagesCardsToSell?: CardToSell[];
   price?: number | null;
   from?: number | null;
   priceTrend?: number | null;
@@ -83,6 +84,7 @@ class Card {
   block: string;
   available: number;
   cardsToSell: CardToSell[];
+  otherLanguagesCardsToSell: CardToSell[];
   price: number | null;
   from: number | null;
   priceTrend: number | null;
@@ -121,6 +123,7 @@ class Card {
     this.block = data.block || '';
     this.available = data.available || 0;
     this.cardsToSell = data.cardsToSell || [];
+    this.otherLanguagesCardsToSell = data.otherLanguagesCardsToSell || [];
     this.price = data.price || null;
     this.from = data.from || null;
     this.priceTrend = data.priceTrend || null;
@@ -140,6 +143,7 @@ class Card {
       const card = new Card(data.card);
       card.available = data.available || (data.cardsToSell ? data.cardsToSell.length : 0);
       card.cardsToSell = data.cardsToSell || [];
+      card.otherLanguagesCardsToSell = data.otherLanguagesCardsToSell || [];
       return card;
     }
     return new Card(data);
