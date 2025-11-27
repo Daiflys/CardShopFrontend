@@ -6,6 +6,7 @@ export interface CardToSell {
   id?: string | null;
   price?: number;
   condition?: string;
+  finish?: string;
   quantity?: number;
   language?: string;
 }
@@ -54,6 +55,7 @@ export interface CardData {
 export interface BulkSellCardData {
   price: number;
   condition: string;
+  finish?: string;
   quantity: number;
   language?: string;
   comments?: string;
@@ -181,6 +183,7 @@ class Card {
       imageUrl: this.imageUrl,
       price: cardData.price,
       condition: cardData.condition,
+      finish: cardData.finish || 'nonfoil',
       quantity: cardData.quantity,
       language: cardData.language || 'en',
       comments: cardData.comments || ''

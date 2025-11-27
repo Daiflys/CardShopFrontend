@@ -4,7 +4,7 @@ import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor, getRarityIcon } from "../utils/rarity";
 import RarityCircle from "../components/RarityCircle";
 import ConditionIcon from "../components/ConditionIcon";
-import { getCardsToSellById } from "../api/card";
+import { getCardsToSellById, getCardsByOracleId } from "../api/card";
 import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
 import { getSetIcon } from "../data/sets.js";
 import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
@@ -18,38 +18,139 @@ import {
   getLegalityStatusColor
 } from '../utils/cardLegalities';
 import Button from '../design/components/Button';
+import usePaginationStore from '../store/paginationStore';
+import Card from '../models/Card';
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
   const [cardsToSell, setCardsToSell] = useState([]);
+  const [otherVersions, setOtherVersions] = useState([]);
   const addRecentlyViewed = useRecentlyViewedStore(state => state.addRecentlyViewed);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
   const [showZoomModal, setShowZoomModal] = useState(false);
+  const [hasOtherVersionsWithAvailability, setHasOtherVersionsWithAvailability] = useState(false);
+  const { handlePaginatedResponse } = usePaginationStore();
 
-  const fetchCardsToSell = useCallback(async (cardName, cardId) => {
+  const fetchCardsToSell = useCallback(async (cardName, cardId, oracleId) => {
     if (!cardName) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const data = await getCardsToSellById(cardId, 0, 100); // Get first 100 results
-      setCardsToSell(data.content || data);
+      // Fetch cards to sell for current card
+      const data = await getCardsToSellById(cardId, 0, 100);
+      let cardsToSellList = data.content || data;
+
+      // Fetch other versions if we have oracle ID
+      let otherVersionsList = [];
+      if (oracleId) {
+        try {
+          console.log('Fetching other versions for oracle ID:', oracleId);
+          const response = await getCardsByOracleId(oracleId);
+          const cardsArray = handlePaginatedResponse(response, 0, 50);
+          const cards = Card.fromApiResponseArray(cardsArray);
+
+          // Filter out the current card
+          const filteredVersions = cards.filter(version => {
+            return version.id !== cardId && version.cardName && version.id;
+          });
+
+          // Sort: cards with availability first, then by language, then by set name
+          const currentLanguage = card.language || 'en';
+          otherVersionsList = filteredVersions.sort((a, b) => {
+            const aHasAvailability = (a.available || 0) > 0;
+            const bHasAvailability = (b.available || 0) > 0;
+
+            if (aHasAvailability !== bHasAvailability) {
+              return aHasAvailability ? -1 : 1;
+            }
+
+            const aIsCurrentLang = (a.language || 'en') === currentLanguage;
+            const bIsCurrentLang = (b.language || 'en') === currentLanguage;
+            if (aIsCurrentLang !== bIsCurrentLang) {
+              return aIsCurrentLang ? -1 : 1;
+            }
+
+            return (a.setName || '').localeCompare(b.setName || '');
+          });
+
+          console.log('✨ Other versions with availability:', otherVersionsList.filter(v => (v.available || 0) > 0).length);
+
+          // Check if there are versions with availability
+          const hasAvailability = otherVersionsList.some(v => (v.available || 0) > 0);
+          setHasOtherVersionsWithAvailability(hasAvailability);
+          setOtherVersions(otherVersionsList);
+
+          // If we have less than 8 cards to sell, fill with other versions that have availability
+          const MAX_CARDS_TO_SHOW = 8;
+          if (cardsToSellList.length < MAX_CARDS_TO_SHOW) {
+            const slotsToFill = MAX_CARDS_TO_SHOW - cardsToSellList.length;
+            console.log(`📦 Slots to fill: ${slotsToFill}`);
+
+            // Get other versions with availability
+            const versionsWithAvailability = otherVersionsList.filter(v => (v.available || 0) > 0);
+            console.log(`🌍 Versions with availability from other languages:`, versionsWithAvailability.length);
+
+            if (versionsWithAvailability.length > 0) {
+              // For each version with availability, fetch its cards to sell
+              for (let i = 0; i < Math.min(slotsToFill, versionsWithAvailability.length); i++) {
+                const version = versionsWithAvailability[i];
+                try {
+                  const versionData = await getCardsToSellById(version.id, 0, 10);
+                  const versionCardsToSell = versionData.content || versionData;
+
+                  // Enrich each cardToSell with the card information from the version
+                  const enrichedCardsToSell = versionCardsToSell.map(cardToSell => ({
+                    ...cardToSell,
+                    _cardInfo: {
+                      cardId: version.id,
+                      cardName: version.cardName,
+                      imageUrl: version.imageUrl,
+                      setName: version.setName,
+                      language: version.language
+                    }
+                  }));
+
+                  // Add the cards from this version
+                  if (enrichedCardsToSell.length > 0) {
+                    cardsToSellList = [...cardsToSellList, ...enrichedCardsToSell];
+                    console.log(`✅ Added ${enrichedCardsToSell.length} cards from ${version.setName} (${version.language})`);
+                  }
+
+                  // Stop if we've filled all slots
+                  if (cardsToSellList.length >= MAX_CARDS_TO_SHOW) {
+                    break;
+                  }
+                } catch (err) {
+                  console.error(`Error fetching cards for version ${version.id}:`, err);
+                }
+              }
+
+              console.log(`🎯 Final cards to sell count: ${cardsToSellList.length}`);
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching other versions:', err);
+        }
+      }
+
+      setCardsToSell(cardsToSellList);
     } catch (err) {
       setError(err.message);
       setCardsToSell([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [card, handlePaginatedResponse]);
 
   useEffect(() => {
-    if (card?.cardName) {
-      fetchCardsToSell(card.cardName, card.id);
+    if (card?.cardName && card?.id) {
+      fetchCardsToSell(card.cardName, card.id, card.oracleId);
     }
-  }, [card?.cardName, card?.id, fetchCardsToSell]);
+  }, [card?.cardName, card?.id, card?.oracleId, fetchCardsToSell]);
 
   // Add card to recently viewed when component mounts
   useEffect(() => {
@@ -127,8 +228,10 @@ const CardInfoTab = ({ card }) => {
           ) : cardsToSell.length === 0 ? (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
-                <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
+                <div className="grid grid-cols-6 gap-2 text-sm font-semibold text-gray-700">
                   <div>Condition</div>
+                  <div>Language</div>
+                  <div>Foil</div>
                   <div>Price</div>
                   <div>Stock</div>
                   <div>Qty</div>
@@ -137,9 +240,15 @@ const CardInfoTab = ({ card }) => {
               <div className="divide-y">
                 {['NM', 'EX', 'GD', 'LP'].map((condition, index) => (
                   <div key={condition} className={`px-4 py-2 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <div className="grid grid-cols-4 gap-4 items-center">
+                    <div className="grid grid-cols-6 gap-2 items-center">
                       <div className="flex items-center">
                         <ConditionIcon condition={condition} />
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        -
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        -
                       </div>
                       <div className="text-gray-400 text-sm">
                         -
@@ -166,8 +275,10 @@ const CardInfoTab = ({ card }) => {
           ) : (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
-                <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
+                <div className="grid grid-cols-6 gap-2 text-sm font-semibold text-gray-700">
                   <div>Condition</div>
+                  <div>Language</div>
+                  <div>Foil</div>
                   <div>Price</div>
                   <div>Stock</div>
                   <div>Qty</div>
@@ -180,13 +291,22 @@ const CardInfoTab = ({ card }) => {
 
                   console.log(`📋 Card to sell #${i}:`, cardToSell);
 
+                  // Use enriched card info if available (for cards from other languages)
+                  const cardInfo = cardToSell._cardInfo || {
+                    cardId: card.id,
+                    cardName: card.cardName,
+                    imageUrl: card.imageUrl || card.image,
+                    setName: card.setName,
+                    language: card.language
+                  };
+
                   const cardForCart = {
                     id: listingId,
                     cardToSellId: cardToSell.id, // The actual ID needed for checkout
-                    cardName: card.cardName,
-                    imageUrl: card.imageUrl || card.image,
+                    cardName: cardInfo.cardName,
+                    imageUrl: cardInfo.imageUrl,
                     price: cardToSell.cardPrice,
-                    set: cardToSell.setName,
+                    set: cardInfo.setName,
                     quantity: selectedQty,
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
@@ -194,11 +314,25 @@ const CardInfoTab = ({ card }) => {
 
                   console.log(`🛒 CardForCart #${i}:`, cardForCart);
 
+                  // Get language flag
+                  const language = (cardToSell.language || 'en').toLowerCase();
+                  const normalizedLanguage = language === 'jp' ? 'ja' : language;
+
+                  // Get finish/foil display
+                  const finish = cardToSell.finish || 'nonfoil';
+                  const foilDisplay = finish === 'foil' ? '⭐' : finish === 'etched' ? '⚡' : '';
+
                   return (
                     <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                      <div className="grid grid-cols-4 gap-4 items-center">
+                      <div className="grid grid-cols-6 gap-2 items-center">
                         <div className="flex items-center">
                           <ConditionIcon condition={cardToSell.condition} />
+                        </div>
+                        <div className="flex items-center justify-center">
+                          {getLanguageFlag(normalizedLanguage, 'normal')}
+                        </div>
+                        <div className="text-sm font-medium text-gray-700">
+                          {foilDisplay}
                         </div>
                         <div className="font-semibold text-green-600 text-sm">
                           ¥ {cardToSell.cardPrice?.toLocaleString() ?? "Unknown"}
@@ -210,7 +344,7 @@ const CardInfoTab = ({ card }) => {
                           {cardToSell.quantity > 0 ? (
                             <>
                               <select
-                                className="border rounded px-2 py-1 text-sm w-16"
+                                className="border rounded px-2 py-1 text-sm w-16 flex-shrink-0"
                                 value={selectedQty}
                                 onChange={e => setSelectedQuantities(prev => ({
                                   ...prev,
@@ -221,16 +355,18 @@ const CardInfoTab = ({ card }) => {
                                   <option key={num} value={num}>{num}</option>
                                 ))}
                               </select>
-                              <AddToCartButton
-                                card={cardForCart}
-                              />
+                              <div className="flex-shrink-0 h-8">
+                                <AddToCartButton
+                                  card={cardForCart}
+                                />
+                              </div>
                             </>
                           ) : (
                             <Button
                               variant="secondary"
                               size="sm"
                               disabled
-                              className="whitespace-nowrap overflow-hidden text-ellipsis"
+                              className="whitespace-nowrap overflow-hidden text-ellipsis h-8"
                             >
                               Want Notice
                             </Button>
@@ -247,10 +383,16 @@ const CardInfoTab = ({ card }) => {
           {/* Action Buttons */}
           <div className="mt-6 space-y-3">
             <Button
-              variant="info"
+              variant={hasOtherVersionsWithAvailability ? "danger" : "info"}
               className="w-full whitespace-nowrap overflow-hidden text-ellipsis py-3"
+              onClick={() => {
+                const otherVersionsSection = document.getElementById('other-versions-section');
+                if (otherVersionsSection) {
+                  otherVersionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
             >
-              📍 See other versions
+              {hasOtherVersionsWithAvailability ? '🔴 Available in other versions' : '📍 See other versions'}
             </Button>
             <Button
               variant="warning"
@@ -531,7 +673,14 @@ const CardInfoTab = ({ card }) => {
 
 
       {/* Other Versions Section */}
-      <OtherVersions card={card} currentCardId={card?.id} />
+      <div id="other-versions-section">
+        <OtherVersions
+          card={card}
+          currentCardId={card?.id}
+          otherVersions={otherVersions}
+          hasAvailability={hasOtherVersionsWithAvailability}
+        />
+      </div>
 
       {/* Recently Viewed Section */}
       <RecentlyViewed />

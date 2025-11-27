@@ -15,6 +15,7 @@ const realSetCardToSell = async (
   imageUrl: string,
   price: number,
   condition: string,
+  finish: string,
   quantity: number,
   comments: string,
   language: string
@@ -30,6 +31,7 @@ const realSetCardToSell = async (
     imageUrl: imageUrl,
     price: price,
     condition: condition,
+    finish: finish || 'nonfoil',
     quantity: quantity,
     comments: comments,
     language: language || 'en'

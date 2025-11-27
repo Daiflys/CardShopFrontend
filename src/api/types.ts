@@ -67,6 +67,7 @@ export interface CardToSell {
   condition: string;
   quantity: number;
   language: string;
+  finish?: string;
   comments?: string | null;
 }
 
