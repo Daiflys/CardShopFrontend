@@ -41,8 +41,8 @@ const useRecentlyViewedStore = create<RecentlyViewedStore>()(
         // Remove if already exists to avoid duplicates
         const filtered = recentlyViewed.filter(item => item.cardId !== cardToAdd.cardId);
 
-        // Add to beginning and keep only last 20
-        const updated = [cardToAdd, ...filtered].slice(0, 20);
+        // Add to beginning and keep only last 18 (multiple of 3 and 6 for grid layout)
+        const updated = [cardToAdd, ...filtered].slice(0, 18);
 
         set({ recentlyViewed: updated });
       },
