@@ -4,7 +4,6 @@ import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor, getRarityIcon } from "../utils/rarity";
 import RarityCircle from "../components/RarityCircle";
 import ConditionIcon from "../components/ConditionIcon";
-import { getCardsToSellById, getCardsByOracleId } from "../api/card";
 import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
 import { getSetIcon } from "../data/sets.js";
 import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
@@ -18,139 +17,33 @@ import {
   getLegalityStatusColor
 } from '../utils/cardLegalities';
 import Button from '../design/components/Button';
-import usePaginationStore from '../store/paginationStore';
-import Card from '../models/Card';
 
 const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
   const [cardsToSell, setCardsToSell] = useState([]);
-  const [otherVersions, setOtherVersions] = useState([]);
   const addRecentlyViewed = useRecentlyViewedStore(state => state.addRecentlyViewed);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
   const [showZoomModal, setShowZoomModal] = useState(false);
-  const [hasOtherVersionsWithAvailability, setHasOtherVersionsWithAvailability] = useState(false);
-  const { handlePaginatedResponse } = usePaginationStore();
 
-  const fetchCardsToSell = useCallback(async (cardName, cardId, oracleId) => {
-    if (!cardName) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      // Fetch cards to sell for current card
-      const data = await getCardsToSellById(cardId, 0, 100);
-      let cardsToSellList = data.content || data;
-
-      // Fetch other versions if we have oracle ID
-      let otherVersionsList = [];
-      if (oracleId) {
-        try {
-          console.log('Fetching other versions for oracle ID:', oracleId);
-          const response = await getCardsByOracleId(oracleId);
-          const cardsArray = handlePaginatedResponse(response, 0, 50);
-          const cards = Card.fromApiResponseArray(cardsArray);
-
-          // Filter out the current card
-          const filteredVersions = cards.filter(version => {
-            return version.id !== cardId && version.cardName && version.id;
-          });
-
-          // Sort: cards with availability first, then by language, then by set name
-          const currentLanguage = card.language || 'en';
-          otherVersionsList = filteredVersions.sort((a, b) => {
-            const aHasAvailability = (a.available || 0) > 0;
-            const bHasAvailability = (b.available || 0) > 0;
-
-            if (aHasAvailability !== bHasAvailability) {
-              return aHasAvailability ? -1 : 1;
-            }
-
-            const aIsCurrentLang = (a.language || 'en') === currentLanguage;
-            const bIsCurrentLang = (b.language || 'en') === currentLanguage;
-            if (aIsCurrentLang !== bIsCurrentLang) {
-              return aIsCurrentLang ? -1 : 1;
-            }
-
-            return (a.setName || '').localeCompare(b.setName || '');
-          });
-
-          console.log('✨ Other versions with availability:', otherVersionsList.filter(v => (v.available || 0) > 0).length);
-
-          // Check if there are versions with availability
-          const hasAvailability = otherVersionsList.some(v => (v.available || 0) > 0);
-          setHasOtherVersionsWithAvailability(hasAvailability);
-          setOtherVersions(otherVersionsList);
-
-          // If we have less than 8 cards to sell, fill with other versions that have availability
-          const MAX_CARDS_TO_SHOW = 8;
-          if (cardsToSellList.length < MAX_CARDS_TO_SHOW) {
-            const slotsToFill = MAX_CARDS_TO_SHOW - cardsToSellList.length;
-            console.log(`📦 Slots to fill: ${slotsToFill}`);
-
-            // Get other versions with availability
-            const versionsWithAvailability = otherVersionsList.filter(v => (v.available || 0) > 0);
-            console.log(`🌍 Versions with availability from other languages:`, versionsWithAvailability.length);
-
-            if (versionsWithAvailability.length > 0) {
-              // For each version with availability, fetch its cards to sell
-              for (let i = 0; i < Math.min(slotsToFill, versionsWithAvailability.length); i++) {
-                const version = versionsWithAvailability[i];
-                try {
-                  const versionData = await getCardsToSellById(version.id, 0, 10);
-                  const versionCardsToSell = versionData.content || versionData;
-
-                  // Enrich each cardToSell with the card information from the version
-                  const enrichedCardsToSell = versionCardsToSell.map(cardToSell => ({
-                    ...cardToSell,
-                    _cardInfo: {
-                      cardId: version.id,
-                      cardName: version.cardName,
-                      imageUrl: version.imageUrl,
-                      setName: version.setName,
-                      language: version.language
-                    }
-                  }));
-
-                  // Add the cards from this version
-                  if (enrichedCardsToSell.length > 0) {
-                    cardsToSellList = [...cardsToSellList, ...enrichedCardsToSell];
-                    console.log(`✅ Added ${enrichedCardsToSell.length} cards from ${version.setName} (${version.language})`);
-                  }
-
-                  // Stop if we've filled all slots
-                  if (cardsToSellList.length >= MAX_CARDS_TO_SHOW) {
-                    break;
-                  }
-                } catch (err) {
-                  console.error(`Error fetching cards for version ${version.id}:`, err);
-                }
-              }
-
-              console.log(`🎯 Final cards to sell count: ${cardsToSellList.length}`);
-            }
-          }
-        } catch (err) {
-          console.error('Error fetching other versions:', err);
-        }
-      }
-
-      setCardsToSell(cardsToSellList);
-    } catch (err) {
-      setError(err.message);
-      setCardsToSell([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [card, handlePaginatedResponse]);
-
+  // Build the combined list of cards to sell when card data changes
   useEffect(() => {
-    if (card?.cardName && card?.id) {
-      fetchCardsToSell(card.cardName, card.id, card.oracleId);
-    }
-  }, [card?.cardName, card?.id, card?.oracleId, fetchCardsToSell]);
+    if (!card) return;
+
+    // Combine cardsToSell from the current card language + other languages (same set)
+    const currentLanguageCards = card.cardsToSell || [];
+    const otherLanguageCards = card.otherLanguagesCardsToSell || [];
+
+    console.log('📦 Current language cards:', currentLanguageCards.length);
+    console.log('🌍 Other language cards (same set):', otherLanguageCards.length);
+
+    // Combine both lists (max 8 total)
+    const combinedList = [...currentLanguageCards, ...otherLanguageCards].slice(0, 8);
+
+    setCardsToSell(combinedList);
+    setLoading(false);
+  }, [card]);
 
   // Add card to recently viewed when component mounts
   useEffect(() => {
@@ -217,13 +110,7 @@ const CardInfoTab = ({ card }) => {
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <div className="text-red-600 mb-2">Error: {error}</div>
-              <Button
-                variant="primary"
-                onClick={() => fetchCardsToSell(card.cardName, card.id)}
-              >
-                Retry
-              </Button>
+              <div className="text-red-600">Error: {error}</div>
             </div>
           ) : cardsToSell.length === 0 ? (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
@@ -291,22 +178,14 @@ const CardInfoTab = ({ card }) => {
 
                   console.log(`📋 Card to sell #${i}:`, cardToSell);
 
-                  // Use enriched card info if available (for cards from other languages)
-                  const cardInfo = cardToSell._cardInfo || {
-                    cardId: card.id,
-                    cardName: card.cardName,
-                    imageUrl: card.imageUrl || card.image,
-                    setName: card.setName,
-                    language: card.language
-                  };
-
+                  // Build card object for cart - all cards are from the same set, just different languages
                   const cardForCart = {
                     id: listingId,
                     cardToSellId: cardToSell.id, // The actual ID needed for checkout
-                    cardName: cardInfo.cardName,
-                    imageUrl: cardInfo.imageUrl,
+                    cardName: card.cardName,
+                    imageUrl: card.imageUrl || card.image,
                     price: cardToSell.cardPrice,
-                    set: cardInfo.setName,
+                    set: card.setName,
                     quantity: selectedQty,
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
@@ -383,7 +262,7 @@ const CardInfoTab = ({ card }) => {
           {/* Action Buttons */}
           <div className="mt-6 space-y-3">
             <Button
-              variant={hasOtherVersionsWithAvailability ? "danger" : "info"}
+              variant="info"
               className="w-full whitespace-nowrap overflow-hidden text-ellipsis py-3"
               onClick={() => {
                 const otherVersionsSection = document.getElementById('other-versions-section');
@@ -392,7 +271,7 @@ const CardInfoTab = ({ card }) => {
                 }
               }}
             >
-              {hasOtherVersionsWithAvailability ? '🔴 Available in other versions' : '📍 See other versions'}
+              📍 See other versions
             </Button>
             <Button
               variant="warning"
@@ -674,12 +553,7 @@ const CardInfoTab = ({ card }) => {
 
       {/* Other Versions Section */}
       <div id="other-versions-section">
-        <OtherVersions
-          card={card}
-          currentCardId={card?.id}
-          otherVersions={otherVersions}
-          hasAvailability={hasOtherVersionsWithAvailability}
-        />
+        <OtherVersions card={card} currentCardId={card?.id} />
       </div>
 
       {/* Recently Viewed Section */}
