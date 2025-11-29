@@ -185,7 +185,7 @@ const CardInfoTab = ({ card }) => {
                     cardToSellId: cardToSell.id, // The actual ID needed for checkout
                     cardName: card.cardName,
                     imageUrl: card.imageUrl || card.image,
-                    price: cardToSell.cardPrice,
+                    price: cardToSell.price,
                     set: card.setName,
                     quantity: selectedQty,
                     condition: cardToSell.condition,
@@ -216,7 +216,7 @@ const CardInfoTab = ({ card }) => {
                           {foilDisplay}
                         </div>
                         <div className="font-semibold text-green-600 text-sm">
-                          ¥ {cardToSell.cardPrice?.toLocaleString() ?? "Unknown"}
+                          ¥ {cardToSell.price?.toLocaleString() ?? "Unknown"}
                         </div>
                         <div className="font-semibold text-blue-600 text-sm">
                           {cardToSell.quantity ?? 0}
