@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import { csvCardSearch } from '../../api/csvSearch';
 import { bulkSellFromCSV } from '../../api/bulkSell';
 import { conditionOptions } from '../../../utils/cardConditions';
+import { finishOptions, getFinishServerValue } from '../../../utils/cardFinishes';
 import RarityCircle from '../../../components/RarityCircle';
 
 interface CSVCard {
@@ -15,6 +16,7 @@ interface CSVCard {
 interface CardData {
   selected: boolean;
   condition: string;
+  finish: string;
   quantity: number;
   price: number;
   csvData: CSVCard | null;
@@ -214,6 +216,7 @@ const BulkUpload: React.FC = () => {
               initialCardData[cardKey] = {
                 selected: true,
                 condition: 'NM',
+                finish: 'nonfoil',
                 quantity: csvAddToQuantity,
                 price: 0,
                 csvData: csvCard || null,
@@ -255,6 +258,7 @@ const BulkUpload: React.FC = () => {
             initialCardData[cardKey] = {
               selected: false,
               condition: 'NM',
+              finish: 'nonfoil',
               quantity: csvAddToQuantity,
               price: 0,
               csvData: csvCard || null,
@@ -313,6 +317,7 @@ const BulkUpload: React.FC = () => {
           imageUrl: card?.imageUrl || '',
           price: parseFloat(String(data.price)),
           condition: data.condition,
+          finish: getFinishServerValue(data.finish || 'nonfoil'), // Transform to uppercase enum
           quantity: parseInt(String(data.quantity)),
           language: language
         };
@@ -327,7 +332,8 @@ const BulkUpload: React.FC = () => {
           ...cardData[cardKey],
           selected: false,
           quantity: 0,
-          price: 0
+          price: 0,
+          finish: 'nonfoil'
         };
       });
       setCardData(clearedCardData);
@@ -462,6 +468,7 @@ const BulkUpload: React.FC = () => {
                         <th className="p-3 text-left">Language</th>
                         <th className="p-3 text-left">Rarity</th>
                         <th className="p-3 text-left">Condition</th>
+                        <th className="p-3 text-left">Finish</th>
                         <th className="p-3 text-left">CSV Qty</th>
                         <th className="p-3 text-left">Current Qty</th>
                         <th className="p-3 text-left">Amount to Add</th>
@@ -557,6 +564,19 @@ const BulkUpload: React.FC = () => {
                                 {conditionOptions.map(option => (
                                   <option key={option.code} value={option.code}>
                                     {option.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="p-3">
+                              <select
+                                className="border rounded px-2 py-1"
+                                value={cardData[cardKey]?.finish || 'nonfoil'}
+                                onChange={(e) => updateCardData(cardKey, 'finish', e.target.value)}
+                              >
+                                {finishOptions.map(option => (
+                                  <option key={option.code} value={option.code}>
+                                    {option.name} {option.icon}
                                   </option>
                                 ))}
                               </select>

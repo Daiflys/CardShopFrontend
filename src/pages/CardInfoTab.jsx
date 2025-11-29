@@ -4,13 +4,13 @@ import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor, getRarityIcon } from "../utils/rarity";
 import RarityCircle from "../components/RarityCircle";
 import ConditionIcon from "../components/ConditionIcon";
-import { getCardsToSellById } from "../api/card";
 import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
 import { getSetIcon } from "../data/sets.js";
 import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
 import RecentlyViewed from "../components/RecentlyViewed.jsx";
 import OtherVersions from "../components/OtherVersions.jsx";
 import { getLanguageFlag } from "../utils/languageFlags.jsx";
+import { getFinishFromServerValue, getFinishIcon } from "../utils/cardFinishes";
 import {
   filterDisplayedLegalities,
   formatLegalityFormat,
@@ -23,33 +23,28 @@ const CardInfoTab = ({ card }) => {
   const navigate = useNavigate();
   const [cardsToSell, setCardsToSell] = useState([]);
   const addRecentlyViewed = useRecentlyViewedStore(state => state.addRecentlyViewed);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
   const [showZoomModal, setShowZoomModal] = useState(false);
 
-  const fetchCardsToSell = useCallback(async (cardName, cardId) => {
-    if (!cardName) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = await getCardsToSellById(cardId, 0, 100); // Get first 100 results
-      setCardsToSell(data.content || data);
-    } catch (err) {
-      setError(err.message);
-      setCardsToSell([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // Build the combined list of cards to sell when card data changes
   useEffect(() => {
-    if (card?.cardName) {
-      fetchCardsToSell(card.cardName, card.id);
-    }
-  }, [card?.cardName, card?.id, fetchCardsToSell]);
+    if (!card) return;
+
+    // Combine cardsToSell from the current card language + other languages (same set)
+    const currentLanguageCards = card.cardsToSell || [];
+    const otherLanguageCards = card.otherLanguagesCardsToSell || [];
+
+    console.log('📦 Current language cards:', currentLanguageCards.length);
+    console.log('🌍 Other language cards (same set):', otherLanguageCards.length);
+
+    // Combine both lists (max 8 total)
+    const combinedList = [...currentLanguageCards, ...otherLanguageCards].slice(0, 8);
+
+    setCardsToSell(combinedList);
+    setLoading(false);
+  }, [card]);
 
   // Add card to recently viewed when component mounts
   useEffect(() => {
@@ -116,19 +111,15 @@ const CardInfoTab = ({ card }) => {
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <div className="text-red-600 mb-2">Error: {error}</div>
-              <Button
-                variant="primary"
-                onClick={() => fetchCardsToSell(card.cardName, card.id)}
-              >
-                Retry
-              </Button>
+              <div className="text-red-600">Error: {error}</div>
             </div>
           ) : cardsToSell.length === 0 ? (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
-                <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
+                <div className="grid grid-cols-6 gap-2 text-sm font-semibold text-gray-700">
                   <div>Condition</div>
+                  <div>Language</div>
+                  <div>Foil</div>
                   <div>Price</div>
                   <div>Stock</div>
                   <div>Qty</div>
@@ -137,9 +128,15 @@ const CardInfoTab = ({ card }) => {
               <div className="divide-y">
                 {['NM', 'EX', 'GD', 'LP'].map((condition, index) => (
                   <div key={condition} className={`px-4 py-2 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <div className="grid grid-cols-4 gap-4 items-center">
+                    <div className="grid grid-cols-6 gap-2 items-center">
                       <div className="flex items-center">
                         <ConditionIcon condition={condition} />
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        -
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        -
                       </div>
                       <div className="text-gray-400 text-sm">
                         -
@@ -166,8 +163,10 @@ const CardInfoTab = ({ card }) => {
           ) : (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
-                <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-700">
+                <div className="grid grid-cols-6 gap-2 text-sm font-semibold text-gray-700">
                   <div>Condition</div>
+                  <div>Language</div>
+                  <div>Foil</div>
                   <div>Price</div>
                   <div>Stock</div>
                   <div>Qty</div>
@@ -180,13 +179,14 @@ const CardInfoTab = ({ card }) => {
 
                   console.log(`📋 Card to sell #${i}:`, cardToSell);
 
+                  // Build card object for cart - all cards are from the same set, just different languages
                   const cardForCart = {
                     id: listingId,
                     cardToSellId: cardToSell.id, // The actual ID needed for checkout
                     cardName: card.cardName,
                     imageUrl: card.imageUrl || card.image,
                     price: cardToSell.cardPrice,
-                    set: cardToSell.setName,
+                    set: card.setName,
                     quantity: selectedQty,
                     condition: cardToSell.condition,
                     available: cardToSell.quantity
@@ -194,11 +194,26 @@ const CardInfoTab = ({ card }) => {
 
                   console.log(`🛒 CardForCart #${i}:`, cardForCart);
 
+                  // Get language flag
+                  const language = (cardToSell.language || 'en').toLowerCase();
+                  const normalizedLanguage = language === 'jp' ? 'ja' : language;
+
+                  // Get finish/foil display - convert from server enum (NONFOIL/FOIL/ETCHED) to internal code
+                  const finishServerValue = cardToSell.finish || 'NONFOIL';
+                  const finish = getFinishFromServerValue(finishServerValue);
+                  const foilDisplay = getFinishIcon(finish);
+
                   return (
                     <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                      <div className="grid grid-cols-4 gap-4 items-center">
+                      <div className="grid grid-cols-6 gap-2 items-center">
                         <div className="flex items-center">
                           <ConditionIcon condition={cardToSell.condition} />
+                        </div>
+                        <div className="flex items-center justify-center">
+                          {getLanguageFlag(normalizedLanguage, 'normal')}
+                        </div>
+                        <div className="text-sm font-medium text-gray-700">
+                          {foilDisplay}
                         </div>
                         <div className="font-semibold text-green-600 text-sm">
                           ¥ {cardToSell.cardPrice?.toLocaleString() ?? "Unknown"}
@@ -210,7 +225,7 @@ const CardInfoTab = ({ card }) => {
                           {cardToSell.quantity > 0 ? (
                             <>
                               <select
-                                className="border rounded px-2 py-1 text-sm w-16"
+                                className="border rounded px-2 py-1 text-sm w-16 flex-shrink-0"
                                 value={selectedQty}
                                 onChange={e => setSelectedQuantities(prev => ({
                                   ...prev,
@@ -221,16 +236,18 @@ const CardInfoTab = ({ card }) => {
                                   <option key={num} value={num}>{num}</option>
                                 ))}
                               </select>
-                              <AddToCartButton
-                                card={cardForCart}
-                              />
+                              <div className="flex-shrink-0 h-8">
+                                <AddToCartButton
+                                  card={cardForCart}
+                                />
+                              </div>
                             </>
                           ) : (
                             <Button
                               variant="secondary"
                               size="sm"
                               disabled
-                              className="whitespace-nowrap overflow-hidden text-ellipsis"
+                              className="whitespace-nowrap overflow-hidden text-ellipsis h-8"
                             >
                               Want Notice
                             </Button>
@@ -249,6 +266,12 @@ const CardInfoTab = ({ card }) => {
             <Button
               variant="info"
               className="w-full whitespace-nowrap overflow-hidden text-ellipsis py-3"
+              onClick={() => {
+                const otherVersionsSection = document.getElementById('other-versions-section');
+                if (otherVersionsSection) {
+                  otherVersionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
             >
               📍 See other versions
             </Button>
@@ -531,7 +554,9 @@ const CardInfoTab = ({ card }) => {
 
 
       {/* Other Versions Section */}
-      <OtherVersions card={card} currentCardId={card?.id} />
+      <div id="other-versions-section">
+        <OtherVersions card={card} currentCardId={card?.id} />
+      </div>
 
       {/* Recently Viewed Section */}
       <RecentlyViewed />

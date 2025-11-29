@@ -1,4 +1,6 @@
 // src/api/postCardToSell.ts
+import { getFinishServerValue } from '../utils/cardFinishes.js';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 interface SetCardToSellResponse {
@@ -15,6 +17,7 @@ const realSetCardToSell = async (
   imageUrl: string,
   price: number,
   condition: string,
+  finish: string,
   quantity: number,
   comments: string,
   language: string
@@ -30,6 +33,7 @@ const realSetCardToSell = async (
     imageUrl: imageUrl,
     price: price,
     condition: condition,
+    finish: getFinishServerValue(finish || 'nonfoil'), // Transform to uppercase enum (NONFOIL, FOIL, ETCHED)
     quantity: quantity,
     comments: comments,
     language: language || 'en'

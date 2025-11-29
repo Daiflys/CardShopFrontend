@@ -12,7 +12,6 @@ const OtherVersions = ({ card, currentCardId }) => {
   const [otherVersions, setOtherVersions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const { handlePaginatedResponse } = usePaginationStore();
 
@@ -57,7 +56,7 @@ const OtherVersions = ({ card, currentCardId }) => {
     };
 
     fetchOtherVersions();
-  }, [card?.oracleId, currentCardId]);
+  }, [card?.oracleId, currentCardId, handlePaginatedResponse]);
 
   // Don't render if no oracle ID available
   if (!card?.oracleId) {
