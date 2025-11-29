@@ -10,6 +10,7 @@ import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
 import RecentlyViewed from "../components/RecentlyViewed.jsx";
 import OtherVersions from "../components/OtherVersions.jsx";
 import { getLanguageFlag } from "../utils/languageFlags.jsx";
+import { getFinishFromServerValue, getFinishIcon } from "../utils/cardFinishes";
 import {
   filterDisplayedLegalities,
   formatLegalityFormat,
@@ -197,9 +198,10 @@ const CardInfoTab = ({ card }) => {
                   const language = (cardToSell.language || 'en').toLowerCase();
                   const normalizedLanguage = language === 'jp' ? 'ja' : language;
 
-                  // Get finish/foil display
-                  const finish = cardToSell.finish || 'nonfoil';
-                  const foilDisplay = finish === 'foil' ? '⭐' : finish === 'etched' ? '⚡' : '';
+                  // Get finish/foil display - convert from server enum (NONFOIL/FOIL/ETCHED) to internal code
+                  const finishServerValue = cardToSell.finish || 'NONFOIL';
+                  const finish = getFinishFromServerValue(finishServerValue);
+                  const foilDisplay = getFinishIcon(finish);
 
                   return (
                     <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>

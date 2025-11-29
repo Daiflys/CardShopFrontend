@@ -2,6 +2,8 @@
  * Card model - Backend usa camelCase
  */
 
+import { getFinishServerValue } from '../utils/cardFinishes.js';
+
 export interface CardToSell {
   id?: string | null;
   price?: number;
@@ -183,7 +185,7 @@ class Card {
       imageUrl: this.imageUrl,
       price: cardData.price,
       condition: cardData.condition,
-      finish: cardData.finish || 'nonfoil',
+      finish: getFinishServerValue(cardData.finish || 'nonfoil'), // Transform to uppercase enum
       quantity: cardData.quantity,
       language: cardData.language || 'en',
       comments: cardData.comments || ''

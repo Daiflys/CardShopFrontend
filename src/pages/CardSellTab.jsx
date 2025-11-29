@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { setCardToSell } from "../api/postCardToSell";
 import { conditionOptions } from "../utils/cardConditions";
+import { finishOptions } from "../utils/cardFinishes";
 import Button from '../design/components/Button';
 
 const CardSellTab = ({ card }) => {
@@ -8,6 +9,7 @@ const CardSellTab = ({ card }) => {
   const [language, setLanguage] = useState("English");
   const [condition, setCondition] = useState("NM");
   const [conditionOpen, setConditionOpen] = useState(false);
+  const [finish, setFinish] = useState("nonfoil");
   const [comments, setComments] = useState("");
   const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ const CardSellTab = ({ card }) => {
         card.imageUrl,
         price,
         condition,
+        finish,
         quantity,
         comments,
         languageCode
@@ -125,6 +128,16 @@ const CardSellTab = ({ card }) => {
             </div>
           )}
         </div>
+      </div>
+      <div className="mb-4">
+        <label className="block font-semibold mb-1">Finish</label>
+        <select className="border rounded px-3 py-2 w-full" value={finish} onChange={e => setFinish(e.target.value)}>
+          {finishOptions.map(option => (
+            <option key={option.code} value={option.code}>
+              {option.name} {option.icon}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="mb-4">
         <label className="block font-semibold mb-1">Comments</label>
