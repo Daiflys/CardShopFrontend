@@ -33,12 +33,14 @@ import CartInitializer from "./components/CartInitializer";
 import RecentlyViewed from "./components/RecentlyViewed";
 import StorefrontConfigListener from "./components/StorefrontConfigListener";
 import SkinConfigListener from "./components/SkinConfigListener";
+import ScrollToTop from "./components/ScrollToTop";
 import "./App.css";
 
 function App() {
   return (
     <CartInitializer>
       <BrowserRouter>
+        <ScrollToTop />
         <StorefrontConfigListener />
         <SkinConfigListener />
         <Routes>
