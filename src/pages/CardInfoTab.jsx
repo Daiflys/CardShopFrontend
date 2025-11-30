@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../components/AddToCartButton";
 import { getRarityTextColor, getRarityIcon } from "../utils/rarity";
 import RarityCircle from "../components/RarityCircle";
-import ConditionIcon from "../components/ConditionIcon";
+import ConditionIconWithTooltip from "../components/ConditionIconWithTooltip";
+import LanguageFlagWithTooltip from "../components/LanguageFlagWithTooltip";
+import FinishIconWithTooltip from "../components/FinishIconWithTooltip";
 import { getColorSymbols, parseManaCost, parseOracleText } from "../data/colorSymbols.jsx";
 import { getSetIcon } from "../data/sets.js";
 import useRecentlyViewedStore from "../store/recentlyViewedStore.js";
 import RecentlyViewed from "../components/RecentlyViewed.jsx";
 import OtherVersions from "../components/OtherVersions.jsx";
-import { getLanguageFlag } from "../utils/languageFlags.jsx";
-import { getFinishFromServerValue, getFinishIcon } from "../utils/cardFinishes";
+import { getFinishFromServerValue } from "../utils/cardFinishes";
 import {
   filterDisplayedLegalities,
   formatLegalityFormat,
@@ -93,7 +94,7 @@ const CardInfoTab = ({ card }) => {
                   const language = (card.language || card.lang || 'en').toLowerCase();
                   // Handle common variations
                   const normalizedLanguage = language === 'jp' ? 'ja' : language;
-                  return getLanguageFlag(normalizedLanguage, 'normal');
+                  return <LanguageFlagWithTooltip languageCode={normalizedLanguage} size="normal" />;
                 })()}
               </div>
               <h1 className="text-2xl font-bold text-gray-700 mb-0 truncate whitespace-nowrap">
@@ -116,27 +117,21 @@ const CardInfoTab = ({ card }) => {
           ) : cardsToSell.length === 0 ? (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
-                <div className="grid grid-cols-6 gap-2 text-sm font-semibold text-gray-700">
-                  <div>Condition</div>
-                  <div>Language</div>
-                  <div>Foil</div>
+                <div className="grid grid-cols-4 gap-2 text-sm font-semibold text-gray-700">
+                  <div>Card</div>
                   <div>Price</div>
-                  <div>Stock</div>
-                  <div>Qty</div>
+                  <div>Quantity</div>
+                  <div></div>
                 </div>
               </div>
               <div className="divide-y">
                 {['NM', 'EX', 'GD', 'LP'].map((condition, index) => (
                   <div key={condition} className={`px-4 py-2 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <div className="grid grid-cols-6 gap-2 items-center">
-                      <div className="flex items-center">
-                        <ConditionIcon condition={condition} />
-                      </div>
-                      <div className="text-gray-400 text-sm">
-                        -
-                      </div>
-                      <div className="text-gray-400 text-sm">
-                        -
+                    <div className="grid grid-cols-4 gap-2 items-center">
+                      <div className="flex items-center gap-2">
+                        <ConditionIconWithTooltip condition={condition} size="xs" />
+                        <span className="text-gray-400 text-sm">-</span>
+                        <span className="text-gray-400 text-sm">-</span>
                       </div>
                       <div className="text-gray-400 text-sm">
                         -
@@ -150,7 +145,7 @@ const CardInfoTab = ({ card }) => {
                           size="sm"
                           disabled
                           title="No stock available"
-                          className="whitespace-nowrap overflow-hidden text-ellipsis"
+                          className="whitespace-nowrap overflow-hidden text-ellipsis h-8"
                         >
                           Add to Cart
                         </Button>
@@ -163,13 +158,11 @@ const CardInfoTab = ({ card }) => {
           ) : (
             <div className="sm:bg-white sm:rounded-lg sm:shadow overflow-hidden">
               <div className="bg-blue-50 px-4 py-2 border-b">
-                <div className="grid grid-cols-6 gap-2 text-sm font-semibold text-gray-700">
-                  <div>Condition</div>
-                  <div>Language</div>
-                  <div>Foil</div>
+                <div className="grid grid-cols-4 gap-2 text-sm font-semibold text-gray-700">
+                  <div>Card</div>
                   <div>Price</div>
-                  <div>Stock</div>
-                  <div>Qty</div>
+                  <div>Quantity</div>
+                  <div></div>
                 </div>
               </div>
               <div className="divide-y">
@@ -201,47 +194,47 @@ const CardInfoTab = ({ card }) => {
                   // Get finish/foil display - convert from server enum (NONFOIL/FOIL/ETCHED) to internal code
                   const finishServerValue = cardToSell.finish || 'NONFOIL';
                   const finish = getFinishFromServerValue(finishServerValue);
-                  const foilDisplay = getFinishIcon(finish);
 
                   return (
                     <div key={listingId} className={`px-4 py-2 hover:bg-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                      <div className="grid grid-cols-6 gap-2 items-center">
-                        <div className="flex items-center">
-                          <ConditionIcon condition={cardToSell.condition} />
+                      <div className="grid grid-cols-4 gap-2 items-center">
+                        {/* Card column: Condition + Language + Foil */}
+                        <div className="flex items-center gap-2">
+                          <ConditionIconWithTooltip condition={cardToSell.condition} size="xs" />
+                          <LanguageFlagWithTooltip languageCode={normalizedLanguage} size="normal" />
+                          <FinishIconWithTooltip finishCode={finish} />
                         </div>
-                        <div className="flex items-center justify-center">
-                          {getLanguageFlag(normalizedLanguage, 'normal')}
-                        </div>
-                        <div className="text-sm font-medium text-gray-700">
-                          {foilDisplay}
-                        </div>
+                        {/* Price column */}
                         <div className="font-semibold text-green-600 text-sm">
                           ¥ {cardToSell.price?.toLocaleString() ?? "Unknown"}
                         </div>
-                        <div className="font-semibold text-blue-600 text-sm">
-                          {cardToSell.quantity ?? 0}
-                        </div>
+                        {/* Quantity column: Dropdown with stock-based options */}
                         <div className="flex items-center gap-2">
                           {cardToSell.quantity > 0 ? (
-                            <>
-                              <select
-                                className="border rounded px-2 py-1 text-sm w-16 flex-shrink-0"
-                                value={selectedQty}
-                                onChange={e => setSelectedQuantities(prev => ({
-                                  ...prev,
-                                  [listingId]: parseInt(e.target.value)
-                                }))}
-                              >
-                                {Array.from({length: Math.min(cardToSell.quantity || 1, 10)}, (_, i) => i + 1).map(num => (
-                                  <option key={num} value={num}>{num}</option>
-                                ))}
-                              </select>
-                              <div className="flex-shrink-0 h-8">
-                                <AddToCartButton
-                                  card={cardForCart}
-                                />
-                              </div>
-                            </>
+                            <select
+                              className="border rounded px-2 py-1 text-sm w-16 flex-shrink-0 h-8"
+                              value={selectedQty}
+                              onChange={e => setSelectedQuantities(prev => ({
+                                ...prev,
+                                [listingId]: parseInt(e.target.value)
+                              }))}
+                            >
+                              {Array.from({length: Math.min(cardToSell.quantity || 1, 10)}, (_, i) => i + 1).map(num => (
+                                <option key={num} value={num}>{num}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="text-gray-400 text-sm">0</span>
+                          )}
+                        </div>
+                        {/* Add to Cart button */}
+                        <div className="flex items-center justify-end">
+                          {cardToSell.quantity > 0 ? (
+                            <div className="flex-shrink-0 h-8">
+                              <AddToCartButton
+                                card={cardForCart}
+                              />
+                            </div>
                           ) : (
                             <Button
                               variant="secondary"
