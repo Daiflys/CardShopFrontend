@@ -12,8 +12,19 @@ const OtherVersions = ({ card, currentCardId }) => {
   const [otherVersions, setOtherVersions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
   const { handlePaginatedResponse } = usePaginationStore();
+
+  // Listen for window resize to update maxDisplayed
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!card?.oracleId) {
@@ -134,7 +145,7 @@ const OtherVersions = ({ card, currentCardId }) => {
         error={error}
         emptyMessage={t('cardDetail.noOtherVersions', 'No other versions found')}
         showExpand={true}
-        maxDisplayed={4}
+        maxDisplayed={isDesktop ? 3 : 2}
         expandText={t('common.showAll', 'Show All')}
         collapseText={t('common.showLess', 'Show Less')}
         onRetry={fetchOtherVersionsRetry}
