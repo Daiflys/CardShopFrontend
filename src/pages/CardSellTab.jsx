@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { setCardToSell } from "../api/postCardToSell";
 import { conditionOptions } from "../utils/cardConditions";
 import { finishOptions } from "../utils/cardFinishes";
+import { languageOptions } from "../utils/languageFlags";
 import Button from '../design/components/Button';
 
 const CardSellTab = ({ card }) => {
   const [quantity, setQuantity] = useState(1);
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState("en"); // Use server code directly
   const [condition, setCondition] = useState("NM");
   const [conditionOpen, setConditionOpen] = useState(false);
   const [finish, setFinish] = useState("nonfoil");
@@ -16,14 +17,6 @@ const CardSellTab = ({ card }) => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Map language names to codes
-  const languageNameToCode = {
-    "English": "en",
-    "Spanish": "es",
-    "German": "de",
-    "French": "fr"
-  };
-
   // Get language code from card or state
   const getLanguageCode = () => {
     // Try to get from card first
@@ -31,8 +24,8 @@ const CardSellTab = ({ card }) => {
     if (cardLang) {
       return cardLang.toLowerCase();
     }
-    // Otherwise map from state
-    return languageNameToCode[language] || "en";
+    // Otherwise use state (already a code)
+    return language || "en";
   };
 
   const handleSubmit = async (e) => {
@@ -87,10 +80,11 @@ const CardSellTab = ({ card }) => {
       <div className="mb-4">
         <label className="block font-semibold mb-1">Language</label>
         <select className="border rounded px-3 py-2 w-full" value={language} onChange={e => setLanguage(e.target.value)}>
-          <option>English</option>
-          <option>Spanish</option>
-          <option>German</option>
-          <option>French</option>
+          {languageOptions.map(lang => (
+            <option key={lang.key} value={lang.key}>
+              {lang.name}
+            </option>
+          ))}
         </select>
       </div>
       <div className="mb-4">

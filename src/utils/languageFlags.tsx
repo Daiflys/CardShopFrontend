@@ -18,7 +18,9 @@ export const getLanguageFlag = (languageCode: string, size: LanguageSize = 'norm
   // Size variants: normal (20x15 for header), small (24x18 for search grid - 50% larger)
   const [width, height] = size === 'normal' ? [20, 15] : [24, 18];
 
-  const validLanguages = ['en', 'es', 'fr', 'de', 'it', 'ja', 'pt', 'ru', 'zh', 'ko'];
+  // Server language codes: en, de, es, fr, it, ja, ko, pt, ru, zhs, zht
+  // Note: 'ph' (Philippines) excluded due to low card availability
+  const validLanguages = ['en', 'de', 'es', 'fr', 'it', 'ja', 'ko', 'pt', 'ru', 'zhs', 'zht'];
   const language = validLanguages.includes(languageCode) ? languageCode : 'en';
 
   return (
@@ -36,26 +38,33 @@ export const getLanguageFlag = (languageCode: string, size: LanguageSize = 'norm
 export const getLanguageName = (languageCode: string): string => {
   const names: Record<string, string> = {
     en: 'English',
+    de: 'Deutsch',
     es: 'Español',
     fr: 'Français',
-    de: 'Deutsch',
     it: 'Italiano',
     ja: '日本語',
+    ko: '한국어',
     pt: 'Português',
     ru: 'Русский',
-    zh: '中文',
-    ko: '한국어'
+    zhs: '简体中文', // Simplified Chinese
+    zht: '繁體中文'  // Traditional Chinese (Hong Kong)
   };
 
   return names[languageCode] || 'English';
 };
 
 // Complete language options for card language filters (all languages)
+// These match the server codes exactly: en, de, es, fr, it, ja, ko, pt, ru, zhs, zht
 export const languageOptions: LanguageOption[] = [
   {
     key: 'en',
     name: 'English',
     flag: getLanguageFlag('en', 'normal')
+  },
+  {
+    key: 'de',
+    name: 'Deutsch',
+    flag: getLanguageFlag('de', 'normal')
   },
   {
     key: 'es',
@@ -68,11 +77,6 @@ export const languageOptions: LanguageOption[] = [
     flag: getLanguageFlag('fr', 'normal')
   },
   {
-    key: 'de',
-    name: 'Deutsch',
-    flag: getLanguageFlag('de', 'normal')
-  },
-  {
     key: 'it',
     name: 'Italiano',
     flag: getLanguageFlag('it', 'normal')
@@ -81,6 +85,11 @@ export const languageOptions: LanguageOption[] = [
     key: 'ja',
     name: '日本語',
     flag: getLanguageFlag('ja', 'normal')
+  },
+  {
+    key: 'ko',
+    name: '한국어',
+    flag: getLanguageFlag('ko', 'normal')
   },
   {
     key: 'pt',
@@ -93,14 +102,14 @@ export const languageOptions: LanguageOption[] = [
     flag: getLanguageFlag('ru', 'normal')
   },
   {
-    key: 'zh',
-    name: '中文',
-    flag: getLanguageFlag('zh', 'normal')
+    key: 'zhs',
+    name: '简体中文',
+    flag: getLanguageFlag('zhs', 'normal')
   },
   {
-    key: 'ko',
-    name: '한국어',
-    flag: getLanguageFlag('ko', 'normal')
+    key: 'zht',
+    name: '繁體中文',
+    flag: getLanguageFlag('zht', 'normal')
   }
 ];
 

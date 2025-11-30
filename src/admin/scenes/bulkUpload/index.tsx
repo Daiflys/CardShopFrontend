@@ -4,6 +4,7 @@ import { csvCardSearch } from '../../api/csvSearch';
 import { bulkSellFromCSV } from '../../api/bulkSell';
 import { conditionOptions } from '../../../utils/cardConditions';
 import { finishOptions, getFinishServerValue } from '../../../utils/cardFinishes';
+import { languageOptions } from '../../../utils/languageFlags';
 import RarityCircle from '../../../components/RarityCircle';
 
 interface CSVCard {
@@ -399,17 +400,11 @@ const BulkUpload: React.FC = () => {
                 onChange={(e) => setLanguage(e.target.value)}
                 className="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-                <option value="it">Italian</option>
-                <option value="pt">Portuguese</option>
-                <option value="ja">Japanese</option>
-                <option value="ko">Korean</option>
-                <option value="ru">Russian</option>
-                <option value="zhs">Chinese Simplified</option>
-                <option value="zht">Chinese Traditional</option>
+                {languageOptions.map(lang => (
+                  <option key={lang.key} value={lang.key}>
+                    {lang.name}
+                  </option>
+                ))}
               </select>
             </div>
 
